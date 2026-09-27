@@ -164,13 +164,15 @@ Visitor types a question in the widget
 
 ### 9.1 Recommended answers
 
-Quick starting positions, to confirm not final:
+Working recommendations for each open question, given the chosen stack (FastAPI, PostgreSQL, Qdrant, GPT-4o). These are starting positions to confirm, not locked decisions.
 
-- **Embeddings:** OpenAI `text-embedding-3-small` — cheap, one vendor with GPT-4o.
-- **Large doc sets:** \~500–800 token chunks, 10–15% overlap, soft per-plan upload cap.
-- **Job queue:** FastAPI `BackgroundTasks` for MVP → Redis + Celery/RQ at scale.
-- **Rate limiting:** per-bot-key token bucket + per-IP limit + domain allow-list.
-- **Pricing tiers:** by monthly message volume (e.g. 500 / 2,000 / unlimited), not doc count.
+| Question | Recommendation | Why |
+| --- | --- | --- |
+| Embedding provider | OpenAI `text-embedding-3-small` | Cheap, good enough for FAQ-style content, one vendor alongside GPT-4o for simpler billing/ops. Upgrade to Voyage only if retrieval quality is a real problem in testing. |
+| Large document sets | \~500–800 token chunks, 10–15% overlap, soft per-plan upload cap | Overlap avoids losing context at chunk boundaries. A per-plan cap (enforced at ingestion, not hard-coded) keeps both LLM/embedding cost and Qdrant storage predictable per pricing tier. |
+| Background jobs/queue | FastAPI `BackgroundTasks` for MVP → Redis + Celery (or lighter: RQ) once load grows | No need to stand up infra before you need it. Both are Python-native and drop into FastAPI without a rewrite later. |
+| Rate limiting | Per-bot-key token bucket (Redis) + secondary per-IP limit, on top of the domain allow-list already in the design | Caps worst-case cost exposure per client even if a public key leaks or gets scraped. |
+| Pricing tiers | Tier by monthly message volume (e.g. 500 / 2,000 / unlimited), not by document count | Message volume is what actually drives GPT-4o + embedding cost — document count doesn't. Exact price points still need real cost-per-message data once the pipeline is live. |
 
 ---
 
