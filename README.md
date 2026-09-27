@@ -181,3 +181,353 @@ Working recommendations for each open question, given the chosen stack (FastAPI,
 1. Review and align on this HLD
 2. Finalize embedding provider choice
 3. Move into detailed design + implementation, starting with multi-tenant DB & auth (already scoped separately)
+
+
+#LLD(low level system Design)
+
+# AI Bot-as-a-Service Platform — Low-Level Design (LLD)
+
+**Scope:** Database schema, Backend LLD, Frontend LLD **Stack recap:** FastAPI (backend) · PostgreSQL (relational data) · Qdrant (vector search) · GPT-4o (LLM) · Next.js + TypeScript (dashboard) · Vanilla TS widget · Docker Compose · Single monorepo
+
+> **Simple English note:** LLD = "Low-Level Design." Where the HLD said *what* the system does, the LLD says *exactly how* — table columns, API routes, request/response shapes, and where each piece of code lives.
+
+---
+
+## 1. How This Maps to Your Phases
+
+| Phase | What this LLD gives you |
+| --- | --- |
+| Phase 1 — Multi-tenant DB & Auth | Section 2 (schema) + Section 3.2 (auth) |
+| Phase 2 — Ingestion + Embeddings | Section 2 (documents/chunks tables) + Section 3.4 |
+| Phase 3 — RAG Chat API | Section 3.5 |
+| Phase 4 — Widget + Integration | Section 3.6 + Section 4.5 |
+
+You said you're starting Phase 1 first — sections **2** and **3.2** are the ones to build against right now. The rest is here so later phases don't force a schema rewrite.
+
+---
+
+## 2. Database Schema
+
+### 2.1 Core idea: multi-tenancy
+
+"Multi-tenant" means **one database serves many clients (tenants)**, and every row is tagged with which tenant it belongs to. Every query in your backend must filter by `tenant_id` — this is the single most important rule in the whole system, because a missing filter means Client A could see Client B's data.
+
+We'll use **row-level multi-tenancy**: one shared schema, every table has a `tenant_id` column, and Postgres Row-Level Security (RLS) enforces it as a safety net even if application code forgets.
+
+### 2.2 Entity relationship overview
+
+```
+tenants ──< users
+tenants ──< api_keys
+tenants ──< documents ──< document_chunks
+tenants ──< chat_sessions ──< chat_messages
+```
+
+- One **tenant** = one client company (e.g. a DVIO client).
+- One tenant has many **users** (people who log into the dashboard), many **documents** (their uploaded FAQs/PDFs), and many **chat_sessions** (conversations visitors have with the bot).
+
+### 2.3 Postgres tables (DDL)
+
+```sql
+-- Enable UUIDs
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- 1. TENANTS — one row per client company
+CREATE TABLE tenants (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name            TEXT NOT NULL,
+    slug            TEXT UNIQUE NOT NULL,          -- used in URLs, e.g. "acme-clinic"
+    plan            TEXT NOT NULL DEFAULT 'trial',  -- trial | starter | pro
+    status          TEXT NOT NULL DEFAULT 'active', -- active | suspended | cancelled
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- 2. USERS — dashboard logins, belong to a tenant
+CREATE TABLE users (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    email           TEXT NOT NULL,
+    hashed_password TEXT NOT NULL,
+    role            TEXT NOT NULL DEFAULT 'owner',  -- owner | member
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (tenant_id, email)
+);
+
+-- 3. API_KEYS — public key the embeddable widget uses (no login needed)
+CREATE TABLE api_keys (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    public_key      TEXT UNIQUE NOT NULL,   -- safe to expose in client-side widget script
+    is_active       BOOLEAN NOT NULL DEFAULT true,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- 4. DOCUMENTS — uploaded source files (PDF/FAQ/URL)
+CREATE TABLE documents (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    source_type     TEXT NOT NULL,           -- pdf | url | faq_text
+    title           TEXT NOT NULL,
+    original_url    TEXT,                    -- if source_type = url
+    file_path       TEXT,                    -- if source_type = pdf (storage path)
+    status          TEXT NOT NULL DEFAULT 'pending', -- pending | processing | ready | failed
+    uploaded_by     UUID REFERENCES users(id),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- 5. DOCUMENT_CHUNKS — the split-up pieces of a document (metadata only; vectors live in Qdrant)
+CREATE TABLE document_chunks (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    document_id     UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+    chunk_index     INTEGER NOT NULL,        -- order within the document
+    content         TEXT NOT NULL,           -- the actual text chunk (kept here for display/debug)
+    qdrant_point_id UUID NOT NULL,           -- links this row to its vector in Qdrant
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- 6. CHAT_SESSIONS — one per website-visitor conversation
+CREATE TABLE chat_sessions (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    visitor_id      TEXT,                    -- anonymous ID generated by the widget (cookie/localStorage)
+    started_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    ended_at        TIMESTAMPTZ
+);
+
+-- 7. CHAT_MESSAGES — every message in a session
+CREATE TABLE chat_messages (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    session_id      UUID NOT NULL REFERENCES chat_sessions(id) ON DELETE CASCADE,
+    role            TEXT NOT NULL,           -- user | assistant
+    content         TEXT NOT NULL,
+    retrieved_chunk_ids UUID[],              -- which chunks were used to answer (for debugging/audit)
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Recommended indexes
+CREATE INDEX idx_users_tenant ON users(tenant_id);
+CREATE INDEX idx_documents_tenant ON documents(tenant_id);
+CREATE INDEX idx_chunks_tenant_doc ON document_chunks(tenant_id, document_id);
+CREATE INDEX idx_sessions_tenant ON chat_sessions(tenant_id);
+CREATE INDEX idx_messages_session ON chat_messages(session_id);
+```
+
+**Why `document_chunks` stores text in Postgres too, not just Qdrant:** Qdrant is for *searching* by meaning; Postgres is your reliable system of record. If Qdrant ever needs to be rebuilt (upgrade, migration, bug), you can re-embed straight from Postgres without re-uploading client files.
+
+### 2.4 Qdrant (vector DB) design
+
+- **One collection, shared across all tenants**, e.g. `document_chunks`.
+- Every vector's **payload** (metadata attached to it) includes `tenant_id` and `document_id`.
+- Every search query **must** filter by `tenant_id` — this is the vector-DB equivalent of the SQL `WHERE tenant_id = ...` rule.
+
+```python
+# Payload stored alongside each vector in Qdrant
+{
+    "tenant_id": "  ...uuid...",
+    "document_id": "...uuid...",
+    "chunk_id": "...uuid...",      # matches document_chunks.id in Postgres
+    "text": "...the chunk text..." # optional duplicate, handy for quick preview
+}
+```
+
+> One collection per tenant is the *other* valid option, and gets you stronger isolation, but it's more ops overhead (hundreds of clients = hundreds of collections to manage). For an MVP with a solo developer, one shared collection with a `tenant_id` filter is simpler and still safe as long as the filter is never skipped.
+
+---
+
+## 3. Backend LLD (FastAPI)
+
+### 3.1 Request flow for every authenticated call
+
+```
+Client request
+   │
+   ▼
+JWT middleware  ──►  decodes token, extracts tenant_id + user_id
+   │
+   ▼
+FastAPI dependency (get_current_tenant)  ──►  injects tenant_id into the route
+   │
+   ▼
+Route handler  ──►  calls a service function, always passing tenant_id
+   │
+   ▼
+Service layer  ──►  every DB/Qdrant query is scoped by tenant_id
+```
+
+Putting `tenant_id` extraction in one shared **dependency** (not repeated per-route) means you can't forget it — every protected route just declares `tenant = Depends(get_current_tenant)` and FastAPI does the rest.
+
+```python
+# app/core/security.py
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPBearer
+import jwt
+
+bearer_scheme = HTTPBearer()
+
+def get_current_tenant(token = Depends(bearer_scheme)) -> str:
+    try:
+        payload = jwt.decode(token.credentials, SECRET_KEY, algorithms=["HS256"])
+        return payload["tenant_id"]
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+```
+
+### 3.2 Auth module (`api/v1/auth.py`)
+
+| Method | Path | Request body | Response | Notes |
+| --- | --- | --- | --- | --- |
+| POST | `/api/v1/auth/signup` | `{ company_name, email, password }` | `{ tenant_id, user_id, access_token }` | Creates a `tenants` row + first `users` row (role=owner) in one transaction |
+| POST | `/api/v1/auth/login` | `{ email, password }` | `{ access_token, tenant_id }` | Verifies password hash, issues JWT |
+| GET | `/api/v1/auth/me` | — (JWT header) | `{ user_id, tenant_id, email, role }` | Used by frontend on page load to check session |
+
+JWT payload shape:
+
+```json
+{ "user_id": "...", "tenant_id": "...", "role": "owner", "exp": 1735689600 }
+```
+
+### 3.3 Tenants module (`api/v1/tenants.py`)
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/api/v1/tenants/me` | Get current tenant's profile (name, plan, status) |
+| PATCH | `/api/v1/tenants/me` | Update tenant name/settings |
+| GET | `/api/v1/tenants/me/api-key` | Fetch the public key used in the embed script |
+
+### 3.4 Documents module (`api/v1/documents.py`)
+
+| Method | Path | Request | Response |
+| --- | --- | --- | --- |
+| POST | `/api/v1/documents/upload` | multipart file (PDF) or `{ url }` or `{ faq_text }` | `{ document_id, status: "pending" }` |
+| GET | `/api/v1/documents` | — | List of documents + status (pending/processing/ready/failed) |
+| DELETE | `/api/v1/documents/{id}` | — | Removes document row, its chunks, and its Qdrant vectors |
+
+**Behind the scenes (`services/ingestion.py` → `services/embedding.py`):**
+
+1. Save the uploaded file, create a `documents` row with `status = "pending"`.
+2. Background task: extract text → split into \~300–500 token chunks → insert `document_chunks` rows.
+3. For each chunk: call embedding model → upsert vector into Qdrant with `tenant_id` payload.
+4. Update `documents.status = "ready"` (or `"failed"` with a logged reason).
+
+This runs as a background task (FastAPI `BackgroundTasks`, or a simple job queue like Celery/RQ later) so the upload request returns instantly instead of the client waiting for embedding to finish.
+
+### 3.5 Chat module (`api/v1/chat.py`) — the RAG endpoint
+
+| Method | Path | Request | Response |
+| --- | --- | --- | --- |
+| POST | `/api/v1/chat` | `{ session_id?, message }` | `{ session_id, answer, sources: [chunk_id, ...] }` |
+
+**`services/retrieval.py` + `services/llm.py` flow:**
+
+1. Embed the visitor's question (same embedding model as ingestion).
+2. Search Qdrant: top-k (e.g. 5) chunks, filtered by `tenant_id`.
+3. Build a prompt: *"Answer using ONLY the following context. If the answer isn't in the context, say you don't know."* + the retrieved chunk text.
+4. Call GPT-4o, stream or return the answer.
+5. Save both the user message and the assistant answer to `chat_messages`.
+
+### 3.6 Widget module (`api/v1/widget.py`) — public, no login
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| POST | `/api/v1/widget/chat` | `public_key` in header, not JWT | Same as `/chat` above, but authenticates via the tenant's public API key instead of a user login, since website visitors aren't logged-in dashboard users |
+
+This is a **separate, lighter auth path**: the widget can't use JWT (visitors never log in), so it resolves `tenant_id` by looking up the `public_key` in `api_keys` instead.
+
+### 3.7 Service layer summary
+
+| File | Responsibility |
+| --- | --- |
+| `services/ingestion.py` | Extract text from PDF/URL, split into chunks |
+| `services/embedding.py` | Turn chunk text into vectors, upsert to Qdrant |
+| `services/retrieval.py` | Search Qdrant for a query, filtered by tenant |
+| `services/llm.py` | Build the prompt, call GPT-4o, return the answer |
+
+---
+
+## 4. Frontend LLD (Next.js + TypeScript)
+
+### 4.1 Route structure
+
+```
+src/app/
+├── login/              → /login          (public)
+├── signup/             → /signup         (public)
+├── dashboard/
+│   ├── page.tsx         → /dashboard              (overview: doc count, chat volume)
+│   ├── documents/
+│   │   └── page.tsx     → /dashboard/documents     (upload + list docs)
+│   ├── chat-test/
+│   │   └── page.tsx     → /dashboard/chat-test     (try the bot before going live)
+│   └── settings/
+│       └── page.tsx     → /dashboard/settings      (embed code, API key, plan)
+```
+
+### 4.2 Component tree (documents page, as an example)
+
+```
+DocumentsPage
+├── UploadDropzone          (drag-and-drop PDF / paste URL / paste FAQ text)
+├── DocumentsTable
+│   └── DocumentRow          (name, status badge, delete button)
+└── StatusPoller             (polls GET /documents every few seconds while any doc is "processing")
+```
+
+### 4.3 State & data fetching
+
+- **Server state** (documents, tenant info, chat history) → **TanStack Query (React Query)**. It handles loading/error states and auto-refetching for you, which fits the "poll while processing" need above.
+- **Auth state** (current user/tenant) → a small **React Context** (`AuthProvider`) populated once from `/api/v1/auth/me` on app load.
+- **No Redux needed** at this size — Query + Context covers it.
+
+### 4.4 API client layer (`src/lib/api.ts`)
+
+```typescript
+// src/lib/api.ts
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = getStoredToken();
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
+export const api = {
+  login: (email: string, password: string) =>
+    apiFetch("/api/v1/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
+  getDocuments: () => apiFetch("/api/v1/documents"),
+  uploadDocument: (formData: FormData) =>
+    apiFetch("/api/v1/documents/upload", { method: "POST", body: formData }),
+  sendChatMessage: (sessionId: string | null, message: string) =>
+    apiFetch("/api/v1/chat", { method: "POST", body: JSON.stringify({ session_id: sessionId, message }) }),
+};
+```
+
+Every dashboard page imports from this one file — no page ever calls `fetch()` directly. That keeps auth-header logic and error handling in exactly one place.
+
+### 4.5 Widget (`widget/src/widget.ts`) — quick note
+
+Since this is what clients paste onto their own site, it must be dependency-free and tiny:
+
+- Renders a floating chat bubble + panel using plain DOM APIs (no React — keeps the bundle small).
+- Reads `data-public-key` from its own `<script>` tag to know which tenant it belongs to.
+- Calls `POST /api/v1/widget/chat` directly — no dashboard code involved.
+
+---
+
+## 5. Suggested Build Order (matches your Phase 1 focus)
+
+1. `tenants`, `users`, `api_keys` tables + `auth.py` (signup/login/me) — **this is Phase 1**.
+2. Wire up the Next.js `login`/`signup` pages against those 3 endpoints.
+3. Once auth works end-to-end, move to `documents` + `document_chunks` tables for Phase 2.
+
+**Key takeaway:** every table has `tenant_id`, every Qdrant vector has `tenant_id` in its payload, and every backend route resolves `tenant_id` through one shared place (JWT dependency, or public-key lookup for the widget). Get that pattern right in Phase 1 and every later phase just reuses it.
