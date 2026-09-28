@@ -1,0 +1,100 @@
+version: "3.9"
+
+# ------------------------------------------------------------------
+# AI Bot-as-a-Service Platform — Local Development Compose File
+# Runs: Postgres (relational data), Qdrant (vector search),
+#       FastAPI backend, Next.js frontend — all on one shared network.
+# Start with:  docker compose up --build
+# ------------------------------------------------------------------
+
+services:
+
+  # ---------------- Postgres: stores tenants, users, documents, chats ----------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: aibot_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - aibot_network
+
+  # ---------------- Qdrant: stores embeddings for semantic search ----------------
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: aibot_qdrant
+    restart: unless-stopped
+    ports:
+      - "${QDRANT_HTTP_PORT:-6333}:6333"   # REST API
+      - "${QDRANT_GRPC_PORT:-6334}:6334"   # gRPC API
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - aibot_network
+
+  # ---------------- Backend: FastAPI (auth, documents, RAG chat, widget) ----------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aibot_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      QDRANT_URL: http://qdrant:6333
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./backend:/app          # live-reload source during development
+      - backend_uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    networks:
+      - aibot_network
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ---------------- Frontend: Next.js client dashboard ----------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: aibot_frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules       # keep container's own node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    networks:
+      - aibot_network
+    command: npm run dev
+
+networks:
+  aibot_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  backend_uploads:
