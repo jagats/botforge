@@ -1,0 +1,46 @@
+# ---------- Secrets (never commit) ----------
+.env
+.env.*
+!.env.example
+
+# ---------- Python (backend) ----------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# ---------- Node / Next.js (frontend) ----------
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tsbuildinfo
+next-env.d.ts
+
+# ---------- Docker / local data ----------
+docker-compose.override.yml
+pgdata/
+qdrantdata/
+qdrant_storage/
+
+# ---------- Uploads and logs ----------
+uploads/
+*.log
+logs/
+
+# ---------- Editors and OS ----------
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
