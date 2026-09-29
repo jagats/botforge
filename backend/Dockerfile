@@ -8,13 +8,15 @@ WORKDIR /app
 
 # Install dependencies first so Docker can cache this layer
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Create uploads directory and non-root user
+RUN mkdir -p /app/uploads && useradd -m appuser && chown -R appuser:appuser /app
 
 # Copy the app code
 COPY . .
+RUN chown -R appuser:appuser /app
 
-# Run as a normal user, not root (safer)
-RUN useradd -m appuser && chown -R appuser /app
 USER appuser
 
 EXPOSE 8000

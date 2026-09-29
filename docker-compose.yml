@@ -74,6 +74,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: dev
     container_name: aibot_frontend
     restart: unless-stopped
     environment:

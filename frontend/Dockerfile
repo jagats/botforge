@@ -1,13 +1,22 @@
-# ---- Stage 1: install dependencies ----
-FROM node:20-alpine AS deps
+# ---- Base stage ----
+FROM node:20-alpine AS base
+WORKDIR /app
+RUN apk add --no-cache libc6-compat
+
+# ---- Stage 1: Development (used by docker compose in dev) ----
+FROM base AS dev
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm install
+COPY . .
+EXPOSE 3000
+CMD ["npm", "run", "dev"]
 
-# ---- Stage 2: build the app ----
-FROM node:20-alpine AS build
+# ---- Stage 2: Production Build ----
+FROM base AS build
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+COPY package*.json ./
+RUN npm install
 COPY . .
 
 # NEXT_PUBLIC_* values are baked in at build time
@@ -16,7 +25,7 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 RUN npm run build
 
-# ---- Stage 3: small runtime image ----
+# ---- Stage 3: Small runtime image for Production ----
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production \
