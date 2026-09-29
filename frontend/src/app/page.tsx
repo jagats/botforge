@@ -14,7 +14,7 @@ export default function HomePage() {
         <div className="card">
           <h2 className="card-title">
             <span className="status-dot"></span>
-            PostgreSQL
+            PostgreSQL as a Service
           </h2>
           <p className="card-desc">Port 5432 &bull; Relational database for tenants, users, API keys, and logs.</p>
         </div>
