@@ -18,7 +18,7 @@ app.add_middleware(
 
 @app.get("/health", tags=["Health"])
 async def health_check():
-    """Health check endpoint to verify backend service status."""
+    """Health check endpoint to verify backend service status. it will return the status of the backend service"""
     return {
         "status": "ok",
         "service": "botforge-backend",
