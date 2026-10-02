@@ -27,7 +27,7 @@ async def health_check():
 
 @app.get("/", tags=["Root"])
 async def root():
-    """Welcome endpoint."""
+    """Welcome endpoint. this is the root route of the backend service"""
     return {
         "message": "Welcome to BotForge API. Visit /docs for Swagger UI or /health for service health."
     }
