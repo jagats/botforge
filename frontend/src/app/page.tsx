@@ -2,7 +2,7 @@ export default function HomePage() {
   return (
     <main className="container">
       <header className="header">
-        <span className="badge">Phase 0: Environment Ready</span>
+        <span className="badge">Phase 0: Environment ready! lets start with backend </span>
         <h1 className="title">BotForge</h1>
         <p className="subtitle">
           Multi-tenant AI Bot-as-a-Service Platform. Ingest documents, embed content,
@@ -14,7 +14,7 @@ export default function HomePage() {
         <div className="card">
           <h2 className="card-title">
             <span className="status-dot"></span>
-            PostgreSQL as a Service
+            PostgreSQL as a Service done
           </h2>
           <p className="card-desc">Port 5432 &bull; Relational database for tenants, users, API keys, and logs.</p>
         </div>
