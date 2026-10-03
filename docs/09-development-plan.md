@@ -16,28 +16,29 @@ Single developer, single monorepo, fully dockerized. Estimates assume full-time 
 ## Current status
 - [x] Concept proposal, HLD/architecture, tech stack, LLD (schema, backend, frontend)
 - [x] Root `docker-compose.yml` and `.env.example`
-- [ ] **Phase 0 remaining:** `backend/Dockerfile`, `frontend/Dockerfile`, minimal `backend/app/main.py` with a health route, minimal Next.js app, `README.md`, basic CI
-- [ ] Phase 1 – Phase 5 not started
+- [x] Phase 0 complete: `backend/Dockerfile`, `frontend/Dockerfile`, `backend/app/main.py` with health route, minimal Next.js app, `.gitignore`, Docker services running.
+- [x] **Phase 1 complete:** Database layer & Alembic migrations (`tenants`, `users`, `api_keys`), FastAPI auth & tenant APIs with test suites (9 passing), and Next.js `/signup`, `/login`, `AuthProvider`, and `/dashboard`.
+- [ ] **Phase 2 next:** Document upload (PDF/FAQ/URL), chunking, embeddings, vectors in Qdrant per tenant.
 
 > Update this checklist whenever a task is finished.
 
 ## Phase 0 — task list
-1. Create the monorepo folders from `04-folder-structure.md`.
-2. Write `backend/Dockerfile` + `requirements.txt` (include `psycopg[binary]`).
-3. Write `backend/app/main.py` with `GET /health`.
-4. Write `frontend/Dockerfile`, init Next.js + TypeScript in `frontend/`.
-5. Copy `.env.example` → `.env`, run `docker compose up --build`.
-6. Done when: Postgres healthy, Qdrant dashboard reachable on 6333, `/health` returns OK, frontend loads on 3000.
-7. Add `.gitignore` (`.env`, `node_modules`, `__pycache__`, `.next`, uploads).
+1. [x] Create the monorepo folders from `04-folder-structure.md`.
+2. [x] Write `backend/Dockerfile` + `requirements.txt` (include `psycopg[binary]`).
+3. [x] Write `backend/app/main.py` with `GET /health`.
+4. [x] Write `frontend/Dockerfile`, init Next.js + TypeScript in `frontend/`.
+5. [x] Copy `.env.example` → `.env`, run `docker compose up --build`.
+6. [x] Done when: Postgres healthy, Qdrant dashboard reachable on 6333, `/health` returns OK, frontend loads on 3000.
+7. [x] Add `.gitignore` (`.env`, `node_modules`, `__pycache__`, `.next`, uploads).
 
 ## Phase 1 — task list (build order from the LLD)
-1. SQLAlchemy models: `tenants`, `users`, `api_keys`; Alembic first migration.
-2. `core/config.py`, `core/security.py` (password hashing, JWT, `get_current_tenant`).
-3. `api/v1/auth.py`: signup (tenant + user + api key in one transaction), login, me.
-4. `api/v1/tenants.py`: me, patch me, api-key.
-5. Tests for signup/login/me and for tenant isolation.
-6. Next.js `/login`, `/signup`, `AuthProvider`, `lib/api.ts`, empty `/dashboard`.
-7. Done when: a user can sign up, log in, see the empty dashboard, and refresh without losing the session.
+1. [x] SQLAlchemy models: `tenants`, `users`, `api_keys`; Alembic first migration.
+2. [x] `core/config.py`, `core/security.py` (password hashing, JWT, `get_current_tenant`).
+3. [x] `api/v1/auth.py`: signup (tenant + user + api key in one transaction), login, me.
+4. [x] `api/v1/tenants.py`: me, patch me, api-key.
+5. [x] Tests for signup/login/me and for tenant isolation.
+6. [x] Next.js `/login`, `/signup`, `AuthProvider`, `lib/api.ts`, empty `/dashboard`.
+7. [x] Done when: a user can sign up, log in, see the empty dashboard, and refresh without losing the session.
 
 ## Phase 2 — outline
 `documents` + `document_chunks` tables → upload endpoint → ingestion + embedding services → Qdrant collection creation → status polling in UI → delete removes Postgres rows and vectors.
