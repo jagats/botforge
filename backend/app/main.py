@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1 import api_v1_router
+
 app = FastAPI(
     title="BotForge API",
     version="0.1.0",
@@ -15,6 +17,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount API routes
+app.include_router(api_v1_router)
 
 @app.get("/health", tags=["Health"])
 async def health_check():
@@ -31,3 +36,4 @@ async def root():
     return {
         "message": "Welcome to BotForge API. Visit /docs for Swagger UI or /health for service health."
     }
+

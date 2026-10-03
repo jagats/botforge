@@ -20,7 +20,7 @@
 `AI_Bot_as_a_Service_Platform_Proposal.docx` mentions Node.js, pgvector, and Claude. The business goals and RAG concept still hold; the tech choices above **override** it.
 
 ## Open questions (decide when the phase arrives)
-1. **Login uniqueness:** `users` is unique on `(tenant_id, email)`, but `/auth/login` only receives `email + password`. If the same email can exist in two tenants, login is ambiguous. Options: make email globally unique, or ask for a tenant slug at login. Decide in Phase 1.
+1. **Login uniqueness (Decided):** Email is globally unique (`UNIQUE (email)` on `users`). One user account maps to one tenant/owner. Keeps `/auth/login` simple with just `{email, password}`.
 2. **RLS setup:** how to set the tenant on each DB session (e.g. `SET LOCAL app.tenant_id`) so RLS policies work. Decide in Phase 1.
 3. **Token storage in the frontend:** localStorage vs httpOnly cookie. Decide in Phase 1.
 4. **Embedding model:** `.env.example` defaults to `text-embedding-3-small`; confirm before creating the Qdrant collection (vector size must match).
