@@ -17,8 +17,9 @@ Single developer, single monorepo, fully dockerized. Estimates assume full-time 
 - [x] Concept proposal, HLD/architecture, tech stack, LLD (schema, backend, frontend)
 - [x] Root `docker-compose.yml` and `.env.example`
 - [x] Phase 0 complete: `backend/Dockerfile`, `frontend/Dockerfile`, `backend/app/main.py` with health route, minimal Next.js app, `.gitignore`, Docker services running.
-- [x] **Phase 1 complete:** Database layer & Alembic migrations (`tenants`, `users`, `api_keys`), FastAPI auth & tenant APIs with test suites (9 passing), and Next.js `/signup`, `/login`, `AuthProvider`, and `/dashboard`.
-- [ ] **Phase 2 next:** Document upload (PDF/FAQ/URL), chunking, embeddings, vectors in Qdrant per tenant.
+- [x] Phase 1 complete: Database layer & Alembic migrations (`tenants`, `users`, `api_keys`), FastAPI auth & tenant APIs with test suites (9 passing), and Next.js `/signup`, `/login`, `AuthProvider`, and `/dashboard`.
+- [x] **Phase 2 complete:** `documents` & `document_chunks` models, Alembic migration, Qdrant collection setup (`document_chunks` with `tenant_id` payload index), ingestion service (PDF parsing via `pypdf`, URL scraping via `beautifulsoup4`, FAQ parsing), OpenAI embeddings + deterministic mock fallback, `/api/v1/documents` endpoints, automated test suite (13 passing), and Next.js `/dashboard/documents` management UI with auto-polling.
+- [ ] **Phase 3 next:** RAG chat API (`retrieval.py` + `llm.py`), Qdrant semantic retrieval filtered by `tenant_id`, GPT-4o grounded answer generation, session & message history, and `/dashboard/chat-test` interactive playground.
 
 > Update this checklist whenever a task is finished.
 
@@ -40,8 +41,15 @@ Single developer, single monorepo, fully dockerized. Estimates assume full-time 
 6. [x] Next.js `/login`, `/signup`, `AuthProvider`, `lib/api.ts`, empty `/dashboard`.
 7. [x] Done when: a user can sign up, log in, see the empty dashboard, and refresh without losing the session.
 
-## Phase 2 — outline
-`documents` + `document_chunks` tables → upload endpoint → ingestion + embedding services → Qdrant collection creation → status polling in UI → delete removes Postgres rows and vectors.
+## Phase 2 — task list (Document Ingestion & Qdrant)
+1. [x] SQLAlchemy models: `documents`, `document_chunks`; Alembic migration `7d32b6ea0771`.
+2. [x] Qdrant collection initialization on startup with payload index on `tenant_id` and `document_id`.
+3. [x] Ingestion service (`services/ingestion.py`): PDF text extraction (`pypdf`), URL scraping (`beautifulsoup4`), and sliding window chunking (~300-500 tokens).
+4. [x] Vector service (`services/embedding.py`): OpenAI embeddings (`text-embedding-3-small`) with deterministic mock fallback, Qdrant upsert and tenant-filtered vector deletion.
+5. [x] Document service (`services/document_service.py`): background ingestion task, document listings, cascade deletion.
+6. [x] API routes (`api/v1/documents.py`): `POST /documents/upload`, `POST /documents/url`, `POST /documents/faq`, `GET /documents`, `GET /documents/{id}`, `DELETE /documents/{id}`.
+7. [x] Automated test suite (`tests/test_documents.py`): FAQ ingestion, PDF validation, deletion, and cross-tenant isolation (13 total passing).
+8. [x] Frontend UI (`frontend/src/app/dashboard/documents/page.tsx`): Tabs for PDF drag-drop, URL input, FAQ form, auto-polling table with status badges and deletion.
 
 ## Phase 3 — outline
 `retrieval.py` + `llm.py` → `/chat` → save sessions/messages → `/dashboard/chat-test` page.

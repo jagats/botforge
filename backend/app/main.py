@@ -1,12 +1,23 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import api_v1_router
+from app.core.qdrant import init_qdrant_collection
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Ensure Qdrant collection and payload indexes exist on startup
+    init_qdrant_collection()
+    yield
+
 
 app = FastAPI(
     title="BotForge API",
     version="0.1.0",
     description="Multi-tenant AI Bot-as-a-Service Platform",
+    lifespan=lifespan,
 )
 
 # Enable CORS for local Next.js frontend and widget embedding

@@ -46,7 +46,7 @@ export default function DashboardLayout({
 
   const navItems = [
     { label: "Overview", href: "/dashboard", icon: "📊" },
-    { label: "Documents", href: "/dashboard/documents", icon: "📄", badge: "Phase 2" },
+    { label: "Documents", href: "/dashboard/documents", icon: "📄" },
     { label: "Chat Test", href: "/dashboard/chat-test", icon: "💬", badge: "Phase 3" },
     { label: "Settings & Embed", href: "/dashboard/settings", icon: "⚙️" },
   ];

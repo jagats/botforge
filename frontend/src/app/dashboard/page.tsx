@@ -2,10 +2,21 @@
 
 import React from "react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../../contexts/AuthContext";
+import { documentApi } from "../../lib/api";
 
 export default function DashboardOverviewPage() {
   const { user } = useAuth();
+
+  const { data: docData } = useQuery({
+    queryKey: ["documents"],
+    queryFn: documentApi.list,
+  });
+
+  const documents = docData?.documents || [];
+  const readyDocs = documents.filter((d) => d.status === "ready");
+  const totalChunks = documents.reduce((sum, d) => sum + (d.chunk_count || 0), 0);
 
   return (
     <div>
@@ -25,18 +36,23 @@ export default function DashboardOverviewPage() {
         }}
       >
         <div>
-          <span className="badge">Phase 1 Complete: Auth & Multi-Tenancy</span>
+          <span className="badge badge-success">Phase 2 Complete: Ingestion & Qdrant Vectors</span>
           <h1 style={{ fontSize: "1.85rem", fontWeight: 800, marginTop: "0.5rem", marginBottom: "0.5rem" }}>
             Welcome, {user?.company_name || "Partner"}
           </h1>
           <p style={{ color: "var(--text-muted)", fontSize: "0.95rem", maxWidth: "600px" }}>
-            Your dedicated multi-tenant workspace is live. All your data, documents, and chatbot
-            conversations are strictly isolated under Tenant ID <code>{user?.tenant_id}</code>.
+            Your dedicated multi-tenant workspace is live. Knowledge documents are automatically segmented,
+            vectorized, and stored in Qdrant strictly isolated under Tenant ID <code>{user?.tenant_id}</code>.
           </p>
         </div>
-        <Link href="/dashboard/settings" className="btn btn-primary">
-          ⚙️ View API Key & Embed Snippet
-        </Link>
+        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+          <Link href="/dashboard/documents" className="btn btn-primary">
+            📄 Manage Documents
+          </Link>
+          <Link href="/dashboard/settings" className="btn btn-outline">
+            ⚙️ Settings & Snippet
+          </Link>
+        </div>
       </div>
 
       {/* Metrics Grid */}
@@ -45,9 +61,11 @@ export default function DashboardOverviewPage() {
           <div style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginBottom: "0.5rem" }}>
             Knowledge Documents
           </div>
-          <div style={{ fontSize: "2rem", fontWeight: 800, color: "var(--text-main)" }}>0</div>
+          <div style={{ fontSize: "2rem", fontWeight: 800, color: "var(--text-main)" }}>
+            {documents.length}
+          </div>
           <p className="card-desc" style={{ marginTop: "0.5rem" }}>
-            Ready for Phase 2 ingestion (PDF, FAQ text, web URLs).
+            {readyDocs.length} ready in Qdrant ({totalChunks} vector chunks).
           </p>
         </div>
 
@@ -81,7 +99,7 @@ export default function DashboardOverviewPage() {
             <span className="status-dot"></span> Active & Scoped
           </div>
           <p className="card-desc" style={{ marginTop: "0.5rem" }}>
-            Authenticated via signed JWT tokens.
+            Postgres and Qdrant queries filtered by tenant.
           </p>
         </div>
       </div>
@@ -95,16 +113,16 @@ export default function DashboardOverviewPage() {
         }}
       >
         <h2 style={{ fontSize: "1.15rem", fontWeight: 700, marginBottom: "0.5rem" }}>
-          🚀 Ready for Phase 2: Document Ingestion & Qdrant Vectors
+          🎯 Next Up: Phase 3 (RAG Chat API & Test Playground)
         </h2>
         <p style={{ color: "var(--text-muted)", fontSize: "0.92rem", lineHeight: 1.6, marginBottom: "1rem" }}>
-          The backend database schema, user accounts, and API key infrastructure are fully operating.
-          The next step will allow uploading PDFs, website URLs, and FAQs, chunking them into semantic fragments,
-          and storing vectors in Qdrant with your tenant ID filter.
+          With document ingestion and multi-tenant Qdrant indexing complete, Phase 3 will introduce
+          the grounded RAG chat engine (Qdrant semantic retrieval + GPT-4o answers) and the in-dashboard
+          test chat playground to chat with your bot.
         </p>
         <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-          <Link href="/dashboard/settings" className="btn btn-secondary">
-            Settings & Embed Code &rarr;
+          <Link href="/dashboard/documents" className="btn btn-secondary">
+            Go to Documents &rarr;
           </Link>
         </div>
       </div>
