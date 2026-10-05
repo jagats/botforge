@@ -24,7 +24,7 @@ export default function DocumentsPage() {
   const [isDragging, setIsDragging] = useState(false);
 
   // Fetch documents list with dynamic polling if any document is processing
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["documents"],
     queryFn: documentApi.list,
     refetchInterval: (query) => {
@@ -163,13 +163,13 @@ export default function DocumentsPage() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-      {/* Page Title */}
+    <div className="space-y-8">
+      {/* Title */}
       <div>
-        <h1 style={{ fontSize: "1.85rem", fontWeight: 800, marginBottom: "0.5rem" }}>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-1.5">
           Knowledge Base & Documents
         </h1>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.95rem" }}>
+        <p className="text-sm text-slate-400">
           Upload PDF files, link web pages, or paste FAQs. BotForge automatically segments and embeds
           your data into Qdrant for strictly grounded chatbot answers.
         </p>
@@ -177,118 +177,106 @@ export default function DocumentsPage() {
 
       {/* Notifications */}
       {successMessage && (
-        <div
-          style={{
-            padding: "0.85rem 1.25rem",
-            backgroundColor: "var(--success-glow)",
-            border: "1px solid rgba(16, 185, 129, 0.4)",
-            borderRadius: "var(--radius-md)",
-            color: "#34d399",
-            fontSize: "0.9rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-          }}
-        >
+        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm flex items-center gap-2 shadow-sm">
           <span>✅</span>
           <span>{successMessage}</span>
         </div>
       )}
 
-      {actionError && <div className="alert-error">⚠️ {actionError}</div>}
+      {actionError && (
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm flex items-center gap-2 shadow-sm">
+          <span>⚠️</span>
+          <span>{actionError}</span>
+        </div>
+      )}
 
-      {/* Upload & Ingestion Card */}
-      <div className="card">
+      {/* Ingestion Source Panel */}
+      <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-6 shadow-sm">
         {/* Source Switcher Tabs */}
-        <div
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            borderBottom: "1px solid var(--border-color)",
-            paddingBottom: "1rem",
-            marginBottom: "1.5rem",
-          }}
-        >
+        <div className="flex flex-wrap gap-2 border-b border-slate-800 pb-4 mb-6">
           <button
             type="button"
-            className={`btn ${activeTab === "pdf" ? "btn-primary" : "btn-outline"}`}
-            style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
+            className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+              activeTab === "pdf"
+                ? "bg-blue-600 text-white shadow-sm"
+                : "bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800"
+            }`}
             onClick={() => setActiveTab("pdf")}
           >
             📑 Upload PDF
           </button>
           <button
             type="button"
-            className={`btn ${activeTab === "url" ? "btn-primary" : "btn-outline"}`}
-            style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
+            className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+              activeTab === "url"
+                ? "bg-blue-600 text-white shadow-sm"
+                : "bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800"
+            }`}
             onClick={() => setActiveTab("url")}
           >
             🌐 Web Page URL
           </button>
           <button
             type="button"
-            className={`btn ${activeTab === "faq" ? "btn-primary" : "btn-outline"}`}
-            style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
+            className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+              activeTab === "faq"
+                ? "bg-blue-600 text-white shadow-sm"
+                : "bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800"
+            }`}
             onClick={() => setActiveTab("faq")}
           >
             ✍️ FAQ / Text Snippet
           </button>
         </div>
 
-        {/* Tab 1: PDF Upload Dropzone */}
+        {/* Tab 1: PDF Dropzone */}
         {activeTab === "pdf" && (
           <form onSubmit={handlePdfSubmit}>
             <div
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              style={{
-                border: `2px dashed ${isDragging ? "var(--accent)" : "var(--border-color)"}`,
-                borderRadius: "var(--radius-lg)",
-                padding: "2.5rem 1.5rem",
-                textAlign: "center",
-                backgroundColor: isDragging ? "var(--accent-glow)" : "rgba(10, 13, 20, 0.4)",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-              }}
               onClick={() => document.getElementById("pdf-file-input")?.click()}
+              className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${
+                isDragging
+                  ? "border-blue-500 bg-blue-500/10 scale-[1.01]"
+                  : "border-slate-800 hover:border-blue-500/50 bg-slate-950/40 hover:bg-slate-950/70"
+              }`}
             >
               <input
                 id="pdf-file-input"
                 type="file"
                 accept=".pdf,application/pdf"
-                style={{ display: "none" }}
+                className="hidden"
                 onChange={handleFileChange}
               />
-              <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>📄</div>
+              <div className="text-4xl mb-3">📄</div>
               {selectedFile ? (
                 <div>
-                  <div style={{ fontWeight: 600, color: "var(--text-main)", fontSize: "1rem" }}>
-                    {selectedFile.name}
-                  </div>
-                  <div style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+                  <div className="font-semibold text-white text-base">{selectedFile.name}</div>
+                  <div className="text-xs text-slate-400 mt-1">
                     {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
                   </div>
-                  <span className="badge" style={{ marginTop: "0.75rem" }}>
-                    Click or drag another to replace
+                  <span className="inline-block mt-3 px-3 py-1 rounded-full text-xs font-medium bg-blue-600/20 text-blue-400 border border-blue-500/30">
+                    Click or drag another file to replace
                   </span>
                 </div>
               ) : (
                 <div>
-                  <div style={{ fontWeight: 600, color: "var(--text-main)", fontSize: "1rem" }}>
-                    Drop your PDF here, or <span style={{ color: "var(--accent)" }}>browse files</span>
+                  <div className="font-semibold text-slate-200 text-base">
+                    Drop your PDF here, or <span className="text-blue-400 underline underline-offset-4">browse files</span>
                   </div>
-                  <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: "0.35rem" }}>
+                  <p className="text-xs text-slate-400 mt-1.5">
                     Standard searchable PDFs up to 20MB
                   </p>
                 </div>
               )}
             </div>
 
-            <div style={{ marginTop: "1.25rem", display: "flex", justifyContent: "flex-end" }}>
+            <div className="mt-4 flex justify-end">
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/20 transition-all disabled:opacity-50 disabled:pointer-events-none active:scale-95"
                 disabled={!selectedFile || uploadPdfMutation.isPending}
               >
                 {uploadPdfMutation.isPending ? "Uploading & Vectorizing..." : "Upload & Vectorize PDF"}
@@ -297,34 +285,38 @@ export default function DocumentsPage() {
           </form>
         )}
 
-        {/* Tab 2: URL Scraper Form */}
+        {/* Tab 2: URL Form */}
         {activeTab === "url" && (
-          <form onSubmit={handleUrlSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-            <div className="form-group" style={{ margin: 0 }}>
-              <label className="form-label">Website or Page URL</label>
+          <form onSubmit={handleUrlSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                Target Web Page URL
+              </label>
               <input
                 type="url"
-                className="form-input"
-                placeholder="https://example.com/faq or https://docs.example.com"
+                className="w-full px-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="https://example.com/help or https://docs.example.com"
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
                 required
               />
             </div>
-            <div className="form-group" style={{ margin: 0 }}>
-              <label className="form-label">Custom Title (Optional)</label>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                Document Title (Optional)
+              </label>
               <input
                 type="text"
-                className="form-input"
-                placeholder="e.g. Pricing & Policy Page"
+                className="w-full px-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="e.g. Terms of Service or Pricing Page"
                 value={urlTitleInput}
                 onChange={(e) => setUrlTitleInput(e.target.value)}
               />
             </div>
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <div className="flex justify-end pt-2">
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/20 transition-all disabled:opacity-50 disabled:pointer-events-none active:scale-95"
                 disabled={!urlInput.trim() || uploadUrlMutation.isPending}
               >
                 {uploadUrlMutation.isPending ? "Scraping & Ingesting..." : "Fetch & Ingest URL"}
@@ -333,36 +325,39 @@ export default function DocumentsPage() {
           </form>
         )}
 
-        {/* Tab 3: FAQ / Direct Text Form */}
+        {/* Tab 3: FAQ Form */}
         {activeTab === "faq" && (
-          <form onSubmit={handleFaqSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-            <div className="form-group" style={{ margin: 0 }}>
-              <label className="form-label">Document Title</label>
+          <form onSubmit={handleFaqSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                Document Title
+              </label>
               <input
                 type="text"
-                className="form-input"
+                className="w-full px-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 placeholder="e.g. Return Policy or Office Hours"
                 value={faqTitleInput}
                 onChange={(e) => setFaqTitleInput(e.target.value)}
                 required
               />
             </div>
-            <div className="form-group" style={{ margin: 0 }}>
-              <label className="form-label">Knowledge Content / FAQ Text</label>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                Knowledge Content / FAQ Text
+              </label>
               <textarea
-                className="form-input"
                 rows={6}
+                className="w-full px-4 py-3 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-y"
                 placeholder="Enter facts, questions & answers, or policies that your chatbot should know..."
                 value={faqTextInput}
                 onChange={(e) => setFaqTextInput(e.target.value)}
-                style={{ resize: "vertical", fontFamily: "inherit" }}
                 required
               />
             </div>
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <div className="flex justify-end pt-2">
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/20 transition-all disabled:opacity-50 disabled:pointer-events-none active:scale-95"
                 disabled={!faqTitleInput.trim() || !faqTextInput.trim() || uploadFaqMutation.isPending}
               >
                 {uploadFaqMutation.isPending ? "Chunking & Vectorizing..." : "Save & Vectorize FAQ"}
@@ -373,118 +368,67 @@ export default function DocumentsPage() {
       </div>
 
       {/* Documents Table */}
-      <div className="card">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
-          <h2 className="card-title" style={{ fontSize: "1.2rem", margin: 0 }}>
-            Indexed Documents ({documents.length})
+      <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-base font-bold text-white flex items-center gap-2">
+            <span>📚</span>
+            <span>Indexed Documents ({documents.length})</span>
           </h2>
-          {isLoading && <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>Refreshing...</span>}
+          {isLoading && <span className="text-xs text-slate-400">Refreshing list...</span>}
         </div>
 
         {documents.length === 0 ? (
-          <div
-            style={{
-              padding: "3rem 1rem",
-              textAlign: "center",
-              color: "var(--text-muted)",
-              border: "1px dashed var(--border-color)",
-              borderRadius: "var(--radius-md)",
-            }}
-          >
-            <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📚</div>
-            <div style={{ fontWeight: 600, color: "var(--text-main)", marginBottom: "0.25rem" }}>
+          <div className="py-12 px-4 text-center border border-dashed border-slate-800 rounded-xl">
+            <div className="text-3xl mb-2">📄</div>
+            <div className="text-sm font-semibold text-slate-200 mb-1">
               No documents in your knowledge base yet
             </div>
-            <p style={{ fontSize: "0.85rem" }}>
+            <p className="text-xs text-slate-400 max-w-sm mx-auto">
               Upload your first PDF or FAQ snippet using the form above to start training your bot.
             </p>
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                textAlign: "left",
-                fontSize: "0.9rem",
-              }}
-            >
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr
-                  style={{
-                    borderBottom: "1px solid var(--border-color)",
-                    color: "var(--text-muted)",
-                    fontSize: "0.8rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  <th style={{ padding: "0.75rem 1rem" }}>Document</th>
-                  <th style={{ padding: "0.75rem 1rem" }}>Type</th>
-                  <th style={{ padding: "0.75rem 1rem" }}>Status</th>
-                  <th style={{ padding: "0.75rem 1rem" }}>Vectors</th>
-                  <th style={{ padding: "0.75rem 1rem" }}>Added</th>
-                  <th style={{ padding: "0.75rem 1rem", textAlign: "right" }}>Actions</th>
+                <tr className="border-b border-slate-800 text-xs uppercase tracking-wider text-slate-400 font-semibold">
+                  <th className="pb-3 px-4">Document</th>
+                  <th className="pb-3 px-4">Type</th>
+                  <th className="pb-3 px-4">Status</th>
+                  <th className="pb-3 px-4">Vectors</th>
+                  <th className="pb-3 px-4">Added</th>
+                  <th className="pb-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-800/60">
                 {documents.map((doc: Document) => {
                   const isProcessing = doc.status === "pending" || doc.status === "processing";
 
                   return (
-                    <tr
-                      key={doc.id}
-                      style={{
-                        borderBottom: "1px solid rgba(35, 49, 82, 0.4)",
-                        transition: "background 0.15s ease",
-                      }}
-                    >
+                    <tr key={doc.id} className="hover:bg-slate-800/30 transition-colors">
                       {/* Title & Origin */}
-                      <td style={{ padding: "1rem" }}>
-                        <div style={{ fontWeight: 600, color: "var(--text-main)" }}>
-                          {doc.title}
-                        </div>
+                      <td className="py-4 px-4">
+                        <div className="font-semibold text-slate-100">{doc.title}</div>
                         {doc.original_url && (
                           <a
                             href={doc.original_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            style={{
-                              fontSize: "0.75rem",
-                              color: "var(--accent)",
-                              display: "inline-block",
-                              marginTop: "0.2rem",
-                            }}
+                            className="text-xs text-blue-400 hover:text-blue-300 inline-block mt-0.5"
                           >
                             🔗 {doc.original_url}
                           </a>
                         )}
                         {doc.error_message && (
-                          <div
-                            style={{
-                              color: "#f87171",
-                              fontSize: "0.75rem",
-                              marginTop: "0.25rem",
-                            }}
-                          >
+                          <div className="text-xs text-red-400 mt-1">
                             Error: {doc.error_message}
                           </div>
                         )}
                       </td>
 
                       {/* Source Type Badge */}
-                      <td style={{ padding: "1rem" }}>
-                        <span
-                          style={{
-                            padding: "0.25rem 0.6rem",
-                            borderRadius: "4px",
-                            fontSize: "0.75rem",
-                            fontWeight: 600,
-                            textTransform: "uppercase",
-                            background: "rgba(148, 163, 184, 0.1)",
-                            color: "var(--text-muted)",
-                          }}
-                        >
+                      <td className="py-4 px-4">
+                        <span className="px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wide bg-slate-800 text-slate-300 border border-slate-700">
                           {doc.source_type === "pdf" && "📑 PDF"}
                           {doc.source_type === "url" && "🌐 URL"}
                           {doc.source_type === "faq_text" && "✍️ FAQ"}
@@ -492,63 +436,37 @@ export default function DocumentsPage() {
                       </td>
 
                       {/* Status */}
-                      <td style={{ padding: "1rem" }}>
+                      <td className="py-4 px-4">
                         {doc.status === "ready" && (
-                          <span
-                            className="badge badge-success"
-                            style={{ margin: 0, padding: "0.2rem 0.6rem", fontSize: "0.75rem" }}
-                          >
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                             Ready
                           </span>
                         )}
                         {isProcessing && (
-                          <span
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "0.4rem",
-                              padding: "0.2rem 0.6rem",
-                              borderRadius: "9999px",
-                              fontSize: "0.75rem",
-                              fontWeight: 600,
-                              background: "rgba(59, 130, 246, 0.15)",
-                              color: "#60a5fa",
-                              border: "1px solid rgba(59, 130, 246, 0.3)",
-                            }}
-                          >
-                            <span className="status-dot"></span>
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
                             {doc.status === "pending" ? "Pending" : "Processing"}
                           </span>
                         )}
                         {doc.status === "failed" && (
-                          <span
-                            style={{
-                              padding: "0.2rem 0.6rem",
-                              borderRadius: "9999px",
-                              fontSize: "0.75rem",
-                              fontWeight: 600,
-                              background: "var(--error-glow)",
-                              color: "#f87171",
-                              border: "1px solid rgba(239, 68, 68, 0.3)",
-                            }}
-                          >
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/30">
                             Failed
                           </span>
                         )}
                       </td>
 
-                      {/* Vector Chunk count */}
-                      <td style={{ padding: "1rem", color: "var(--text-main)", fontWeight: 600 }}>
+                      {/* Chunk count */}
+                      <td className="py-4 px-4 text-slate-200 font-medium">
                         {doc.chunk_count} {doc.chunk_count === 1 ? "chunk" : "chunks"}
                       </td>
 
                       {/* Created date */}
-                      <td style={{ padding: "1rem", color: "var(--text-muted)", fontSize: "0.85rem" }}>
+                      <td className="py-4 px-4 text-slate-400 text-xs">
                         {new Date(doc.created_at).toLocaleDateString()}
                       </td>
 
-                      {/* Action buttons */}
-                      <td style={{ padding: "1rem", textAlign: "right" }}>
+                      {/* Action */}
+                      <td className="py-4 px-4 text-right">
                         <button
                           type="button"
                           onClick={() => {
@@ -556,11 +474,7 @@ export default function DocumentsPage() {
                               deleteMutation.mutate(doc.id);
                             }
                           }}
-                          className="btn btn-danger"
-                          style={{
-                            padding: "0.35rem 0.75rem",
-                            fontSize: "0.8rem",
-                          }}
+                          className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-colors disabled:opacity-50"
                           disabled={deleteMutation.isPending}
                         >
                           Delete
