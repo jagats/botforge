@@ -3,9 +3,13 @@
 import {
   ApiKey,
   AuthTokens,
+  Document,
+  DocumentListResponse,
   LoginInput,
   SignupInput,
   Tenant,
+  UploadFaqInput,
+  UploadUrlInput,
   User,
 } from "../types";
 
@@ -115,5 +119,45 @@ export const tenantApi = {
 
   getApiKey: async (): Promise<ApiKey> => {
     return apiFetch<ApiKey>("/api/v1/tenants/me/api-key");
+  },
+};
+
+/** Document management API endpoints */
+export const documentApi = {
+  list: async (): Promise<DocumentListResponse> => {
+    return apiFetch<DocumentListResponse>("/api/v1/documents");
+  },
+
+  get: async (id: string): Promise<Document> => {
+    return apiFetch<Document>(`/api/v1/documents/${id}`);
+  },
+
+  uploadPdf: async (file: File): Promise<Document> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiFetch<Document>("/api/v1/documents/upload", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  uploadUrl: async (data: UploadUrlInput): Promise<Document> => {
+    return apiFetch<Document>("/api/v1/documents/url", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  uploadFaq: async (data: UploadFaqInput): Promise<Document> => {
+    return apiFetch<Document>("/api/v1/documents/faq", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await apiFetch<void>(`/api/v1/documents/${id}`, {
+      method: "DELETE",
+    });
   },
 };
