@@ -18,7 +18,6 @@ export default function SettingsPage() {
   const {
     data: tenant,
     isLoading: isLoadingTenant,
-    error: tenantError,
   } = useQuery({
     queryKey: ["tenantProfile"],
     queryFn: tenantApi.getProfile,
@@ -28,7 +27,6 @@ export default function SettingsPage() {
   const {
     data: apiKey,
     isLoading: isLoadingKey,
-    error: keyError,
   } = useQuery({
     queryKey: ["tenantApiKey"],
     queryFn: tenantApi.getApiKey,
@@ -44,7 +42,7 @@ export default function SettingsPage() {
       setSaveError(null);
     },
     onError: (err: any) => {
-      setSaveError(err?.message || "Failed to update company name");
+      setSaveError(err?.message || "Failed to update company name.");
     },
   });
 
@@ -67,41 +65,51 @@ export default function SettingsPage() {
 
   if (isLoadingTenant || isLoadingKey) {
     return (
-      <div style={{ color: "var(--text-muted)", padding: "2rem 0" }}>
-        Loading workspace configuration...
+      <div className="flex items-center gap-3 text-slate-400 py-12">
+        <div className="w-5 h-5 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div>
+        <span className="text-sm">Loading workspace configuration...</span>
       </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+    <div className="space-y-8">
+      {/* Title */}
       <div>
-        <h1 style={{ fontSize: "1.85rem", fontWeight: 800, marginBottom: "0.5rem" }}>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-1.5">
           Workspace Settings & Embed
         </h1>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.95rem" }}>
-          Manage your organization profile, review API credentials, and integrate the chatbot snippet.
+        <p className="text-sm text-slate-400">
+          Manage your organization profile, inspect public API credentials, and integrate the chatbot snippet.
         </p>
       </div>
 
-      {saveError && <div className="alert-error">{saveError}</div>}
+      {saveError && (
+        <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm flex items-center gap-2">
+          <span>⚠️</span>
+          <span>{saveError}</span>
+        </div>
+      )}
 
       {/* Organization Details */}
-      <div className="card">
-        <h2 className="card-title" style={{ marginBottom: "1.25rem", fontSize: "1.15rem" }}>
-          🏢 Organization Profile
+      <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-6 shadow-sm">
+        <h2 className="text-base font-bold text-white mb-6 flex items-center gap-2">
+          <span>🏢</span>
+          <span>Organization Profile</span>
         </h2>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Company Name */}
           <div>
-            <label className="form-label">Company Name</label>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+              Company Name
+            </label>
             {!isEditingName ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                <span style={{ fontSize: "1.1rem", fontWeight: 600 }}>{tenant?.name}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-base font-bold text-white">{tenant?.name}</span>
                 <button
                   type="button"
-                  className="btn btn-outline"
-                  style={{ padding: "0.3rem 0.75rem", fontSize: "0.8rem" }}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
                   onClick={() => {
                     setCompanyNameInput(tenant?.name || "");
                     setIsEditingName(true);
@@ -111,27 +119,24 @@ export default function SettingsPage() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSaveName} style={{ display: "flex", gap: "0.5rem", marginTop: "0.25rem" }}>
+              <form onSubmit={handleSaveName} className="flex items-center gap-2 mt-1">
                 <input
                   type="text"
-                  className="form-input"
+                  className="px-3 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-44"
                   value={companyNameInput}
                   onChange={(e) => setCompanyNameInput(e.target.value)}
-                  style={{ maxWidth: "260px" }}
                   required
                 />
                 <button
                   type="submit"
-                  className="btn btn-primary"
-                  style={{ padding: "0.4rem 0.9rem", fontSize: "0.85rem" }}
+                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-all disabled:opacity-50"
                   disabled={updateMutation.isPending}
                 >
-                  {updateMutation.isPending ? "Saving..." : "Save"}
+                  {updateMutation.isPending ? "..." : "Save"}
                 </button>
                 <button
                   type="button"
-                  className="btn btn-outline"
-                  style={{ padding: "0.4rem 0.9rem", fontSize: "0.85rem" }}
+                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 transition-all"
                   onClick={() => setIsEditingName(false)}
                 >
                   Cancel
@@ -140,53 +145,69 @@ export default function SettingsPage() {
             )}
           </div>
 
+          {/* Workspace Slug */}
           <div>
-            <label className="form-label">Workspace Slug</label>
-            <div style={{ fontSize: "0.95rem", color: "var(--text-muted)" }}>
-              <code>{tenant?.slug}</code>
-            </div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+              Workspace Slug
+            </label>
+            <span className="px-2.5 py-1 rounded-md bg-slate-950 font-mono text-xs text-slate-300 border border-slate-800">
+              {tenant?.slug}
+            </span>
           </div>
 
+          {/* Plan */}
           <div>
-            <label className="form-label">Subscription Plan</label>
-            <span className="badge badge-success" style={{ margin: 0, textTransform: "capitalize" }}>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+              Subscription Plan
+            </label>
+            <span className="px-2.5 py-1 rounded-full text-xs font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
               {tenant?.plan}
             </span>
           </div>
 
+          {/* Tenant ID */}
           <div>
-            <label className="form-label">Tenant ID (Isolated Partition)</label>
-            <div style={{ fontSize: "0.85rem", color: "var(--text-dim)" }}>
-              <code>{tenant?.id}</code>
-            </div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+              Partition Tenant ID
+            </label>
+            <span className="font-mono text-xs text-slate-400 block truncate" title={tenant?.id}>
+              {tenant?.id}
+            </span>
           </div>
         </div>
       </div>
 
       {/* Widget Embed Code */}
-      <div className="card">
-        <h2 className="card-title" style={{ marginBottom: "0.5rem", fontSize: "1.15rem" }}>
-          🔌 Embed Chatbot on your Website
+      <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-6 shadow-sm">
+        <h2 className="text-base font-bold text-white mb-1.5 flex items-center gap-2">
+          <span>🔌</span>
+          <span>Embed Chatbot on Your Website</span>
         </h2>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "1.25rem" }}>
-          Paste this single tag into the <code>&lt;head&gt;</code> or <code>&lt;body&gt;</code> of your website.
-          The widget will safely communicate with BotForge using your tenant&apos;s public API key.
+        <p className="text-sm text-slate-400 mb-6 max-w-2xl">
+          Paste this single script tag into the <code>&lt;head&gt;</code> or <code>&lt;body&gt;</code> of your website.
+          The widget connects directly to BotForge using your organization&apos;s public API key.
         </p>
 
-        <div style={{ marginBottom: "1rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-muted)" }}>
-              Public API Key: <code>{apiKey?.public_key}</code>
+        <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <span className="text-xs font-semibold text-slate-400 flex items-center gap-2">
+              <span>Public Key:</span>
+              <code className="px-2 py-0.5 rounded bg-slate-950 text-blue-400 font-mono text-xs border border-slate-800">
+                {apiKey?.public_key}
+              </code>
             </span>
             <button
               onClick={handleCopy}
-              className="btn btn-secondary"
-              style={{ padding: "0.4rem 0.9rem", fontSize: "0.85rem" }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
             >
-              {copyFeedback ? "✅ Copied!" : "📋 Copy Snippet"}
+              <span>{copyFeedback ? "✅" : "📋"}</span>
+              <span>{copyFeedback ? "Copied to Clipboard!" : "Copy Snippet"}</span>
             </button>
           </div>
-          <pre className="code-snippet">{embedSnippet}</pre>
+
+          <pre className="bg-slate-950 border border-slate-800/90 rounded-xl p-4 font-mono text-xs text-sky-400 overflow-x-auto whitespace-pre-wrap break-all shadow-inner">
+            {embedSnippet}
+          </pre>
         </div>
       </div>
     </div>
