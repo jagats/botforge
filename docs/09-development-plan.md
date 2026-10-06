@@ -19,7 +19,8 @@ Single developer, single monorepo, fully dockerized. Estimates assume full-time 
 - [x] Phase 0 complete: `backend/Dockerfile`, `frontend/Dockerfile`, `backend/app/main.py` with health route, minimal Next.js app, `.gitignore`, Docker services running.
 - [x] Phase 1 complete: Database layer & Alembic migrations (`tenants`, `users`, `api_keys`), FastAPI auth & tenant APIs with test suites (9 passing), and Next.js `/signup`, `/login`, `AuthProvider`, and `/dashboard`.
 - [x] **Phase 2 complete:** `documents` & `document_chunks` models, Alembic migration, Qdrant collection setup (`document_chunks` with `tenant_id` payload index), ingestion service (PDF parsing via `pypdf`, URL scraping via `beautifulsoup4`, FAQ parsing), OpenAI embeddings + deterministic mock fallback, `/api/v1/documents` endpoints, automated test suite (13 passing), and Next.js `/dashboard/documents` management UI with auto-polling.
-- [ ] **Phase 3 next:** RAG chat API (`retrieval.py` + `llm.py`), Qdrant semantic retrieval filtered by `tenant_id`, GPT-4o grounded answer generation, session & message history, and `/dashboard/chat-test` interactive playground.
+- [x] **Phase 3 complete:** `chat_sessions` & `chat_messages` models, Alembic migration `44750554ab41`, vector retrieval with strict `tenant_id` filter (`retrieval.py`), GPT-4o grounded answer generation with context-only guardrails (`llm.py`), conversation session persistence (`chat_service.py`), `/api/v1/chat` endpoints, automated test suite (16 total passing), and Next.js `/dashboard/chat-test` interactive playground with source chunk citation inspector.
+- [ ] **Phase 4 next:** Embeddable widget (`widget/src/widget.ts` built to `widget/dist/widget.js`), public-key authenticated endpoint `POST /api/v1/widget/chat`, embed snippet in settings page, and standalone HTML test demo.
 
 > Update this checklist whenever a task is finished.
 
@@ -51,8 +52,15 @@ Single developer, single monorepo, fully dockerized. Estimates assume full-time 
 7. [x] Automated test suite (`tests/test_documents.py`): FAQ ingestion, PDF validation, deletion, and cross-tenant isolation (13 total passing).
 8. [x] Frontend UI (`frontend/src/app/dashboard/documents/page.tsx`): Tabs for PDF drag-drop, URL input, FAQ form, auto-polling table with status badges and deletion.
 
-## Phase 3 — outline
-`retrieval.py` + `llm.py` → `/chat` → save sessions/messages → `/dashboard/chat-test` page.
+## Phase 3 — task list (RAG Chat Engine & Playground)
+1. [x] SQLAlchemy models: `chat_sessions`, `chat_messages` with tenant cascade and indexes.
+2. [x] Alembic migration `44750554ab41` applied to PostgreSQL.
+3. [x] Retrieval service (`services/retrieval.py`): query embedding and Qdrant vector search strictly filtered by `tenant_id`.
+4. [x] LLM service (`services/llm.py`): strict "only-context" system prompt guardrail, multi-turn history assembly, OpenAI GPT-4o with deterministic mock fallback.
+5. [x] Chat service (`services/chat_service.py`): session resolution, conversation message logging, citation tracking.
+6. [x] API routes (`api/v1/chat.py`): `POST /api/v1/chat` and `GET /api/v1/chat/sessions/{session_id}`.
+7. [x] Automated test suite (`tests/test_chat.py`): multi-turn chat persistence, cross-tenant isolation, no-context fallback (16 total passing).
+8. [x] Frontend UI (`frontend/src/app/dashboard/chat-test/page.tsx`): Real-time chat playground with citation inspector, expandable chunk excerpts, session reset, and knowledge base readiness indicator.
 
 ## Phase 4 — outline
 `widget.ts` (bubble + panel) → build to `dist/widget.js` → `/widget/chat` with public-key auth → embed snippet in settings page → test on a plain HTML page.

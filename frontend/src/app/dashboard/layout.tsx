@@ -35,10 +35,17 @@ export default function DashboardLayout({
     return null;
   }
 
-  const navItems = [
+  interface NavItem {
+    label: string;
+    href: string;
+    icon: string;
+    badge?: string;
+  }
+
+  const navItems: NavItem[] = [
     { label: "Overview", href: "/dashboard", icon: "📊" },
     { label: "Documents", href: "/dashboard/documents", icon: "📄" },
-    { label: "Chat Test", href: "/dashboard/chat-test", icon: "💬", badge: "Phase 3" },
+    { label: "Chat Test", href: "/dashboard/chat-test", icon: "💬" },
     { label: "Settings & Embed", href: "/dashboard/settings", icon: "⚙️" },
   ];
 
