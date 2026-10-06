@@ -23,7 +23,7 @@ export default function ChatTestPage() {
       id: "initial-welcome",
       role: "assistant",
       content:
-        "👋 Welcome to the BotForge Chat Playground! Ask questions about your business, products, or uploaded policies to test how your AI bot responds with grounded document citations.",
+        " Welcome to the BotForge Chat Playground! Ask questions about your business, products, or uploaded policies to test how your AI bot responds with grounded document citations.",
       createdAt: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
@@ -77,7 +77,7 @@ export default function ChatTestPage() {
         id: `error-${Date.now()}`,
         role: "assistant",
         content:
-          "⚠️ Failed to get a response from the AI assistant. Please check your connection or backend status.",
+          " Failed to get a response from the AI assistant. Please check your connection or backend status.",
         createdAt: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -112,7 +112,7 @@ export default function ChatTestPage() {
         id: `welcome-${Date.now()}`,
         role: "assistant",
         content:
-          "🔄 New conversation started. Ask questions about your knowledge base to test retrieval.",
+          " New conversation started. Ask questions about your knowledge base to test retrieval.",
         createdAt: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       },
     ]);
