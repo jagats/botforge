@@ -11,6 +11,9 @@ import {
   UploadFaqInput,
   UploadUrlInput,
   User,
+  ChatRequest,
+  ChatResponse,
+  ChatSessionDetail,
 } from "../types";
 
 const TOKEN_KEY = "botforge_access_token";
@@ -159,5 +162,19 @@ export const documentApi = {
     await apiFetch<void>(`/api/v1/documents/${id}`, {
       method: "DELETE",
     });
+  },
+};
+
+/** Interactive chat playground API endpoints */
+export const chatApi = {
+  sendMessage: async (data: ChatRequest): Promise<ChatResponse> => {
+    return apiFetch<ChatResponse>("/api/v1/chat", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  getSession: async (sessionId: string): Promise<ChatSessionDetail> => {
+    return apiFetch<ChatSessionDetail>(`/api/v1/chat/sessions/${sessionId}`);
   },
 };
