@@ -3,6 +3,7 @@
 import logging
 from typing import Dict, List, Optional
 from openai import AsyncOpenAI
+from openai.types.chat import ChatCompletionMessageParam
 
 from app.core.config import settings
 from app.services.retrieval import RetrievedChunk
@@ -74,7 +75,7 @@ async def generate_rag_answer(
 
     # Build prompt messages
     context_block = _build_context_block(context_chunks)
-    messages: List[Dict[str, str]] = [
+    messages: List[ChatCompletionMessageParam] = [
         {"role": "system", "content": SYSTEM_PROMPT},
     ]
 
@@ -83,8 +84,10 @@ async def generate_rag_answer(
         for msg in history[-6:]:
             role = msg.get("role")
             content = msg.get("content", "")
-            if role in ("user", "assistant") and content.strip():
-                messages.append({"role": role, "content": content.strip()})
+            if role == "user" and content.strip():
+                messages.append({"role": "user", "content": content.strip()})
+            elif role == "assistant" and content.strip():
+                messages.append({"role": "assistant", "content": content.strip()})
 
     # Append current user question with retrieved context
     user_prompt = f"Context:\n{context_block}\n\nQuestion: {clean_query}\n\nAnswer:"
