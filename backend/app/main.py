@@ -1,5 +1,6 @@
+import os
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import api_v1_router
@@ -41,10 +42,26 @@ async def health_check():
         "version": "0.1.0",
     }
 
-@app.get("/", tags=["Root"])
-async def root():
-    """Welcome endpoint. this is the root route of the backend service"""
-    return {
-        "message": "Welcome to BotForge API. Visit /docs for Swagger UI or /health for service health."
-    }
+@app.api_route("/widget.js", methods=["GET", "HEAD"], tags=["Widget"])
+async def serve_widget_script():
+    """Serve the standalone embeddable chat widget script bundle."""
+    static_widget_path = os.path.join(os.path.dirname(__file__), "static", "widget.js")
+    if os.path.exists(static_widget_path):
+        with open(static_widget_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        return Response(
+            content=content,
+            media_type="application/javascript",
+            headers={
+                "Cache-Control": "public, max-age=3600",
+                "Access-Control-Allow-Origin": "*",
+            },
+        )
+    return Response(
+        content="/* BotForge widget script is compiling. Please build the widget bundle. */",
+        media_type="application/javascript",
+        status_code=200,
+        headers={"Access-Control-Allow-Origin": "*"},
+    )
+
 

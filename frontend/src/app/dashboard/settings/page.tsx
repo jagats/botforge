@@ -196,13 +196,24 @@ export default function SettingsPage() {
                 {apiKey?.public_key}
               </code>
             </span>
-            <button
-              onClick={handleCopy}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
-            >
-              <span>{copyFeedback ? "✅" : "📋"}</span>
-              <span>{copyFeedback ? "Copied to Clipboard!" : "Copy Snippet"}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <a
+                href={`/widget-demo.html?key=${encodeURIComponent(apiKey?.public_key || "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 transition-colors"
+              >
+                <span>🧪</span>
+                <span>Test in Live Demo ↗</span>
+              </a>
+              <button
+                onClick={handleCopy}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
+              >
+                <span>{copyFeedback ? "✅" : "📋"}</span>
+                <span>{copyFeedback ? "Copied to Clipboard!" : "Copy Snippet"}</span>
+              </button>
+            </div>
           </div>
 
           <pre className="bg-slate-950 border border-slate-800/90 rounded-xl p-4 font-mono text-xs text-sky-400 overflow-x-auto whitespace-pre-wrap break-all shadow-inner">

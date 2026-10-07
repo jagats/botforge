@@ -2,11 +2,11 @@
 
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import bcrypt
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
@@ -148,3 +148,56 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
+
+
+def get_tenant_by_api_key(
+    x_public_key: Optional[str] = Header(None, alias="X-Public-Key"),
+    authorization: Optional[str] = Header(None),
+    db: Session = Depends(get_db),
+):
+    """FastAPI dependency resolving Tenant from public API key for widget chat."""
+    from app.models.api_key import ApiKey
+
+    key = x_public_key
+    if not key and authorization:
+        parts = authorization.strip().split()
+        if len(parts) == 2 and parts[0].lower() == "bearer":
+            key = parts[1]
+        elif len(parts) == 1:
+            key = parts[0]
+
+    if not key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Public API key missing. Provide 'X-Public-Key' header or 'Authorization: Bearer <key>'.",
+            headers={"WWW-Authenticate": "ApiKey"},
+        )
+
+    api_key_record = (
+        db.query(ApiKey)
+        .filter(ApiKey.public_key == key)
+        .first()
+    )
+    if not api_key_record or not api_key_record.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or inactive public API key",
+            headers={"WWW-Authenticate": "ApiKey"},
+        )
+
+    tenant = api_key_record.tenant
+    if not tenant or tenant.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Organization account is suspended or inactive",
+        )
+
+    return tenant
+
+
+def get_tenant_id_by_api_key(
+    tenant=Depends(get_tenant_by_api_key),
+) -> uuid.UUID:
+    """FastAPI dependency extracting tenant_id UUID from validated public API key."""
+    return tenant.id
+

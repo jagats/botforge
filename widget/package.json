@@ -1,0 +1,12 @@
+{
+  "name": "botforge-widget",
+  "version": "1.0.0",
+  "description": "Zero-dependency embeddable chat widget for BotForge",
+  "main": "dist/widget.js",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  }
+}

@@ -20,7 +20,8 @@ Single developer, single monorepo, fully dockerized. Estimates assume full-time 
 - [x] Phase 1 complete: Database layer & Alembic migrations (`tenants`, `users`, `api_keys`), FastAPI auth & tenant APIs with test suites (9 passing), and Next.js `/signup`, `/login`, `AuthProvider`, and `/dashboard`.
 - [x] **Phase 2 complete:** `documents` & `document_chunks` models, Alembic migration, Qdrant collection setup (`document_chunks` with `tenant_id` payload index), ingestion service (PDF parsing via `pypdf`, URL scraping via `beautifulsoup4`, FAQ parsing), OpenAI embeddings + deterministic mock fallback, `/api/v1/documents` endpoints, automated test suite (13 passing), and Next.js `/dashboard/documents` management UI with auto-polling.
 - [x] **Phase 3 complete:** `chat_sessions` & `chat_messages` models, Alembic migration `44750554ab41`, vector retrieval with strict `tenant_id` filter (`retrieval.py`), GPT-4o grounded answer generation with context-only guardrails (`llm.py`), conversation session persistence (`chat_service.py`), `/api/v1/chat` endpoints, automated test suite (16 total passing), and Next.js `/dashboard/chat-test` interactive playground with source chunk citation inspector.
-- [ ] **Phase 4 next:** Embeddable widget (`widget/src/widget.ts` built to `widget/dist/widget.js`), public-key authenticated endpoint `POST /api/v1/widget/chat`, embed snippet in settings page, and standalone HTML test demo.
+- [x] **Phase 4 complete:** Embeddable widget (`widget/src/widget.ts` built to `widget/dist/widget.js` at 21 KB with zero dependencies, Shadow DOM isolation), public-key authenticated endpoints `POST /api/v1/widget/chat` and `GET /api/v1/widget/config`, static script serving route `GET /widget.js`, embed snippet with Live Demo button in settings page, standalone HTML demo test, and comprehensive test suite (24 total passing).
+- [ ] **Phase 5 next:** Rate limiting per key/tenant, usage analytics (conversation volume, top queries), `docker-compose.prod.yml`, pilot with 1 real client.
 
 > Update this checklist whenever a task is finished.
 
@@ -62,8 +63,15 @@ Single developer, single monorepo, fully dockerized. Estimates assume full-time 
 7. [x] Automated test suite (`tests/test_chat.py`): multi-turn chat persistence, cross-tenant isolation, no-context fallback (16 total passing).
 8. [x] Frontend UI (`frontend/src/app/dashboard/chat-test/page.tsx`): Real-time chat playground with citation inspector, expandable chunk excerpts, session reset, and knowledge base readiness indicator.
 
-## Phase 4 — outline
-`widget.ts` (bubble + panel) → build to `dist/widget.js` → `/widget/chat` with public-key auth → embed snippet in settings page → test on a plain HTML page.
+## Phase 4 — task list (Embeddable Widget)
+1. [x] Security dependency (`core/security.py`): `get_tenant_by_api_key` and `get_tenant_id_by_api_key` validating public keys (`X-Public-Key` or `Bearer`) and ensuring active tenant status.
+2. [x] Pydantic schemas (`schemas/widget.py`): `WidgetChatRequest`, `WidgetChatResponse`, `WidgetConfigResponse`.
+3. [x] API routes (`api/v1/widget.py`): `POST /api/v1/widget/chat` and `GET /api/v1/widget/config` scoped to public API keys.
+4. [x] Static script serving (`main.py`): `GET /widget.js` and `HEAD /widget.js` serving the compiled widget with permissive CORS and caching.
+5. [x] Standalone widget client (`widget/src/widget.ts`): Zero-dependency TypeScript, Shadow DOM isolation, floating launcher bubble, responsive chat drawer, markdown formatter, typing indicator, local session persistence, and branding integration.
+6. [x] Build pipeline (`widget/build.js`): Compiles to single 21 KB bundle `widget/dist/widget.js` and synchronizes to `backend/app/static/widget.js` and `frontend/public/widget.js`.
+7. [x] Integration test suite (`tests/test_widget.py`): Config endpoint, multi-turn public chat, bearer auth, inactive key checks, suspended tenant checks, cross-tenant isolation, and static script serving (24 total passing).
+8. [x] Demo playgrounds & settings integration: `examples/widget-demo.html`, `frontend/public/widget-demo.html`, and "Test in Live Demo" action in `/dashboard/settings`.
 
 ## Phase 5 — outline
 Rate limiting per key/tenant, consistent error responses, basic analytics (message counts, top questions), `docker-compose.prod.yml`, pilot with one friendly client.
