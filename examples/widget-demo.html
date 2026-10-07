@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BotForge Embed Widget — Live Demo</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #111827;
+      --border: #1f2937;
+      --primary: #3b82f6;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(17, 24, 39, 0.8);
+      backdrop-filter: blur(12px);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo span {
+      background: linear-gradient(135deg, #3b82f6, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .badge {
+      font-size: 11px;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #60a5fa;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+    main {
+      flex: 1;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 24px;
+      width: 100%;
+    }
+    .hero {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .hero h1 {
+      font-size: 36px;
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      background: linear-gradient(to right, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .card h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .code-box {
+      background: #030712;
+      border: 1px solid #1f2937;
+      border-radius: 10px;
+      padding: 16px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 13px;
+      color: #38bdf8;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+    .instructions {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .instructions li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 14px;
+      color: #cbd5e1;
+    }
+    .step-num {
+      width: 24px;
+      height: 24px;
+      background: #1e293b;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 12px;
+      color: #60a5fa;
+      flex-shrink: 0;
+    }
+    .key-selector {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      align-items: center;
+    }
+    .key-selector input {
+      flex: 1;
+      background: #030712;
+      border: 1px solid #374151;
+      color: #fff;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .key-selector button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .key-selector button:hover {
+      background: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <span>⚡ BotForge</span> Widget Integration Demo
+    </div>
+    <div class="badge">Phase 4 Verified</div>
+  </header>
+
+  <main>
+    <div class="hero">
+      <h1>External Client Website Demo</h1>
+      <p>This HTML page simulates an external customer website embedding the standalone BotForge AI chat widget via a single &lt;script&gt; tag.</p>
+    </div>
+
+    <div class="card">
+      <h2><span>📋</span> Embed Snippet</h2>
+      <p style="font-size: 13.5px; color: #94a3b8; margin-bottom: 12px;">
+        To embed the chatbot, clients simply paste this single snippet into their website's HTML before the closing <code>&lt;/body&gt;</code> tag:
+      </p>
+      <div class="code-box" id="snippet-display">
+&lt;script src="http://localhost:8000/widget.js" data-public-key="YOUR_PUBLIC_KEY" async&gt;&lt;/script&gt;
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span>🧪</span> Test with Custom API Key</h2>
+      <p style="font-size: 13.5px; color: #94a3b8;">
+        Copy your tenant's public API key from <strong>Dashboard &gt; Settings</strong> and click "Load Widget" to interact live:
+      </p>
+      <div class="key-selector">
+        <input type="text" id="custom-api-key" placeholder="Enter pk_... from your dashboard settings" />
+        <button id="load-widget-btn">Load Widget</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span>🚀</span> What Happens Next?</h2>
+      <ul class="instructions">
+        <li>
+          <div class="step-num">1</div>
+          <div>Look at the <strong>bottom-right corner</strong> of this page to see the floating chat bubble.</div>
+        </li>
+        <li>
+          <div class="step-num">2</div>
+          <div>Click the bubble to open the chat panel, rendered inside an isolated <strong>Shadow DOM</strong>.</div>
+        </li>
+        <li>
+          <div class="step-num">3</div>
+          <div>Ask questions grounded in the knowledge base you uploaded in Phase 2 & 3.</div>
+        </li>
+      </ul>
+    </div>
+  </main>
+
+  <!-- Script initialization -->
+  <script>
+    // Check if an existing key was stored or passed via URL param ?key=pk_...
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialKey = urlParams.get("key") || localStorage.getItem("demo_public_key") || "pk_test_demo";
+
+    document.getElementById("custom-api-key").value = initialKey;
+    document.getElementById("snippet-display").textContent =
+      `<script src="http://localhost:8000/widget.js" data-public-key="${initialKey}" async><\/script>`;
+
+    document.getElementById("load-widget-btn").addEventListener("click", () => {
+      const key = document.getElementById("custom-api-key").value.trim();
+      if (!key) return alert("Please enter a valid API key.");
+      localStorage.setItem("demo_public_key", key);
+      window.location.search = `?key=${encodeURIComponent(key)}`;
+    });
+
+    // Dynamically inject the widget script with the configured public key
+    const script = document.createElement("script");
+    script.src = "http://localhost:8000/widget.js";
+    script.setAttribute("data-public-key", initialKey);
+    script.setAttribute("data-api-url", "http://localhost:8000");
+    script.async = true;
+    document.body.appendChild(script);
+  </script>
+</body>
+</html>
