@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
+from app.core.rate_limiter import rate_limit_auth
 from app.core.security import get_current_user
 from app.db.session import get_db
 from app.models.user import User
@@ -22,6 +23,7 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
     "/signup",
     response_model=SignupResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit_auth)],
     summary="Register new company tenant and owner account",
 )
 def signup(
@@ -36,6 +38,7 @@ def signup(
     "/login",
     response_model=LoginResponse,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit_auth)],
     summary="Authenticate user and receive access token",
 )
 def login(

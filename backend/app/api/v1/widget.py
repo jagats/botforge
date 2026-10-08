@@ -4,6 +4,7 @@ import uuid
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
+from app.core.rate_limiter import rate_limit_widget
 from app.core.security import get_tenant_by_api_key, get_tenant_id_by_api_key
 from app.db.session import get_db
 from app.models.tenant import Tenant
@@ -22,6 +23,7 @@ router = APIRouter(prefix="/widget", tags=["Widget"])
     "/chat",
     response_model=WidgetChatResponse,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit_widget)],
     summary="Public chatbot conversation endpoint for website embed widget",
 )
 async def widget_chat_endpoint(

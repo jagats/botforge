@@ -73,8 +73,12 @@ Single developer, single monorepo, fully dockerized. Estimates assume full-time 
 7. [x] Integration test suite (`tests/test_widget.py`): Config endpoint, multi-turn public chat, bearer auth, inactive key checks, suspended tenant checks, cross-tenant isolation, and static script serving (24 total passing).
 8. [x] Demo playgrounds & settings integration: `examples/widget-demo.html`, `frontend/public/widget-demo.html`, and "Test in Live Demo" action in `/dashboard/settings`.
 
-## Phase 5 — outline
-Rate limiting per key/tenant, consistent error responses, basic analytics (message counts, top questions), `docker-compose.prod.yml`, pilot with one friendly client.
+## Phase 5 — task list (Hardening, Analytics & Pilot Readiness)
+1. [x] **Rate limiting & abuse protection (`core/rate_limiter.py`):** Thread-safe in-memory sliding window rate limiter, IP-based auth throttling (`/auth/login`, `/auth/signup`), and device IP + public API key throttling on public widget chat (`POST /api/v1/widget/chat`) with HTTP 429 and `Retry-After` headers. Test suite with 27 passing tests.
+2. [ ] **Usage analytics & dashboard metrics (`api/v1/analytics.py`):** Aggregate tenant metrics endpoint (total sessions, total messages, 7d/30d activity, recent questions) and real-time dashboard stats in `/dashboard`.
+3. [ ] **Production error handling & resilience:** Consistent error schemas across endpoints, upstream OpenAI/Qdrant timeout protection, and graceful failure logging.
+4. [ ] **Production Docker setup (`docker-compose.prod.yml`):** Production configurations, pinned versions, secure secrets handling, and disabling reload flags.
+5. [ ] **Pilot verification & onboarding runbook:** End-to-end smoke tests and setup instructions for deploying the chatbot on the first client website.
 
 ## Business next steps (parallel, not code)
 Validate with 2–3 DVIO clients who asked for a chatbot; define pricing tiers (e.g. by messages or documents); plan phased rollout.
