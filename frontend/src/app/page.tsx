@@ -88,7 +88,7 @@ export default function HomePage() {
                 href="/login"
                 className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-base font-semibold bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 transition-all flex items-center justify-center"
               >
-                Sign In to Existing Account
+                If you already have an account Sign In to your Existing Account
               </Link>
             </>
           )}
