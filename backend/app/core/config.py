@@ -39,6 +39,12 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE_MB: int = 20
     UPLOAD_DIR: str = "/app/uploads"
 
+    # Rate Limiting (Phase 5 Hardening)
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_WIDGET_PER_MINUTE: int = 60
+    RATE_LIMIT_WIDGET_IP_PER_MINUTE: int = 20
+    RATE_LIMIT_AUTH_PER_MINUTE: int = 15
+
     @field_validator("DATABASE_URL")
     @classmethod
     def adjust_db_host_for_local_dev(cls, v: str) -> str:
