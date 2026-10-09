@@ -3,16 +3,14 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useFormik } from "formik";
 import { useAuth } from "../../contexts/AuthContext";
+import { loginSchema, LoginFormValues } from "../../lib/validations";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, isAuthenticated, isLoading } = useAuth();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -20,28 +18,27 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!email || !password) {
-      setError("Please fill in both email and password.");
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      await login({
-        email: email.trim().toLowerCase(),
-        password,
-      });
-      router.push("/dashboard");
-    } catch (err: any) {
-      setError(err?.message || "Invalid email or password.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const formik = useFormik<LoginFormValues>({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: loginSchema,
+    onSubmit: async (values, { setSubmitting }) => {
+      setServerError(null);
+      try {
+        await login({
+          email: values.email.trim().toLowerCase(),
+          password: values.password,
+        });
+        router.push("/dashboard");
+      } catch (err: any) {
+        setServerError(err?.message || "Invalid email or password.");
+      } finally {
+        setSubmitting(false);
+      }
+    },
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-slate-950">
@@ -60,29 +57,40 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Error Alert */}
-        {error && (
+        {/* Server Error Alert */}
+        {serverError && (
           <div className="p-3.5 mb-6 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm flex items-center gap-2.5">
             <span>⚠️</span>
-            <span>{error}</span>
+            <span>{serverError}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={formik.handleSubmit} noValidate className="space-y-4">
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5" htmlFor="email">
               Work Email Address
             </label>
             <input
               id="email"
+              name="email"
               type="email"
-              className="w-full px-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className={`w-full px-4 py-2.5 bg-slate-950/80 border rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 transition-all ${
+                formik.touched.email && formik.errors.email
+                  ? "border-red-500/60 focus:ring-red-500/30 focus:border-red-500"
+                  : "border-slate-800 focus:ring-blue-500 focus:border-transparent"
+              }`}
               placeholder="alex@acmehealth.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isSubmitting}
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={formik.isSubmitting}
             />
+            {formik.touched.email && formik.errors.email && (
+              <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
+                <span>•</span>
+                <span>{formik.errors.email}</span>
+              </p>
+            )}
           </div>
 
           <div>
@@ -91,22 +99,33 @@ export default function LoginPage() {
             </label>
             <input
               id="password"
+              name="password"
               type="password"
-              className="w-full px-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className={`w-full px-4 py-2.5 bg-slate-950/80 border rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 transition-all ${
+                formik.touched.password && formik.errors.password
+                  ? "border-red-500/60 focus:ring-red-500/30 focus:border-red-500"
+                  : "border-slate-800 focus:ring-blue-500 focus:border-transparent"
+              }`}
               placeholder="••••••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={isSubmitting}
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={formik.isSubmitting}
             />
+            {formik.touched.password && formik.errors.password && (
+              <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
+                <span>•</span>
+                <span>{formik.errors.password}</span>
+              </p>
+            )}
           </div>
 
           <button
             type="submit"
             className="w-full mt-2 py-3 px-4 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/25 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
-            disabled={isSubmitting}
+            disabled={formik.isSubmitting}
           >
-            {isSubmitting ? "Signing in..." : "Sign In to Workspace"}
+            {formik.isSubmitting ? "Signing in..." : "Sign In to Workspace"}
           </button>
         </form>
 

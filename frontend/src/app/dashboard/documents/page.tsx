@@ -2,8 +2,15 @@
 
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useFormik } from "formik";
 import { documentApi } from "../../../lib/api";
 import { Document } from "../../../types";
+import {
+  documentUrlSchema,
+  DocumentUrlFormValues,
+  documentFaqSchema,
+  DocumentFaqFormValues,
+} from "../../../lib/validations";
 
 type TabType = "pdf" | "url" | "faq";
 
@@ -11,12 +18,8 @@ export default function DocumentsPage() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabType>("pdf");
 
-  // Form states
+  // File upload state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [urlInput, setUrlInput] = useState("");
-  const [urlTitleInput, setUrlTitleInput] = useState("");
-  const [faqTitleInput, setFaqTitleInput] = useState("");
-  const [faqTextInput, setFaqTextInput] = useState("");
 
   // Feedback states
   const [actionError, setActionError] = useState<string | null>(null);
@@ -62,8 +65,6 @@ export default function DocumentsPage() {
     mutationFn: (payload: { url: string; title?: string }) =>
       documentApi.uploadUrl(payload),
     onSuccess: () => {
-      setUrlInput("");
-      setUrlTitleInput("");
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       showNotification("URL submitted. Ingestion and vectorization started.");
     },
@@ -77,8 +78,6 @@ export default function DocumentsPage() {
     mutationFn: (payload: { title: string; faq_text: string }) =>
       documentApi.uploadFaq(payload),
     onSuccess: () => {
-      setFaqTitleInput("");
-      setFaqTextInput("");
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       showNotification("FAQ snippet saved and vectorized.");
     },
@@ -96,6 +95,48 @@ export default function DocumentsPage() {
     },
     onError: (err: any) => {
       setActionError(err?.message || "Failed to delete document.");
+    },
+  });
+
+  // Formik for URL Ingestion
+  const urlFormik = useFormik<DocumentUrlFormValues>({
+    initialValues: {
+      url: "",
+      title: "",
+    },
+    validationSchema: documentUrlSchema,
+    onSubmit: async (values, { resetForm }) => {
+      setActionError(null);
+      try {
+        await uploadUrlMutation.mutateAsync({
+          url: values.url.trim(),
+          title: values.title?.trim() || undefined,
+        });
+        resetForm();
+      } catch (err: any) {
+        // Error captured by uploadUrlMutation.onError
+      }
+    },
+  });
+
+  // Formik for FAQ Ingestion
+  const faqFormik = useFormik<DocumentFaqFormValues>({
+    initialValues: {
+      title: "",
+      faq_text: "",
+    },
+    validationSchema: documentFaqSchema,
+    onSubmit: async (values, { resetForm }) => {
+      setActionError(null);
+      try {
+        await uploadFaqMutation.mutateAsync({
+          title: values.title.trim(),
+          faq_text: values.faq_text.trim(),
+        });
+        resetForm();
+      } catch (err: any) {
+        // Error captured by uploadFaqMutation.onError
+      }
     },
   });
 
@@ -142,24 +183,6 @@ export default function DocumentsPage() {
       return;
     }
     uploadPdfMutation.mutate(selectedFile);
-  };
-
-  const handleUrlSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!urlInput.trim()) return;
-    uploadUrlMutation.mutate({
-      url: urlInput.trim(),
-      title: urlTitleInput.trim() || undefined,
-    });
-  };
-
-  const handleFaqSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!faqTitleInput.trim() || !faqTextInput.trim()) return;
-    uploadFaqMutation.mutate({
-      title: faqTitleInput.trim(),
-      faq_text: faqTextInput.trim(),
-    });
   };
 
   return (
@@ -287,37 +310,64 @@ export default function DocumentsPage() {
 
         {/* Tab 2: URL Form */}
         {activeTab === "url" && (
-          <form onSubmit={handleUrlSubmit} className="space-y-4">
+          <form onSubmit={urlFormik.handleSubmit} noValidate className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5" htmlFor="url">
                 Target Web Page URL
               </label>
               <input
+                id="url"
+                name="url"
                 type="url"
-                className="w-full px-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className={`w-full px-4 py-2.5 bg-slate-950/80 border rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 transition-all ${
+                  urlFormik.touched.url && urlFormik.errors.url
+                    ? "border-red-500/60 focus:ring-red-500/30 focus:border-red-500"
+                    : "border-slate-800 focus:ring-blue-500 focus:border-transparent"
+                }`}
                 placeholder="https://example.com/help or https://docs.example.com"
-                value={urlInput}
-                onChange={(e) => setUrlInput(e.target.value)}
-                required
+                value={urlFormik.values.url}
+                onChange={urlFormik.handleChange}
+                onBlur={urlFormik.handleBlur}
+                disabled={uploadUrlMutation.isPending}
               />
+              {urlFormik.touched.url && urlFormik.errors.url && (
+                <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
+                  <span>•</span>
+                  <span>{urlFormik.errors.url}</span>
+                </p>
+              )}
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5" htmlFor="url-title">
                 Document Title (Optional)
               </label>
               <input
+                id="url-title"
+                name="title"
                 type="text"
-                className="w-full px-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className={`w-full px-4 py-2.5 bg-slate-950/80 border rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 transition-all ${
+                  urlFormik.touched.title && urlFormik.errors.title
+                    ? "border-red-500/60 focus:ring-red-500/30 focus:border-red-500"
+                    : "border-slate-800 focus:ring-blue-500 focus:border-transparent"
+                }`}
                 placeholder="e.g. Terms of Service or Pricing Page"
-                value={urlTitleInput}
-                onChange={(e) => setUrlTitleInput(e.target.value)}
+                value={urlFormik.values.title}
+                onChange={urlFormik.handleChange}
+                onBlur={urlFormik.handleBlur}
+                disabled={uploadUrlMutation.isPending}
               />
+              {urlFormik.touched.title && urlFormik.errors.title && (
+                <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
+                  <span>•</span>
+                  <span>{urlFormik.errors.title}</span>
+                </p>
+              )}
             </div>
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
                 className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/20 transition-all disabled:opacity-50 disabled:pointer-events-none active:scale-95"
-                disabled={!urlInput.trim() || uploadUrlMutation.isPending}
+                disabled={uploadUrlMutation.isPending}
               >
                 {uploadUrlMutation.isPending ? "Scraping & Ingesting..." : "Fetch & Ingest URL"}
               </button>
@@ -327,38 +377,64 @@ export default function DocumentsPage() {
 
         {/* Tab 3: FAQ Form */}
         {activeTab === "faq" && (
-          <form onSubmit={handleFaqSubmit} className="space-y-4">
+          <form onSubmit={faqFormik.handleSubmit} noValidate className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5" htmlFor="faq-title">
                 Document Title
               </label>
               <input
+                id="faq-title"
+                name="title"
                 type="text"
-                className="w-full px-4 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className={`w-full px-4 py-2.5 bg-slate-950/80 border rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 transition-all ${
+                  faqFormik.touched.title && faqFormik.errors.title
+                    ? "border-red-500/60 focus:ring-red-500/30 focus:border-red-500"
+                    : "border-slate-800 focus:ring-blue-500 focus:border-transparent"
+                }`}
                 placeholder="e.g. Return Policy or Office Hours"
-                value={faqTitleInput}
-                onChange={(e) => setFaqTitleInput(e.target.value)}
-                required
+                value={faqFormik.values.title}
+                onChange={faqFormik.handleChange}
+                onBlur={faqFormik.handleBlur}
+                disabled={uploadFaqMutation.isPending}
               />
+              {faqFormik.touched.title && faqFormik.errors.title && (
+                <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
+                  <span>•</span>
+                  <span>{faqFormik.errors.title}</span>
+                </p>
+              )}
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5" htmlFor="faq-text">
                 Knowledge Content / FAQ Text
               </label>
               <textarea
+                id="faq-text"
+                name="faq_text"
                 rows={6}
-                className="w-full px-4 py-3 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-y"
+                className={`w-full px-4 py-3 bg-slate-950/80 border rounded-xl text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 transition-all resize-y ${
+                  faqFormik.touched.faq_text && faqFormik.errors.faq_text
+                    ? "border-red-500/60 focus:ring-red-500/30 focus:border-red-500"
+                    : "border-slate-800 focus:ring-blue-500 focus:border-transparent"
+                }`}
                 placeholder="Enter facts, questions & answers, or policies that your chatbot should know..."
-                value={faqTextInput}
-                onChange={(e) => setFaqTextInput(e.target.value)}
-                required
+                value={faqFormik.values.faq_text}
+                onChange={faqFormik.handleChange}
+                onBlur={faqFormik.handleBlur}
+                disabled={uploadFaqMutation.isPending}
               />
+              {faqFormik.touched.faq_text && faqFormik.errors.faq_text && (
+                <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
+                  <span>•</span>
+                  <span>{faqFormik.errors.faq_text}</span>
+                </p>
+              )}
             </div>
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
                 className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/20 transition-all disabled:opacity-50 disabled:pointer-events-none active:scale-95"
-                disabled={!faqTitleInput.trim() || !faqTextInput.trim() || uploadFaqMutation.isPending}
+                disabled={uploadFaqMutation.isPending}
               >
                 {uploadFaqMutation.isPending ? "Chunking & Vectorizing..." : "Save & Vectorize FAQ"}
               </button>
