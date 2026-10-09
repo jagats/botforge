@@ -2,14 +2,15 @@
 
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useFormik } from "formik";
 import { tenantApi } from "../../../lib/api";
 import { useAuth } from "../../../contexts/AuthContext";
+import { tenantUpdateSchema, TenantUpdateFormValues } from "../../../lib/validations";
 
 export default function SettingsPage() {
   const queryClient = useQueryClient();
   const { user, refreshUser } = useAuth();
 
-  const [companyNameInput, setCompanyNameInput] = useState("");
   const [isEditingName, setIsEditingName] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -46,11 +47,17 @@ export default function SettingsPage() {
     },
   });
 
-  const handleSaveName = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!companyNameInput.trim()) return;
-    updateMutation.mutate(companyNameInput.trim());
-  };
+  const formik = useFormik<TenantUpdateFormValues>({
+    initialValues: {
+      name: tenant?.name || "",
+    },
+    enableReinitialize: true,
+    validationSchema: tenantUpdateSchema,
+    onSubmit: async (values) => {
+      setSaveError(null);
+      await updateMutation.mutateAsync(values.name.trim());
+    },
+  });
 
   const embedSnippet = apiKey
     ? `<script src="http://localhost:8000/widget.js" data-public-key="${apiKey.public_key}" async></script>`
@@ -111,7 +118,7 @@ export default function SettingsPage() {
                   type="button"
                   className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
                   onClick={() => {
-                    setCompanyNameInput(tenant?.name || "");
+                    formik.resetForm({ values: { name: tenant?.name || "" } });
                     setIsEditingName(true);
                   }}
                 >
@@ -119,28 +126,46 @@ export default function SettingsPage() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSaveName} className="flex items-center gap-2 mt-1">
-                <input
-                  type="text"
-                  className="px-3 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-44"
-                  value={companyNameInput}
-                  onChange={(e) => setCompanyNameInput(e.target.value)}
-                  required
-                />
-                <button
-                  type="submit"
-                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-all disabled:opacity-50"
-                  disabled={updateMutation.isPending}
-                >
-                  {updateMutation.isPending ? "..." : "Save"}
-                </button>
-                <button
-                  type="button"
-                  className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 transition-all"
-                  onClick={() => setIsEditingName(false)}
-                >
-                  Cancel
-                </button>
+              <form onSubmit={formik.handleSubmit} noValidate className="mt-1">
+                <div className="flex items-center gap-2">
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    className={`px-3 py-1.5 bg-slate-950 border rounded-lg text-sm text-white focus:outline-none focus:ring-2 w-44 transition-all ${
+                      formik.touched.name && formik.errors.name
+                        ? "border-red-500/60 focus:ring-red-500/30 focus:border-red-500"
+                        : "border-slate-700 focus:ring-blue-500"
+                    }`}
+                    value={formik.values.name}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    disabled={updateMutation.isPending}
+                  />
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-all disabled:opacity-50"
+                    disabled={updateMutation.isPending}
+                  >
+                    {updateMutation.isPending ? "..." : "Save"}
+                  </button>
+                  <button
+                    type="button"
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 transition-all"
+                    onClick={() => {
+                      formik.resetForm();
+                      setIsEditingName(false);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+                {formik.touched.name && formik.errors.name && (
+                  <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
+                    <span>•</span>
+                    <span>{formik.errors.name}</span>
+                  </p>
+                )}
               </form>
             )}
           </div>
