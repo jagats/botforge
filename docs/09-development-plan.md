@@ -76,9 +76,10 @@ Single developer, single monorepo, fully dockerized. Estimates assume full-time 
 ## Phase 5 — task list (Hardening, Analytics & Pilot Readiness)
 1. [x] **Rate limiting & abuse protection (`core/rate_limiter.py`):** Thread-safe in-memory sliding window rate limiter, IP-based auth throttling (`/auth/login`, `/auth/signup`), and device IP + public API key throttling on public widget chat (`POST /api/v1/widget/chat`) with HTTP 429 and `Retry-After` headers. Test suite with 27 passing tests.
 2. [ ] **Usage analytics & dashboard metrics (`api/v1/analytics.py`):** Aggregate tenant metrics endpoint (total sessions, total messages, 7d/30d activity, recent questions) and real-time dashboard stats in `/dashboard`.
-3. [ ] **Production error handling & resilience:** Consistent error schemas across endpoints, upstream OpenAI/Qdrant timeout protection, and graceful failure logging.
-4. [ ] **Production Docker setup (`docker-compose.prod.yml`):** Production configurations, pinned versions, secure secrets handling, and disabling reload flags.
-5. [ ] **Pilot verification & onboarding runbook:** End-to-end smoke tests and setup instructions for deploying the chatbot on the first client website.
+3. [ ] **Frontend form validation migration (Formik + Yup):** Replace manual `useState` validation in `/login`, `/signup`, `/dashboard/settings`, and `/dashboard/documents` with Formik and Yup validation schemas mirrored from backend Pydantic models (`SignupRequest`, `LoginRequest`, `TenantUpdateRequest`, `DocumentUrlCreate`, `DocumentFaqCreate`).
+4. [ ] **Production error handling & resilience:** Consistent error schemas across endpoints, upstream OpenAI/Qdrant timeout protection, and graceful failure logging.
+5. [ ] **Production Docker setup (`docker-compose.prod.yml`):** Production configurations, pinned versions, secure secrets handling, and disabling reload flags.
+6. [ ] **Pilot verification & onboarding runbook:** End-to-end smoke tests and setup instructions for deploying the chatbot on the first client website.
 
 ## Business next steps (parallel, not code)
 Validate with 2–3 DVIO clients who asked for a chatbot; define pricing tiers (e.g. by messages or documents); plan phased rollout.

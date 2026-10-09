@@ -59,3 +59,17 @@ Embed snippet shown in dashboard settings (example shape — final URL decided a
 ```html
 <script src="https://<widget-host>/widget.js" data-public-key="pk_xxx" async></script>
 ```
+
+## Form Management & Validation (Formik + Yup)
+
+All dashboard and auth forms use **Formik** for form state handling and **Yup** for schema validation.
+Validation schemas are maintained in `frontend/src/lib/validations.ts` and directly mirror backend Pydantic models in `backend/app/schemas/`:
+
+| Frontend Form | Backend Schema | Validation Rules (Yup Schema) |
+|---|---|---|
+| **Signup** (`/signup`) | `SignupRequest` (`auth.py`) | • `company_name`: string, min 2, max 100, required<br>• `email`: string, valid email format, required<br>• `password`: string, min 8, max 100, required |
+| **Login** (`/login`) | `LoginRequest` (`auth.py`) | • `email`: string, valid email format, required<br>• `password`: string, min 1, required |
+| **Settings Profile** (`/dashboard/settings`) | `TenantUpdateRequest` (`tenant.py`) | • `name`: string, min 2, max 100, required |
+| **Document URL Ingestion** (`/dashboard/documents`) | `DocumentUrlCreate` (`document.py`) | • `url`: string, valid URL (http/https), required<br>• `title`: string, optional |
+| **Document FAQ Ingestion** (`/dashboard/documents`) | `DocumentFaqCreate` (`document.py`) | • `title`: string, min 1, max 255, required<br>• `faq_text`: string, min 10, required |
+

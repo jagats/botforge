@@ -10,7 +10,8 @@
 | Dashboard | **Next.js + TypeScript** | Client-facing: upload docs, test bot, embed code |
 | Widget | **Vanilla TypeScript** → one JS file | Tiny, dependency-free, works on any site |
 | ORM / migrations | SQLAlchemy + Alembic | Per folder structure (`models/`, `db/migrations/`) |
-| Validation | Pydantic | Request/response schemas |
+| Backend Validation | Pydantic | Request/response schemas |
+| Frontend Form Validation | **Formik + Yup** | Robust client form state & validation schemas synchronized with backend Pydantic models |
 | Server state (frontend) | TanStack Query | Loading/error/polling handled for us |
 | Auth state (frontend) | React Context (`AuthProvider`) | Filled from `/auth/me` on load. No Redux. |
 | Containers | Docker + Docker Compose | Same setup on every machine |
