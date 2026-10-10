@@ -1,5 +1,7 @@
 """Security utilities: password hashing, JWT encoding/decoding, and auth dependencies."""
 
+import logging
+import re
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
@@ -14,6 +16,7 @@ from app.core.config import settings
 from app.db.session import get_db
 
 bearer_scheme = HTTPBearer(auto_error=True)
+logger = logging.getLogger(__name__)
 
 
 def hash_password(password: str) -> str:
@@ -56,6 +59,16 @@ def decode_access_token(token: str) -> Dict[str, Any]:
 
     Raises HTTPException 401 if invalid or expired.
     """
+    # Clean leading/trailing spaces, surrounding quotes, or accidental double 'Bearer'
+    token = token.strip().strip('"').strip("'")
+    if token.lower().startswith("bearer "):
+        token = token[7:].strip()
+
+    # If the user copied adjacent JSON text (e.g. '", "tenant_id": "..."'), isolate the 3-part JWT
+    jwt_match = re.search(r"([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)", token)
+    if jwt_match:
+        token = jwt_match.group(1)
+
     try:
         payload = jwt.decode(
             token,
@@ -69,7 +82,13 @@ def decode_access_token(token: str) -> Dict[str, Any]:
             detail="Token has expired",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    except jwt.PyJWTError:
+    except jwt.PyJWTError as exc:
+        logger.warning(
+            "JWT decode validation failed: %s (token length: %d, token repr: %r)",
+            exc,
+            len(token),
+            token,
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
