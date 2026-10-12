@@ -196,7 +196,7 @@ def list_documents(
     )
 
 
-@router.get("/{document_id}", response_model=DocumentResponse)
+@router.get("/{document_id:uuid}", response_model=DocumentResponse)
 def get_document(
     document_id: uuid.UUID,
     tenant_id: uuid.UUID = Depends(get_current_tenant_id),
@@ -227,7 +227,7 @@ def get_document(
     )
 
 
-@router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{document_id:uuid}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_document_endpoint(
     document_id: uuid.UUID,
     tenant_id: uuid.UUID = Depends(get_current_tenant_id),
