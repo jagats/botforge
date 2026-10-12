@@ -80,6 +80,14 @@ def test_pdf_upload_validation_and_rejection():
     assert "PDF" in res.json()["detail"]
 
 
+def test_upload_endpoint_rejects_get_method():
+    token, _ = _create_test_tenant("getupload")
+    headers = {"Authorization": f"Bearer {token}"}
+    res = client.get("/api/v1/documents/upload", headers=headers)
+    assert res.status_code == 405
+    assert "Method Not Allowed" in res.json()["detail"]
+
+
 def test_document_deletion_purges_record():
     token, _ = _create_test_tenant("delete")
     headers = {"Authorization": f"Bearer {token}"}
