@@ -226,7 +226,7 @@ export default function DocumentsPage() {
             }`}
             onClick={() => setActiveTab("pdf")}
           >
-            📑 Upload PDF
+            📑 Upload knowledge base PDF
           </button>
           <button
             type="button"
