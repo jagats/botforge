@@ -17,20 +17,31 @@ RAG makes the AI answer from real facts in the client's data instead of guessing
 
 ## System components
 ```
+                                ┌───────────────────────────────────────┐
+                                │   Product Admin (Platform Owner)      │
+                                └───────────────────┬───────────────────┘
+                                                    │ Onboards Brand / Toggles Status
+                                                    ▼
  Client's website ──(script tag + public key)──► Widget (vanilla TS)
                                                      │  POST /api/v1/widget/chat
                                                      ▼
- Client dashboard (Next.js) ──(JWT)──► FastAPI backend ──► PostgreSQL (system of record)
+ Brand dashboard (Next.js) ──(JWT)──► FastAPI backend ──► PostgreSQL (system of record)
                                             │
                                             ├──► Qdrant (vectors, tenant-filtered)
                                             └──► OpenAI (embeddings + GPT-4o)
 ```
 
-## Two authentication paths
-| Caller | Auth | Resolves tenant by |
-|---|---|---|
-| Dashboard user | JWT (Bearer) | `tenant_id` inside the JWT |
-| Website visitor via widget | Public key in header | Lookup `api_keys.public_key` → `tenant_id` |
+## User tiers and authentication paths
+| Caller | Role | Auth | Scope & Privileges |
+|---|---|---|---|
+| Product Admin (DVIO) | `superadmin` | JWT (Bearer) | Cross-tenant access: onboard brands, list all members, toggle active/inactive |
+| Client Brand (Member) | `owner` / `member` | JWT (Bearer) | Tenant-scoped: upload knowledge base, playground test, embed widget |
+| Website visitor via widget | Public | Public key in header (`X-Public-Key`) | Chat with AI grounded in active brand's documents |
+
+## Closed onboarding model
+- **No public self-service registration.** Public `/signup` route is removed/redirected to `/login`.
+- **Admin-provisioned brands:** Only Product Admin creates new client tenants and issues initial credentials.
+- **Instant deactivation switch:** When a brand is deactivated, their login is blocked and widget queries return HTTP 403 Forbidden.
 
 ## Multi-tenancy model
 - **Row-level multi-tenancy:** one shared schema, every table has `tenant_id`.

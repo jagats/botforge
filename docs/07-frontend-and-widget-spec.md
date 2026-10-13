@@ -1,14 +1,25 @@
 # 07 — Frontend (Next.js) and Widget Spec
 
-## Dashboard routes (`frontend/src/app/`)
+## Application routes (`frontend/src/app/`)
 ```
-login/                       → /login (public)
-signup/                      → /signup (public)
-dashboard/page.tsx           → /dashboard            overview: doc count, chat volume
-dashboard/documents/page.tsx → /dashboard/documents  upload + list docs
-dashboard/chat-test/page.tsx → /dashboard/chat-test  try the bot before going live
-dashboard/settings/page.tsx  → /dashboard/settings   embed code, API key, plan
+login/                       → /login (public - single authentication portal for all roles)
+signup/                      → /signup (redirects to /login - public self-registration disabled)
+
+[Role: superadmin]
+admin/brands/page.tsx        → /admin/brands         Product Admin: Brand directory, onboard new brand, toggle active/inactive
+
+[Role: owner / member (Client Brands)]
+dashboard/page.tsx           → /dashboard            Brand overview: doc count, chat volume
+dashboard/documents/page.tsx → /dashboard/documents  Brand knowledge base: upload + list docs
+dashboard/chat-test/page.tsx → /dashboard/chat-test  Brand playground: test bot before going live
+dashboard/settings/page.tsx  → /dashboard/settings   Brand embed: script tag, API key, branding
 ```
+
+## Role-based redirection after login
+Upon entering credentials on `/login`:
+- If `user.role === 'superadmin'` ➔ automatically redirects to `/admin/brands`.
+- If `user.role === 'owner'` or `'member'` ➔ automatically redirects to `/dashboard`.
+- If `user.is_active === false` or `tenant.status !== 'active'` ➔ displays error: *"Account suspended. Please contact platform administrator."*
 
 ## State and data fetching
 - **Server state** (documents, tenant info, chat history): **TanStack Query** — handles loading/error and polling.

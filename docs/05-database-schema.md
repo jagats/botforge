@@ -31,7 +31,8 @@ CREATE TABLE users (
   tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
   hashed_password TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'owner',        -- owner | member
+  role TEXT NOT NULL DEFAULT 'owner',        -- superadmin (platform admin) | owner (brand admin) | member (brand staff)
+  is_active BOOLEAN NOT NULL DEFAULT true,   -- active/inactive account status toggle
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (tenant_id, email)
 );
