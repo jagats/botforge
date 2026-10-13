@@ -8,30 +8,34 @@
 DVIO builds websites. Some clients also want a customer-support chatbot that answers questions from their own knowledge base (FAQs, product info, policies). DVIO does not offer this today, so clients go to another agency. DVIO loses the business and the client relationship gets split across vendors.
 
 ## The idea
-Build an in-house **AI Bot-as-a-Service** platform:
-1. Client signs up and uploads FAQs / PDFs / web page URLs.
-2. The platform turns this content into a searchable knowledge base.
-3. An AI model answers website visitors' questions using **only** that content.
-4. Client pastes one script tag to add the bot to their site.
-5. DVIO earns a **recurring subscription** per client.
+Build an in-house **AI Bot-as-a-Service** platform for DVIO Digital and its client brands:
+1. **Product Admin (DVIO)** onboards a client brand (member) into BotForge with dedicated login credentials.
+2. **Client Brand** logs in via `/login` to their brand workspace and uploads FAQs / PDFs / web page URLs.
+3. The platform turns this content into a searchable, tenant-isolated knowledge base in Qdrant.
+4. An AI model answers website visitors' questions using **only** that brand's content.
+5. Client pastes one script tag to add the bot to their site.
+6. DVIO manages client subscriptions with one-click active/inactive controls.
 
-"As-a-Service" = monthly subscription, not a one-time fee.
+"As-a-Service" = monthly retainer/subscription, controlled directly by DVIO.
 
 ## Business value
 | Benefit | Why it matters |
 |---|---|
 | Recurring revenue | Monthly income instead of one-time project fees |
-| Client retention | Chatbot work stays in-house |
-| Low delivery cost | One platform serves many clients |
-| Competitive edge | DVIO becomes an AI-capable agency |
+| Client retention | Chatbot work stays in-house with agency relationship intact |
+| Controlled onboarding | No spam or open signups; only contracted brands are onboarded |
+| Low delivery cost | One shared multi-tenant platform serves all agency clients |
+| Competitive edge | DVIO becomes a full-stack AI-capable agency |
 | Upsell | Offer to every existing and new website client |
 
 ## Goals (MVP)
-- A client can sign up, log in, upload documents, test the bot, and copy an embed script.
-- Bot answers grounded in that client's data only.
-- Strict data isolation between clients (multi-tenant).
+- Product Admin can onboard client brands, view all members, and toggle their active/inactive status.
+- Single unified `/login` page with role-based routing (no open public registration).
+- Client Brand logs in, uploads documents, tests the bot, and copies their embed script.
+- Bot answers grounded strictly in that brand's data.
+- Strict data isolation between client brands (multi-tenant).
 - Whole app runs with `docker compose up`.
-- Pilot with 1 real client.
+- Pilot with 1 real client brand.
 
 ## Non-goals (for the MVP)
 - Billing/payments integration (pricing tiers are defined later; no Stripe yet).

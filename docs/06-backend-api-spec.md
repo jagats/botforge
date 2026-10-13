@@ -27,21 +27,33 @@ def get_current_tenant(token=Depends(bearer_scheme)) -> str:
 ```
 Every protected route declares `tenant_id = Depends(get_current_tenant)`.
 
-## Auth — `api/v1/auth.py` (Phase 1)
+## Auth — `api/v1/auth.py`
 | Method | Path | Body | Response | Notes |
 |---|---|---|---|---|
-| POST | `/auth/signup` | `{company_name, email, password}` | `{tenant_id, user_id, access_token}` | Creates tenant + first user (role=owner) **in one transaction**. Also create an `api_keys` row. |
-| POST | `/auth/login` | `{email, password}` | `{access_token, tenant_id}` | Verify hash, issue JWT |
-| GET | `/auth/me` | JWT | `{user_id, tenant_id, email, role}` | Used by frontend on load |
+| POST | `/auth/login` | `{email, password}` | `{access_token, tenant_id, role}` | Verifies hash, checks `user.is_active` AND `tenant.status == 'active'`. Issues JWT. |
+| GET | `/auth/me` | JWT | `{user_id, tenant_id, email, role, is_active}` | Used by frontend on load to enforce role routing |
 
-JWT payload: `{ "user_id": "...", "tenant_id": "...", "role": "owner", "exp": <unix> }`
+> **Public Signup Disabled:** The public `/auth/signup` route is removed/deprecated. All new accounts must be onboarded through the Product Admin API.
+
+JWT payload: `{ "user_id": "...", "tenant_id": "...", "role": "superadmin" | "owner" | "member", "exp": <unix> }`
+
+## Admin & Brand Provisioning — `api/v1/admin/brands.py`
+*Restricted to Product Admin (`role=superadmin`).*
+
+| Method | Path | Body | Response | Notes |
+|---|---|---|---|---|
+| POST | `/admin/brands` | `{company_name, email, password}` | `{tenant_id, user_id, public_key}` | Onboards a client brand (creates tenant + owner user + widget API key) in one transaction |
+| GET | `/admin/brands` | — | `List[BrandSummaryResponse]` | Lists all onboarded brands, owner emails, document count, and active/inactive status |
+| PATCH | `/admin/brands/{tenant_id}/status` | `{status: "active" \| "suspended"}` | `{tenant_id, status}` | Instantly activates or suspends a client brand, disabling login and widget |
+| DELETE | `/admin/brands/{tenant_id}` | — | `{message: "Brand offboarded"}` | Cascades and deletes tenant, users, documents, and Qdrant vectors |
 
 ## Tenants — `api/v1/tenants.py`
+*Client Brand self-management.*
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/tenants/me` | Tenant profile (name, plan, status) |
-| PATCH | `/tenants/me` | Update tenant name/settings |
-| GET | `/tenants/me/api-key` | Public key for the embed script |
+| GET | `/tenants/me` | Brand profile (name, plan, status) |
+| PATCH | `/tenants/me` | Update brand company name |
+| GET | `/tenants/me/api-key` | Public key for embed script integration |
 
 ## Documents — `api/v1/documents.py` (Phase 2)
 | Method | Path | Request | Response |

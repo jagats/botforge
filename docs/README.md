@@ -4,7 +4,7 @@
 > These docs are the single source of truth for the project. If code and docs disagree, tell the developer and ask before changing either.
 
 ## What this project is (one paragraph)
-A multi-tenant platform where a client (a DVIO website customer) signs up, uploads their FAQs / PDFs / web pages, and gets an AI chatbot for their website. The bot answers using ONLY the client's own content (RAG). The client adds the bot with one `<script>` tag. DVIO earns a monthly subscription per client.
+A multi-tenant platform where DVIO Digital (Product Admin) onboards client brands, and each brand logs in to upload their FAQs / PDFs / web pages to get a grounded AI chatbot for their website. The bot answers using ONLY that brand's own content (RAG). The client brand embeds the bot with one `<script>` tag. DVIO manages recurring client subscriptions with full administrative controls.
 
 ## Reading order
 | # | File | What it covers |

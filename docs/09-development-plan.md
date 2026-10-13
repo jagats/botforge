@@ -81,6 +81,37 @@ Single developer, single monorepo, fully dockerized. Estimates assume full-time 
 5. [ ] **Production Docker setup (`docker-compose.prod.yml`):** Production configurations, pinned versions, secure secrets handling, and disabling reload flags.
 6. [ ] **Pilot verification & onboarding runbook:** End-to-end smoke tests and setup instructions for deploying the chatbot on the first client website.
 
+## Phase 6 — Product Admin & Brand Provisioning (Closed Onboarding & RBAC)
+*Replaces open public registration with agency-controlled brand onboarding and active/inactive subscription management.*
+
+- [ ] **Chunk 6.1: Database Schema & Migration**
+  - Add `is_active: Mapped[bool]` to `User` model (`app/models/user.py`).
+  - Generate and apply Alembic migration for `users.is_active`.
+  - Add initial seed/script to create master Product Admin (`superadmin`) user.
+- [ ] **Chunk 6.2: Backend RBAC & Security Guardrails**
+  - Implement `require_superadmin` dependency in `app/core/security.py`.
+  - Update `login_user` and `get_current_user` to reject inactive accounts (`user.is_active is False`) and suspended tenants with `403 Forbidden`.
+- [ ] **Chunk 6.3: Backend Brand Provisioning API (`/api/v1/admin/brands`)**
+  - `POST /api/v1/admin/brands`: Onboard new client brand (creates tenant, owner user, default API key in atomic transaction).
+  - `GET /api/v1/admin/brands`: List all onboarded brands with owner details, doc count, and active status.
+  - `PATCH /api/v1/admin/brands/{tenant_id}/status`: Toggle brand active/inactive (suspends/activates both tenant and user).
+  - `DELETE /api/v1/admin/brands/{tenant_id}`: Offboard brand with cascade cleanup.
+- [ ] **Chunk 6.4: Disable Public Self-Signup**
+  - Deprecate public `/api/v1/auth/signup` route to prevent uncontrolled registrations.
+  - Ensure all test suites use admin provisioning or test helpers.
+- [ ] **Chunk 6.5: Frontend Single Login & Role-Based Redirection**
+  - Remove public signup links from `/login` and landing page.
+  - Make `/signup` automatically redirect to `/login`.
+  - Update `LoginPage` & `AuthContext` to route `superadmin` ➔ `/admin/brands` and `owner`/`member` ➔ `/dashboard`.
+- [ ] **Chunk 6.6: Product Admin Management UI (`/admin/brands`)**
+  - Dedicated Admin layout and sidebar for `superadmin`.
+  - Brand directory table (Brand name, slug, email, status badge, docs count, date).
+  - "Onboard New Brand" Formik modal (Company name, client email, temporary password).
+  - Instant Active/Inactive toggle switch per brand.
+- [ ] **Chunk 6.7: Automated Test Suite & Verification**
+  - Write integration test suite `tests/test_admin_brands.py` (verify onboarding, RBAC barriers, deactivation lockout).
+  - Verify end-to-end login, brand redirection, and widget blocking for suspended brands.
+
 ## Business next steps (parallel, not code)
 Validate with 2–3 DVIO clients who asked for a chatbot; define pricing tiers (e.g. by messages or documents); plan phased rollout.
 
