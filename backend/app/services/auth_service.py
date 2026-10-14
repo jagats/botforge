@@ -12,8 +12,6 @@ from app.models.user import User
 from app.schemas.auth import (
     LoginRequest,
     LoginResponse,
-    SignupRequest,
-    SignupResponse,
     UserMeResponse,
 )
 
@@ -40,78 +38,6 @@ def generate_unique_slug(db: Session, company_name: str) -> str:
 def generate_public_key() -> str:
     """Generate an API public key for widget embedding."""
     return f"bf_pub_{uuid.uuid4().hex}"
-
-
-def signup_tenant(db: Session, req: SignupRequest) -> SignupResponse:
-    """Onboard a new tenant, owner user, and widget public API key in an atomic transaction."""
-    email_clean = req.email.lower().strip()
-
-    # 1. Enforce globally unique email
-    existing_user = db.query(User).filter(User.email == email_clean).first()
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="A user with this email address already exists",
-        )
-
-    # 2. Generate slug and hash password
-    slug = generate_unique_slug(db, req.company_name)
-    hashed_pwd = hash_password(req.password)
-
-    try:
-        # 3. Create Tenant
-        tenant = Tenant(
-            name=req.company_name.strip(),
-            slug=slug,
-            plan="trial",
-            status="active",
-        )
-        db.add(tenant)
-        db.flush()
-
-        # 4. Create Owner User
-        user = User(
-            tenant_id=tenant.id,
-            email=email_clean,
-            hashed_password=hashed_pwd,
-            role="owner",
-        )
-        db.add(user)
-        db.flush()
-
-        # 5. Create Default Widget API Key
-        api_key = ApiKey(
-            tenant_id=tenant.id,
-            public_key=generate_public_key(),
-            is_active=True,
-        )
-        db.add(api_key)
-
-        db.commit()
-        db.refresh(tenant)
-        db.refresh(user)
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to complete registration transaction",
-        ) from e
-
-    # 6. Issue JWT Token
-    token = create_access_token(
-        {
-            "user_id": str(user.id),
-            "tenant_id": str(tenant.id),
-            "role": user.role,
-        }
-    )
-
-    return SignupResponse(
-        tenant_id=tenant.id,
-        user_id=user.id,
-        access_token=token,
-        token_type="bearer",
-    )
 
 
 def login_user(db: Session, req: LoginRequest) -> LoginResponse:

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { authApi, getStoredToken } from "../lib/api";
-import { LoginInput, SignupInput, User } from "../types";
+import { LoginInput, User } from "../types";
 
 interface AuthContextType {
   user: User | null;
@@ -10,7 +10,6 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isSuperadmin: boolean;
   login: (data: LoginInput) => Promise<User>;
-  signup: (data: SignupInput) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -51,12 +50,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return profile;
   };
 
-  const signup = async (data: SignupInput) => {
-    await authApi.signup(data);
-    const profile = await authApi.getMe();
-    setUser(profile);
-  };
-
   const logout = () => {
     authApi.logout();
     setUser(null);
@@ -75,7 +68,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!user,
         isSuperadmin: user?.role === "superadmin",
         login,
-        signup,
         logout,
         refreshUser,
       }}

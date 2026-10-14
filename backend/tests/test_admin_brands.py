@@ -8,6 +8,7 @@ from app.core.config import settings
 from app.db.seed import seed_superadmin
 from app.db.session import SessionLocal
 from app.main import app
+from tests.conftest import provision_test_brand
 
 client = TestClient(app)
 
@@ -61,23 +62,17 @@ def test_superadmin_seed_and_login():
     assert profile["is_active"] is True
 
 
-def test_public_signup_disabled_guard():
-    """Verify that when ALLOW_PUBLIC_SIGNUP is false, public self-signup is rejected with 403."""
-    original = settings.ALLOW_PUBLIC_SIGNUP
-    settings.ALLOW_PUBLIC_SIGNUP = False
-    try:
-        res = client.post(
-            "/api/v1/auth/signup",
-            json={
-                "company_name": "Random Public Org",
-                "email": f"public_{uuid.uuid4().hex[:6]}@example.com",
-                "password": "Password123!",
-            },
-        )
-        assert res.status_code == 403
-        assert "disabled" in res.json()["detail"].lower()
-    finally:
-        settings.ALLOW_PUBLIC_SIGNUP = original
+def test_public_signup_route_is_not_found():
+    """Verify that public signup route does not exist and returns 404."""
+    res = client.post(
+        "/api/v1/auth/signup",
+        json={
+            "company_name": "Random Public Org",
+            "email": f"public_{uuid.uuid4().hex[:6]}@example.com",
+            "password": "Password123!",
+        },
+    )
+    assert res.status_code in [404, 405]
 
 
 def test_admin_brands_rbac_protection():
@@ -87,17 +82,8 @@ def test_admin_brands_rbac_protection():
     assert res.status_code in [401, 403]
 
     # 2. Regular client brand owner -> 403 Forbidden
-    client_email = f"owner_{uuid.uuid4().hex[:6]}@example.com"
-    signup_res = client.post(
-        "/api/v1/auth/signup",
-        json={
-            "company_name": "Client Regular",
-            "email": client_email,
-            "password": "Password123!",
-        },
-    )
-    assert signup_res.status_code == 201
-    owner_token = signup_res.json()["access_token"]
+    brand = provision_test_brand(company_name="Client Regular")
+    owner_token = brand["access_token"]
 
     forbidden_res = client.get(
         "/api/v1/admin/brands",

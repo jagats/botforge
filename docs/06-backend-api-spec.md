@@ -28,24 +28,45 @@ def get_current_tenant(token=Depends(bearer_scheme)) -> str:
 Every protected route declares `tenant_id = Depends(get_current_tenant)`.
 
 ## Auth — `api/v1/auth.py`
+*Public self-signup has been completely removed. User and client brand onboarding is agency-managed via the Product Admin API.*
+
 | Method | Path | Body | Response | Notes |
 |---|---|---|---|---|
-| POST | `/auth/login` | `{email, password}` | `{access_token, tenant_id, role}` | Verifies hash, checks `user.is_active` AND `tenant.status == 'active'`. Issues JWT. |
-| GET | `/auth/me` | JWT | `{user_id, tenant_id, email, role, is_active}` | Used by frontend on load to enforce role routing |
+| POST | `/auth/login` | `{email, password}` | `{access_token, tenant_id, role, token_type}` | Verifies hash, checks `user.is_active` AND `tenant.status == 'active'`. Issues JWT bearer token. |
+| GET | `/auth/me` | Bearer JWT | `{user_id, tenant_id, email, role, is_active, company_name}` | Returns profile information for current session; used by frontend for role-based routing. |
 
-> **Public Signup Disabled:** The public `/auth/signup` route is removed/deprecated. All new accounts must be onboarded through the Product Admin API.
+> **Public Signup Removed:** The public `/auth/signup` route is completely removed (`404 Not Found`). All new client brands and workspaces must be onboarded through the Product Admin API.
 
 JWT payload: `{ "user_id": "...", "tenant_id": "...", "role": "superadmin" | "owner" | "member", "exp": <unix> }`
 
-## Admin & Brand Provisioning — `api/v1/admin/brands.py`
-*Restricted to Product Admin (`role=superadmin`).*
+## Admin & Brand Provisioning — `api/v1/admin.py` (`/api/v1/admin/brands`)
+*Restricted to Product Admin (`role=superadmin`) via `require_superadmin` dependency.*
 
 | Method | Path | Body | Response | Notes |
 |---|---|---|---|---|
-| POST | `/admin/brands` | `{company_name, email, password}` | `{tenant_id, user_id, public_key}` | Onboards a client brand (creates tenant + owner user + widget API key) in one transaction |
-| GET | `/admin/brands` | — | `List[BrandSummaryResponse]` | Lists all onboarded brands, owner emails, document count, and active/inactive status |
-| PATCH | `/admin/brands/{tenant_id}/status` | `{status: "active" \| "suspended"}` | `{tenant_id, status}` | Instantly activates or suspends a client brand, disabling login and widget |
-| DELETE | `/admin/brands/{tenant_id}` | — | `{message: "Brand offboarded"}` | Cascades and deletes tenant, users, documents, and Qdrant vectors |
+| POST | `/admin/brands` | `{company_name, email, password, plan?}` | `BrandResponse` | Atomically provisions a client brand (creates tenant + owner user + widget API key). |
+| GET | `/admin/brands` | Query: `skip=0`, `limit=100` | `{brands: BrandResponse[], total: int}` | Lists all client brands with owner details, doc counts, chat sessions, and active status. |
+| GET | `/admin/brands/{tenant_id}` | — | `BrandResponse` | Retrieves single brand metadata, knowledge stats, and widget public API key. |
+| PATCH | `/admin/brands/{tenant_id}/status` | `{status: "active" \| "suspended"}` | `BrandResponse` | Activates or suspends client brand; instantly locks/unlocks owner logins and blocks widget chat. |
+| DELETE | `/admin/brands/{tenant_id}` | — | `204 No Content` | Offboards brand; cascades and purges DB records and Qdrant vector points. |
+
+### `BrandResponse` Schema
+```json
+{
+  "tenant_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "name": "Apex Logistics",
+  "slug": "apex-logistics",
+  "plan": "starter",
+  "status": "active",
+  "owner_email": "admin@apexlogistics.com",
+  "owner_user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "is_active": true,
+  "document_count": 5,
+  "chat_session_count": 42,
+  "public_api_key": "bf_pub_3f1a...",
+  "created_at": "2026-10-14T22:00:00Z"
+}
+```
 
 ## Tenants — `api/v1/tenants.py`
 *Client Brand self-management.*

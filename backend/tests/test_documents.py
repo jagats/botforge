@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 from pypdf import PdfWriter
 
 from app.main import app
+from tests.conftest import provision_test_brand
 
 client = TestClient(app)
 
@@ -14,12 +15,8 @@ client = TestClient(app)
 def _create_test_tenant(prefix: str = "tenant"):
     """Helper to create a new tenant with owner credentials."""
     email = f"{prefix}_{uuid.uuid4().hex[:8]}@example.com"
-    res = client.post(
-        "/api/v1/auth/signup",
-        json={"company_name": f"{prefix.title()} Corp", "email": email, "password": "Password123!"},
-    )
-    assert res.status_code == 201
-    return res.json()["access_token"], res.json()["tenant_id"]
+    brand = provision_test_brand(company_name=f"{prefix.title()} Corp", email=email)
+    return brand["access_token"], brand["tenant_id"]
 
 
 def _generate_minimal_pdf_bytes(text_content: str = "Welcome to BotForge. This is a knowledge base document.") -> io.BytesIO:

@@ -78,7 +78,7 @@ Validation schemas are maintained in `frontend/src/lib/validations.ts` and direc
 
 | Frontend Form | Backend Schema | Validation Rules (Yup Schema) |
 |---|---|---|
-| **Signup** (`/signup`) | `SignupRequest` (`auth.py`) | • `company_name`: string, min 2, max 100, required<br>• `email`: string, valid email format, required<br>• `password`: string, min 8, max 100, required |
+| **Onboard Brand Modal** (`/admin/brands`) | `BrandCreateRequest` (`admin.py`) | • `company_name`: string, min 2, max 100, required<br>• `email`: string, valid email format, required<br>• `password`: string, min 8, max 100, required<br>• `plan`: string, oneOf [trial, starter, pro], required |
 | **Login** (`/login`) | `LoginRequest` (`auth.py`) | • `email`: string, valid email format, required<br>• `password`: string, min 1, required |
 | **Settings Profile** (`/dashboard/settings`) | `TenantUpdateRequest` (`tenant.py`) | • `name`: string, min 2, max 100, required |
 | **Document URL Ingestion** (`/dashboard/documents`) | `DocumentUrlCreate` (`document.py`) | • `url`: string, valid URL (http/https), required<br>• `title`: string, optional |

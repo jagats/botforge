@@ -1,23 +1,19 @@
 """Automated tests for tenant management and strict cross-tenant data isolation."""
 
 import uuid
-import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+from tests.conftest import provision_test_brand
 
 client = TestClient(app)
 
 
 def test_tenant_profile_and_patch():
     company = "Original Name Health"
-    email = f"user_{uuid.uuid4().hex[:8]}@example.com"
-    signup_res = client.post(
-        "/api/v1/auth/signup",
-        json={"company_name": company, "email": email, "password": "Password123!"},
-    )
-    token = signup_res.json()["access_token"]
-    tenant_id = signup_res.json()["tenant_id"]
+    brand = provision_test_brand(company_name=company, plan="trial")
+    token = brand["access_token"]
+    tenant_id = brand["tenant_id"]
 
     # 1. GET /tenants/me
     get_res = client.get(
@@ -50,12 +46,8 @@ def test_tenant_profile_and_patch():
 
 
 def test_tenant_api_key():
-    email = f"user_{uuid.uuid4().hex[:8]}@example.com"
-    signup_res = client.post(
-        "/api/v1/auth/signup",
-        json={"company_name": "API Key Clinic", "email": email, "password": "Password123!"},
-    )
-    token = signup_res.json()["access_token"]
+    brand = provision_test_brand(company_name="API Key Clinic")
+    token = brand["access_token"]
 
     key_res = client.get(
         "/api/v1/tenants/me/api-key",
@@ -70,22 +62,14 @@ def test_tenant_api_key():
 def test_cross_tenant_isolation():
     """Verify strict tenant isolation: Tenant A and Tenant B never cross-pollinate data."""
     # Create Tenant A
-    email_a = f"tenant_a_{uuid.uuid4().hex[:8]}@example.com"
-    res_a = client.post(
-        "/api/v1/auth/signup",
-        json={"company_name": "Tenant Alpha Corp", "email": email_a, "password": "Password123!"},
-    )
-    token_a = res_a.json()["access_token"]
-    tenant_id_a = res_a.json()["tenant_id"]
+    brand_a = provision_test_brand(company_name="Tenant Alpha Corp")
+    token_a = brand_a["access_token"]
+    tenant_id_a = brand_a["tenant_id"]
 
     # Create Tenant B
-    email_b = f"tenant_b_{uuid.uuid4().hex[:8]}@example.com"
-    res_b = client.post(
-        "/api/v1/auth/signup",
-        json={"company_name": "Tenant Beta Ltd", "email": email_b, "password": "Password123!"},
-    )
-    token_b = res_b.json()["access_token"]
-    tenant_id_b = res_b.json()["tenant_id"]
+    brand_b = provision_test_brand(company_name="Tenant Beta Ltd")
+    token_b = brand_b["access_token"]
+    tenant_id_b = brand_b["tenant_id"]
 
     # Assert IDs are distinct
     assert tenant_id_a != tenant_id_b
