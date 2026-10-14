@@ -166,7 +166,32 @@ def get_current_user(
             detail="User not found or does not belong to tenant",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account is deactivated. Please contact your administrator.",
+        )
+
+    if user.role != "superadmin" and user.tenant and user.tenant.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Organization account is suspended or inactive.",
+        )
+
     return user
+
+
+def require_superadmin(
+    current_user=Depends(get_current_user),
+):
+    """FastAPI dependency enforcing superadmin role."""
+    if current_user.role != "superadmin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Superadmin privilege required to perform this action",
+        )
+    return current_user
 
 
 def get_tenant_by_api_key(

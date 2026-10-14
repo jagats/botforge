@@ -125,9 +125,16 @@ def login_user(db: Session, req: LoginRequest) -> LoginResponse:
             detail="Invalid email or password",
         )
 
-    # Verify tenant status is active
+    # Verify user account is active
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your user account is deactivated. Please contact support.",
+        )
+
+    # Verify tenant status is active (superadmins bypass tenant suspension)
     tenant = db.query(Tenant).filter(Tenant.id == user.tenant_id).first()
-    if not tenant or tenant.status != "active":
+    if user.role != "superadmin" and (not tenant or tenant.status != "active"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Your organization account is not active. Please contact support.",
@@ -136,14 +143,15 @@ def login_user(db: Session, req: LoginRequest) -> LoginResponse:
     token = create_access_token(
         {
             "user_id": str(user.id),
-            "tenant_id": str(tenant.id),
+            "tenant_id": str(tenant.id) if tenant else "",
             "role": user.role,
         }
     )
 
     return LoginResponse(
         access_token=token,
-        tenant_id=tenant.id,
+        tenant_id=tenant.id if tenant else user.tenant_id,
+        role=user.role,
         token_type="bearer",
     )
 
@@ -155,5 +163,6 @@ def get_user_profile(user: User) -> UserMeResponse:
         tenant_id=user.tenant_id,
         email=user.email,
         role=user.role,
+        is_active=user.is_active,
         company_name=user.tenant.name if user.tenant else "",
     )

@@ -49,6 +49,7 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
     access_token: str
     tenant_id: uuid.UUID
+    role: str = "owner"
     token_type: str = "bearer"
 
 
@@ -57,4 +58,5 @@ class UserMeResponse(BaseModel):
     tenant_id: uuid.UUID
     email: str
     role: str
+    is_active: bool = True
     company_name: str

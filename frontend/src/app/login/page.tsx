@@ -9,14 +9,18 @@ import { loginSchema, LoginFormValues } from "../../lib/validations";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, isAuthenticated, isLoading, user } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.push("/dashboard");
+    if (!isLoading && isAuthenticated && user) {
+      if (user.role === "superadmin") {
+        router.push("/admin/brands");
+      } else {
+        router.push("/dashboard");
+      }
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, user, router]);
 
   const formik = useFormik<LoginFormValues>({
     initialValues: {
@@ -27,11 +31,15 @@ export default function LoginPage() {
     onSubmit: async (values, { setSubmitting }) => {
       setServerError(null);
       try {
-        await login({
+        const profile = await login({
           email: values.email.trim().toLowerCase(),
           password: values.password,
         });
-        router.push("/dashboard");
+        if (profile.role === "superadmin") {
+          router.push("/admin/brands");
+        } else {
+          router.push("/dashboard");
+        }
       } catch (err: any) {
         setServerError(err?.message || "Invalid email or password.");
       } finally {
@@ -130,10 +138,8 @@ export default function LoginPage() {
         </form>
 
         <div className="text-center mt-6 text-xs text-slate-400">
-          Don&apos;t have an account yet?{" "}
-          <Link href="/signup" className="text-blue-400 hover:text-blue-300 font-semibold underline underline-offset-4">
-            Create workspace
-          </Link>
+          Need brand access or new client onboarding?{" "}
+          <span className="text-slate-300 font-medium">Contact your BotForge Administrator</span>
         </div>
       </div>
     </div>
