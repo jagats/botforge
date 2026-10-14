@@ -1,8 +1,9 @@
 """Authentication endpoints: signup, login, me."""
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.rate_limiter import rate_limit_auth
 from app.core.security import get_current_user
 from app.db.session import get_db
@@ -31,6 +32,11 @@ def signup(
     db: Session = Depends(get_db),
 ) -> SignupResponse:
     """Create tenant, owner user, and default widget API key in an atomic transaction."""
+    if not settings.ALLOW_PUBLIC_SIGNUP:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Public registration is disabled. Brand onboarding is managed by administrators.",
+        )
     return signup_tenant(db, payload)
 
 

@@ -129,3 +129,28 @@ def delete_document_vectors(tenant_id: uuid.UUID, document_id: uuid.UUID) -> Non
         ),
     )
     logger.info("Deleted Qdrant vectors for tenant=%s doc=%s", tenant_id, document_id)
+
+
+def delete_tenant_vectors(tenant_id: uuid.UUID) -> None:
+    """
+    Delete all vector points belonging to an entire tenant.
+    """
+    try:
+        client = get_qdrant_client()
+        client.delete(
+            collection_name=settings.QDRANT_COLLECTION_NAME,
+            points_selector=models.FilterSelector(
+                filter=models.Filter(
+                    must=[
+                        models.FieldCondition(
+                            key="tenant_id",
+                            match=models.MatchValue(value=str(tenant_id)),
+                        ),
+                    ]
+                )
+            ),
+        )
+        logger.info("Deleted all Qdrant vectors for tenant=%s", tenant_id)
+    except Exception as exc:
+        logger.warning("Could not delete Qdrant vectors for tenant %s: %s", tenant_id, exc)
+

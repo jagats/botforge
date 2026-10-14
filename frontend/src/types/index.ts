@@ -5,7 +5,39 @@ export interface User {
   tenant_id: string;
   email: string;
   role: string;
+  is_active?: boolean;
   company_name: string;
+}
+
+export interface Brand {
+  tenant_id: string;
+  name: string;
+  slug: string;
+  plan: string;
+  status: "active" | "suspended";
+  owner_email: string;
+  owner_user_id: string;
+  is_active: boolean;
+  document_count: number;
+  chat_session_count: number;
+  public_api_key?: string | null;
+  created_at: string;
+}
+
+export interface BrandListResponse {
+  brands: Brand[];
+  total: number;
+}
+
+export interface BrandCreateInput {
+  company_name: string;
+  email: string;
+  password: string;
+  plan?: string;
+}
+
+export interface BrandStatusUpdateInput {
+  status: "active" | "suspended";
 }
 
 export interface Tenant {
@@ -37,6 +69,7 @@ export interface LoginInput {
 export interface AuthTokens {
   access_token: string;
   tenant_id: string;
+  role?: string;
   user_id?: string;
   token_type: string;
 }

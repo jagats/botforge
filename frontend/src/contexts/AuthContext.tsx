@@ -8,7 +8,8 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (data: LoginInput) => Promise<void>;
+  isSuperadmin: boolean;
+  login: (data: LoginInput) => Promise<User>;
   signup: (data: SignupInput) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -43,10 +44,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchCurrentUser();
   }, []);
 
-  const login = async (data: LoginInput) => {
+  const login = async (data: LoginInput): Promise<User> => {
     await authApi.login(data);
     const profile = await authApi.getMe();
     setUser(profile);
+    return profile;
   };
 
   const signup = async (data: SignupInput) => {
@@ -71,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         isLoading,
         isAuthenticated: !!user,
+        isSuperadmin: user?.role === "superadmin",
         login,
         signup,
         logout,

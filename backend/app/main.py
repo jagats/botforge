@@ -5,12 +5,20 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import api_v1_router
 from app.core.qdrant import init_qdrant_collection
+from app.db.seed import seed_superadmin
+from app.db.session import SessionLocal
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Ensure Qdrant collection and payload indexes exist on startup
     init_qdrant_collection()
+    # Ensure master superadmin user and system tenant exist
+    db = SessionLocal()
+    try:
+        seed_superadmin(db)
+    finally:
+        db.close()
     yield
 
 

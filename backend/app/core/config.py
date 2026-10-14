@@ -45,6 +45,11 @@ class Settings(BaseSettings):
     RATE_LIMIT_WIDGET_IP_PER_MINUTE: int = 20
     RATE_LIMIT_AUTH_PER_MINUTE: int = 15
 
+    # RBAC & Superadmin Closed Onboarding (Phase 6)
+    SUPERADMIN_EMAIL: str = "admin@botforge.com"
+    SUPERADMIN_PASSWORD: str = "Admin@BotForge2026!"
+    ALLOW_PUBLIC_SIGNUP: bool = False
+
     @field_validator("DATABASE_URL")
     @classmethod
     def adjust_db_host_for_local_dev(cls, v: str) -> str:

@@ -66,8 +66,30 @@ export const documentFaqSchema = Yup.object().shape({
     .required("FAQ content is required"),
 });
 
+// Mirrors `backend/app/schemas/admin.py:BrandCreateRequest`
+export const brandCreateSchema = Yup.object().shape({
+  company_name: Yup.string()
+    .trim()
+    .min(2, "Brand name must be at least 2 characters")
+    .max(100, "Brand name cannot exceed 100 characters")
+    .required("Brand name is required"),
+  email: Yup.string()
+    .trim()
+    .email("Please enter a valid owner email address")
+    .required("Owner email is required"),
+  password: Yup.string()
+    .min(8, "Temporary password must be at least 8 characters")
+    .max(100, "Temporary password cannot exceed 100 characters")
+    .required("Temporary password is required"),
+  plan: Yup.string()
+    .oneOf(["trial", "starter", "pro"], "Plan must be trial, starter, or pro")
+    .default("trial")
+    .required("Plan is required"),
+});
+
 export type SignupFormValues = Yup.InferType<typeof signupSchema>;
 export type LoginFormValues = Yup.InferType<typeof loginSchema>;
 export type TenantUpdateFormValues = Yup.InferType<typeof tenantUpdateSchema>;
 export type DocumentUrlFormValues = Yup.InferType<typeof documentUrlSchema>;
 export type DocumentFaqFormValues = Yup.InferType<typeof documentFaqSchema>;
+export type BrandCreateFormValues = Yup.InferType<typeof brandCreateSchema>;

@@ -23,30 +23,27 @@ export default function HomePage() {
             {isAuthenticated ? (
               <>
                 <span className="text-sm text-slate-400 hidden sm:inline">
-                  Signed in as <strong className="text-slate-200">{user?.company_name}</strong>
+                  Signed in as <strong className="text-slate-200">{user?.email}</strong>
+                  {user?.role === "superadmin" && (
+                    <span className="ml-2 px-2 py-0.5 text-xs font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/30 rounded-md">
+                      Superadmin
+                    </span>
+                  )}
                 </span>
                 <Link
-                  href="/dashboard"
+                  href={user?.role === "superadmin" ? "/admin/brands" : "/dashboard"}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/20 transition-all active:scale-95"
                 >
-                  Dashboard &rarr;
+                  {user?.role === "superadmin" ? "Admin Console \u2192" : "Dashboard \u2192"}
                 </Link>
               </>
             ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900 border border-slate-800 transition-colors"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/25 transition-all active:scale-95"
-                >
-                  Get Started Free
-                </Link>
-              </>
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/25 transition-all active:scale-95"
+              >
+                Sign In to Workspace &rarr;
+              </Link>
             )}
           </div>
         </div>
@@ -56,7 +53,7 @@ export default function HomePage() {
       <section className="flex-1 flex flex-col items-center justify-center text-center px-4 pt-16 pb-20 max-w-5xl mx-auto">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 mb-8 shadow-sm">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>all development phase completed now we are working on the testing part</span>
+          <span>Enterprise Multi-Tenant AI Bot Platform</span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight bg-gradient-to-b from-white via-slate-100 to-slate-400 bg-clip-text text-transparent max-w-4xl leading-[1.1] mb-6">
@@ -71,26 +68,18 @@ export default function HomePage() {
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
           {isAuthenticated ? (
             <Link
-              href="/dashboard"
+              href={user?.role === "superadmin" ? "/admin/brands" : "/dashboard"}
               className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-base font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25 transition-all active:scale-95 flex items-center justify-center gap-2"
             >
-              Go to Workspace Dashboard &rarr;
+              {user?.role === "superadmin" ? "Manage Client Brands \u2192" : "Go to Workspace Dashboard \u2192"}
             </Link>
           ) : (
-            <>
-              <Link
-                href="/signup"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-base font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25 transition-all active:scale-95 flex items-center justify-center gap-2"
-              >
-                Create Your Workspace &rarr;
-              </Link>
-              <Link
-                href="/login"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-base font-semibold bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 transition-all flex items-center justify-center"
-              >
-                If you already have an account Sign In to your Existing Account
-              </Link>
-            </>
+            <Link
+              href="/login"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-base font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25 transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
+              Sign In to Workspace &rarr;
+            </Link>
           )}
         </div>
 
