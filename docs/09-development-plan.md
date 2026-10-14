@@ -98,11 +98,13 @@ Single developer, single monorepo, fully dockerized. Estimates assume full-time 
   - `GET /api/v1/admin/brands`: List all onboarded brands with owner details, doc count, chat sessions, and active status.
   - `PATCH /api/v1/admin/brands/{tenant_id}/status`: Toggle brand active/inactive (suspends/activates tenant and locks/unlocks users).
   - `DELETE /api/v1/admin/brands/{tenant_id}`: Offboard brand with cascade cleanup in DB and Qdrant.
-- [x] **Chunk 6.4: Disable Public Self-Signup**
-  - Guarded public `/api/v1/auth/signup` route with `settings.ALLOW_PUBLIC_SIGNUP = False` to prevent uncontrolled registrations.
+- [x] **Chunk 6.4: Remove Public Self-Signup**
+  - Completely removed `POST /api/v1/auth/signup` route and `SignupRequest`/`SignupResponse` schemas from backend.
+  - Removed `authApi.signup`, `SignupInput`, and `signupSchema` from frontend; `/signup` immediately redirects to `/login`.
+  - Refactored all test suites to use `provision_test_brand` admin fixture instead of public registration.
 - [x] **Chunk 6.5: Frontend Single Login & Role-Based Redirection**
   - Removed open public signup links from `/login` and landing page.
-  - Made `/signup` render a closed onboarding notice and automatically redirect to `/login`.
+  - Made `/signup` immediately redirect to `/login`.
   - Updated `LoginPage` & `AuthContext` to route `superadmin` ➔ `/admin/brands` and `owner`/`member` ➔ `/dashboard`.
 - [x] **Chunk 6.6: Product Admin Management UI (`/admin/brands`)**
   - Dedicated Admin layout (`/admin/layout.tsx`) and header for `superadmin`.

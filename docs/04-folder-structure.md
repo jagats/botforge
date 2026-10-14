@@ -17,7 +17,8 @@ ai-bot-platform/
 │   │   │   ├── config.py       # Env vars / settings
 │   │   │   └── security.py     # JWT, password hashing, get_current_tenant
 │   │   ├── api/v1/
-│   │   │   ├── auth.py         # signup / login / me
+│   │   │   ├── auth.py         # login / me (public signup removed)
+│   │   │   ├── admin.py        # superadmin brand provisioning (RBAC)
 │   │   │   ├── tenants.py      # tenant profile, api-key
 │   │   │   ├── documents.py    # upload, list, delete
 │   │   │   ├── chat.py         # RAG chat (dashboard, JWT)

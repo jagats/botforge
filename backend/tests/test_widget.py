@@ -7,6 +7,7 @@ from app.db.session import SessionLocal
 from app.main import app
 from app.models.api_key import ApiKey
 from app.models.tenant import Tenant
+from tests.conftest import provision_test_brand
 
 client = TestClient(app)
 
@@ -14,20 +15,8 @@ client = TestClient(app)
 def _setup_test_tenant(prefix: str = "widget_tenant"):
     """Create tenant, return auth token, tenant_id, and public_key."""
     email = f"{prefix}_{uuid.uuid4().hex[:8]}@example.com"
-    res = client.post(
-        "/api/v1/auth/signup",
-        json={"company_name": f"{prefix.title()} Corp", "email": email, "password": "Password123!"},
-    )
-    assert res.status_code == 201
-    token = res.json()["access_token"]
-    tenant_id = res.json()["tenant_id"]
-
-    # Fetch public API key
-    key_res = client.get("/api/v1/tenants/me/api-key", headers={"Authorization": f"Bearer {token}"})
-    assert key_res.status_code == 200
-    public_key = key_res.json()["public_key"]
-
-    return token, tenant_id, public_key
+    brand = provision_test_brand(company_name=f"{prefix.title()} Corp", email=email)
+    return brand["access_token"], brand["tenant_id"], brand["public_key"]
 
 
 def test_widget_config_endpoint():

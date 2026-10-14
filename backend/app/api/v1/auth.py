@@ -11,33 +11,11 @@ from app.models.user import User
 from app.schemas.auth import (
     LoginRequest,
     LoginResponse,
-    SignupRequest,
-    SignupResponse,
     UserMeResponse,
 )
-from app.services.auth_service import get_user_profile, login_user, signup_tenant
+from app.services.auth_service import get_user_profile, login_user
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
-
-
-@router.post(
-    "/signup",
-    response_model=SignupResponse,
-    status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(rate_limit_auth)],
-    summary="Register new company tenant and owner account",
-)
-def signup(
-    payload: SignupRequest,
-    db: Session = Depends(get_db),
-) -> SignupResponse:
-    """Create tenant, owner user, and default widget API key in an atomic transaction."""
-    if not settings.ALLOW_PUBLIC_SIGNUP:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Public registration is disabled. Brand onboarding is managed by administrators.",
-        )
-    return signup_tenant(db, payload)
 
 
 @router.post(

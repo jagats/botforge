@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from app.core.config import settings
 from app.core.rate_limiter import InMemoryRateLimiter, limiter
 from app.main import app
+from tests.conftest import provision_test_brand
 
 client = TestClient(app)
 
@@ -45,15 +46,8 @@ def test_widget_chat_rate_limiting():
 
     # Create test tenant
     email = f"ratelimit_widget_{uuid.uuid4().hex[:8]}@example.com"
-    res = client.post(
-        "/api/v1/auth/signup",
-        json={"company_name": "Rate Limit Co", "email": email, "password": "Password123!"},
-    )
-    assert res.status_code == 201
-    token = res.json()["access_token"]
-
-    key_res = client.get("/api/v1/tenants/me/api-key", headers={"Authorization": f"Bearer {token}"})
-    public_key = key_res.json()["public_key"]
+    brand = provision_test_brand(company_name="Rate Limit Co", email=email)
+    public_key = brand["public_key"]
 
     # Temporarily lower the threshold for test speed
     original_ip_limit = settings.RATE_LIMIT_WIDGET_IP_PER_MINUTE

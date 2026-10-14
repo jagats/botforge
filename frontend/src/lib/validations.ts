@@ -4,23 +4,6 @@ import * as Yup from "yup";
  * Yup validation schemas mirroring backend Pydantic models in `backend/app/schemas/`.
  */
 
-// Mirrors `backend/app/schemas/auth.py:SignupRequest`
-export const signupSchema = Yup.object().shape({
-  company_name: Yup.string()
-    .trim()
-    .min(2, "Company name must be at least 2 characters")
-    .max(100, "Company name cannot exceed 100 characters")
-    .required("Company name is required"),
-  email: Yup.string()
-    .trim()
-    .email("Please enter a valid work email address")
-    .required("Work email address is required"),
-  password: Yup.string()
-    .min(8, "Password must be at least 8 characters long")
-    .max(100, "Password cannot exceed 100 characters")
-    .required("Password is required"),
-});
-
 // Mirrors `backend/app/schemas/auth.py:LoginRequest`
 export const loginSchema = Yup.object().shape({
   email: Yup.string()
@@ -87,7 +70,6 @@ export const brandCreateSchema = Yup.object().shape({
     .required("Plan is required"),
 });
 
-export type SignupFormValues = Yup.InferType<typeof signupSchema>;
 export type LoginFormValues = Yup.InferType<typeof loginSchema>;
 export type TenantUpdateFormValues = Yup.InferType<typeof tenantUpdateSchema>;
 export type DocumentUrlFormValues = Yup.InferType<typeof documentUrlSchema>;

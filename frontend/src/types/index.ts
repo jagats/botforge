@@ -55,12 +55,6 @@ export interface ApiKey {
   created_at: string;
 }
 
-export interface SignupInput {
-  company_name: string;
-  email: string;
-  password: string;
-}
-
 export interface LoginInput {
   email: string;
   password: string;
