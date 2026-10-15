@@ -1,4 +1,4 @@
-# Project Docs — AI Bot-as-a-Service Platform
+# Project Docs — BOTFORGE (AI Bot-as-a-Service Platform)
 
 > **For the AI coding assistant (Antigravity):** Read this file first, then the files below in order.
 > These docs are the single source of truth for the project. If code and docs disagree, tell the developer and ask before changing either.
