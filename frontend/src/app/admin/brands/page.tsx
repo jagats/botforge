@@ -18,11 +18,15 @@ export default function AdminBrandsPage() {
   const [brandToDelete, setBrandToDelete] = useState<Brand | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState<string>("");
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
   const fetchBrands = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await adminApi.listBrands(0, 200);
+      const data = await adminApi.listBrands(0, 500);
       setBrands(data.brands);
     } catch (err: any) {
       setError(err?.message || "Failed to load brands.");
@@ -49,6 +53,55 @@ export default function AdminBrandsPage() {
       return matchesSearch && matchesStatus;
     });
   }, [brands, searchQuery, statusFilter]);
+
+  // Reset to first page when filtering or searching
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
+  // Pagination calculations
+  const totalPages = Math.max(1, Math.ceil(filteredBrands.length / pageSize));
+
+  // Automatically clamp page if results shrink
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, filteredBrands.length);
+
+  const paginatedBrands = useMemo(() => {
+    return filteredBrands.slice(startIndex, startIndex + pageSize);
+  }, [filteredBrands, startIndex, pageSize]);
+
+  // Generate numbered page buttons with smart ellipsis
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxButtons = 5;
+
+    if (totalPages <= maxButtons + 2) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+      if (currentPage > 3) {
+        pages.push("...");
+      }
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      if (currentPage < totalPages - 2) {
+        pages.push("...");
+      }
+      pages.push(totalPages);
+    }
+    return pages;
+  };
 
   // Metric stats
   const stats = useMemo(() => {
@@ -273,7 +326,7 @@ export default function AdminBrandsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
-                {filteredBrands.map((brand) => (
+                {paginatedBrands.map((brand) => (
                   <tr
                     key={brand.tenant_id}
                     className="hover:bg-slate-800/30 transition-colors"
@@ -392,7 +445,118 @@ export default function AdminBrandsPage() {
               </tbody>
             </table>
           </div>
-        )}
+
+          {/* Frontend Pagination Controls */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 bg-slate-950/40 border-t border-slate-800/80 text-xs text-slate-400">
+            {/* Left: Summary info & Page size selector */}
+            <div className="flex flex-wrap items-center gap-4">
+              <div>
+                Showing{" "}
+                <span className="font-semibold text-slate-200">
+                  {filteredBrands.length === 0 ? 0 : startIndex + 1}
+                </span>{" "}
+                to{" "}
+                <span className="font-semibold text-slate-200">{endIndex}</span> of{" "}
+                <span className="font-semibold text-slate-200">
+                  {filteredBrands.length}
+                </span>{" "}
+                {filteredBrands.length === 1 ? "brand" : "brands"}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label htmlFor="pageSizeSelect" className="text-slate-500 font-medium">
+                  Per page:
+                </label>
+                <select
+                  id="pageSizeSelect"
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="bg-slate-900 border border-slate-800 text-slate-200 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-purple-500 cursor-pointer"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Right: Page Navigation Buttons */}
+            <div className="flex items-center gap-1.5">
+              {/* First Page */}
+              <button
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+                className="px-2.5 py-1.5 rounded-lg border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/80 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                title="First Page"
+                aria-label="First Page"
+              >
+                «
+              </button>
+
+              {/* Previous Page */}
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-2.5 py-1.5 rounded-lg border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/80 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                title="Previous Page"
+                aria-label="Previous Page"
+              >
+                ‹
+              </button>
+
+              {/* Numbered Page Buttons */}
+              <div className="flex items-center gap-1">
+                {getPageNumbers().map((p, idx) =>
+                  typeof p === "number" ? (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentPage(p)}
+                      className={`min-w-[32px] h-8 px-2 rounded-lg text-xs font-semibold transition-all ${
+                        currentPage === p
+                          ? "bg-purple-600 text-white shadow-md shadow-purple-600/30 border border-purple-500 font-bold"
+                          : "border border-slate-800/80 text-slate-400 hover:text-slate-100 hover:bg-slate-800/60"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ) : (
+                    <span key={idx} className="px-1 text-slate-600 select-none">
+                      ...
+                    </span>
+                  )
+                )}
+              </div>
+
+              {/* Next Page */}
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-2.5 py-1.5 rounded-lg border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/80 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                title="Next Page"
+                aria-label="Next Page"
+              >
+                ›
+              </button>
+
+              {/* Last Page */}
+              <button
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+                className="px-2.5 py-1.5 rounded-lg border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/80 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                title="Last Page"
+                aria-label="Last Page"
+              >
+                »
+              </button>
+            </div>
+          </div>
+        </>
+      )}
       </div>
 
       {/* Onboard New Brand Modal */}
