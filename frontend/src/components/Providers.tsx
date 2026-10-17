@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "../contexts/AuthContext";
+import { SidebarProvider } from "../contexts/SidebarContext";
+import { ToastProvider } from "../contexts/ToastContext";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -20,7 +22,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider>
+        <SidebarProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </SidebarProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
