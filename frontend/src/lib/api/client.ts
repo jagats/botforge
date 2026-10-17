@@ -8,12 +8,14 @@ export function getStoredToken(): string | null {
 export function setStoredToken(token: string): void {
   if (typeof window !== "undefined") {
     localStorage.setItem(TOKEN_KEY, token);
+    document.cookie = `botforge_token=${token}; path=/; max-age=604800; SameSite=Lax`;
   }
 }
 
 export function removeStoredToken(): void {
   if (typeof window !== "undefined") {
     localStorage.removeItem(TOKEN_KEY);
+    document.cookie = `botforge_token=; path=/; max-age=0; SameSite=Lax`;
   }
 }
 
