@@ -19,7 +19,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   const variantStyles = {
     text: "h-4 rounded-md w-full",
     circular: "rounded-full shrink-0",
-    rectangular: "rounded-xl",
+    rectangular: "rounded-md",
   }[variant];
 
   const inlineStyles: React.CSSProperties = {
@@ -30,7 +30,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 
   return (
     <div
-      className={`animate-shimmer bg-slate-200/70 ${variantStyles} ${className}`}
+      className={`animate-shimmer bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.12)] ${variantStyles} ${className}`}
       style={inlineStyles}
       {...props}
     />

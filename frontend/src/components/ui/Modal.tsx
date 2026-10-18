@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useCallback } from "react";
+import { PiXLight } from "react-icons/pi";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -68,19 +69,19 @@ export const Modal: React.FC<ModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className={`relative w-full ${sizeStyles} glass-card-elevated border border-white/60 bg-white/95 p-6 shadow-2xl transition-all duration-300 animate-scale-in z-10`}
+        className={`relative w-full ${sizeStyles} glass-card-elevated p-6 shadow-2xl transition-all duration-300 animate-scale-in z-10 text-[#F5EDE8]`}
       >
         {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b border-slate-100">
+        <div className="flex items-start justify-between pb-4 border-b border-[rgba(221,208,200,0.15)]">
           <div>
             <h3
               id="modal-title"
-              className="text-lg font-bold tracking-tight text-slate-900"
+              className="text-lg font-bold tracking-tight text-[#F5EDE8]"
             >
               {title}
             </h3>
             {description && (
-              <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+              <p className="mt-1 text-xs text-[#C4B4A8] leading-relaxed">
                 {description}
               </p>
             )}
@@ -89,28 +90,18 @@ export const Modal: React.FC<ModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded-lg p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            className="rounded-md p-1.5 text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.12)] transition-colors focus:outline-none focus:ring-2 focus:ring-[#DDD0C8] cursor-pointer"
           >
-            <svg
-              className="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <PiXLight size={20} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="py-4">{children}</div>
+        <div className="py-4 text-[#F5EDE8]">{children}</div>
 
         {/* Optional Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[rgba(221,208,200,0.15)]">
             {footer}
           </div>
         )}

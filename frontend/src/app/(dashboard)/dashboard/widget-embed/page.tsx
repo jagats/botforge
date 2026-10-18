@@ -22,10 +22,10 @@ export default function WidgetEmbedPage() {
 
       {/* Live Interactive Browser Preview */}
       <div className="space-y-2">
-        <h3 className="text-sm font-bold text-slate-800">
+        <h3 className="text-sm font-bold text-[#F5EDE8]">
           Live Interactive Simulator
         </h3>
-        <p className="text-xs text-slate-500 mb-3">
+        <p className="text-xs text-[#C4B4A8] mb-3">
           Click the chat launcher bubble in the bottom right corner of the preview to test conversations in real time.
         </p>
         <WidgetPreview />

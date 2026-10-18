@@ -99,10 +99,10 @@
 
 @keyframes glowPulse {
   0%, 100% {
-    box-shadow: 0 0 4px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 4px rgba(221, 208, 200, 0.2);
   }
   50% {
-    box-shadow: 0 0 16px rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 16px rgba(221, 208, 200, 0.35);
   }
 }
 
@@ -146,9 +146,9 @@
   animation: shimmer 2s infinite linear;
   background: linear-gradient(
     90deg,
-    var(--color-bg-body, #f1f5f9) 25%,
-    rgba(255, 255, 255, 0.8) 50%,
-    var(--color-bg-body, #f1f5f9) 75%
+    rgba(221, 208, 200, 0.05) 25%,
+    rgba(221, 208, 200, 0.15) 50%,
+    rgba(221, 208, 200, 0.05) 75%
   );
   background-size: 200% 100%;
 }

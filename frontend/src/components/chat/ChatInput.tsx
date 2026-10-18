@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
+import { PiPaperPlaneRightLight } from "react-icons/pi";
 
 export interface ChatInputProps {
   value: string;
@@ -51,7 +52,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       {/* Sample Quick Prompts */}
       {samplePrompts && samplePrompts.length > 0 && (
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          <span className="text-[11px] font-semibold text-slate-400 shrink-0">
+          <span className="text-[11px] font-semibold text-[#7A6E68] shrink-0">
             Try:
           </span>
           {samplePrompts.map((prompt, idx) => (
@@ -60,7 +61,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               type="button"
               onClick={() => onSelectPrompt?.(prompt)}
               disabled={isLoading || disabled}
-              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200/80 text-slate-600 hover:text-slate-900 text-xs font-medium whitespace-nowrap transition-colors cursor-pointer border border-slate-200/60"
+              className="px-2.5 py-1 rounded-md bg-[rgba(221,208,200,0.10)] hover:bg-[rgba(221,208,200,0.20)] text-[#DDD0C8] hover:text-[#F5EDE8] text-xs font-medium whitespace-nowrap transition-colors cursor-pointer border border-[rgba(221,208,200,0.18)]"
             >
               {prompt}
             </button>
@@ -69,7 +70,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       )}
 
       {/* Input Container */}
-      <div className="relative rounded-2xl border border-slate-200/90 bg-white shadow-xs focus-within:border-indigo-500 focus-within:ring-3 focus-within:ring-indigo-500/15 transition-all">
+      <div className="relative rounded-md border border-[rgba(221,208,200,0.25)] bg-[rgba(221,208,200,0.08)] shadow-xs focus-within:border-[#DDD0C8] focus-within:ring-2 focus-within:ring-[#DDD0C8]/20 transition-all">
         <textarea
           ref={textareaRef}
           rows={1}
@@ -78,27 +79,23 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled || isLoading}
-          className="w-full resize-none bg-transparent px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none max-h-36 disabled:opacity-60"
+          className="w-full resize-none bg-transparent px-4 py-3 text-sm text-[#F5EDE8] placeholder:text-[rgba(196,180,168,0.50)] focus:outline-none max-h-36 disabled:opacity-60"
         />
 
         <div className="flex items-center justify-between px-3 pb-2.5">
-          <span className="text-[11px] text-slate-400 hidden sm:inline">
-            Press <kbd className="px-1.5 py-0.5 rounded bg-slate-100 font-mono text-[10px] text-slate-600 border border-slate-200">Enter</kbd> to send, <kbd className="px-1.5 py-0.5 rounded bg-slate-100 font-mono text-[10px] text-slate-600 border border-slate-200">Shift + Enter</kbd> for newline
+          <span className="text-[11px] text-[#7A6E68] hidden sm:inline">
+            Press <kbd className="px-1.5 py-0.5 rounded-sm bg-[#323232] font-mono text-[10px] text-[#DDD0C8] border border-[rgba(221,208,200,0.20)]">Enter</kbd> to send, <kbd className="px-1.5 py-0.5 rounded-sm bg-[#323232] font-mono text-[10px] text-[#DDD0C8] border border-[rgba(221,208,200,0.20)]">Shift + Enter</kbd> for newline
           </span>
 
           <div className="ml-auto">
             <Button
               type="button"
-              variant="primary"
+              variant="accent"
               size="sm"
               onClick={onSubmit}
               isLoading={isLoading}
               disabled={disabled || !value.trim() || isLoading}
-              leftIcon={
-                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                </svg>
-              }
+              leftIcon={<PiPaperPlaneRightLight size={15} />}
             >
               Send
             </Button>

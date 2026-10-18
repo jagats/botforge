@@ -11,6 +11,7 @@ import { useTenant } from "@/hooks/useTenant";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import { tenantUpdateSchema, TenantUpdateFormValues } from "@/lib/validations";
+import { PiBuildingsLight, PiWarningCircleLight } from "react-icons/pi";
 
 export const TenantProfileForm: React.FC = () => {
   const { tenant, updateProfile, isUpdatingProfile } = useTenant();
@@ -41,12 +42,13 @@ export const TenantProfileForm: React.FC = () => {
 
   return (
     <GlassCard elevated padding="lg" className="space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-slate-200/60">
+      <div className="flex items-center justify-between pb-4 border-b border-[rgba(221,208,200,0.15)]">
         <div>
-          <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <span>🏢</span> Organization Profile
+          <h2 className="text-base font-bold text-[#F5EDE8] tracking-tight flex items-center gap-2">
+            <PiBuildingsLight size={18} className="text-[#DDD0C8]" />
+            <span>Organization Profile</span>
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-[#C4B4A8] mt-0.5">
             Manage company brand identity and multi-tenant partitioning settings.
           </p>
         </div>
@@ -66,8 +68,8 @@ export const TenantProfileForm: React.FC = () => {
       </div>
 
       {error && (
-        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-700 text-xs flex items-center gap-2 animate-fade-in">
-          <span>⚠️</span>
+        <div className="p-3.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2 animate-fade-in">
+          <PiWarningCircleLight size={16} className="shrink-0 text-rose-400" />
           <span>{error}</span>
         </div>
       )}
@@ -75,11 +77,11 @@ export const TenantProfileForm: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Company Name */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#7A6E68]">
             Company Name
           </label>
           {!isEditing ? (
-            <p className="text-sm font-bold text-slate-900 pt-1">
+            <p className="text-sm font-bold text-[#F5EDE8] pt-1">
               {tenant?.name || "—"}
             </p>
           ) : (
@@ -98,7 +100,7 @@ export const TenantProfileForm: React.FC = () => {
               <div className="flex items-center gap-2 pt-1">
                 <Button
                   type="submit"
-                  variant="primary"
+                  variant="accent"
                   size="sm"
                   isLoading={isUpdatingProfile}
                 >
@@ -124,11 +126,11 @@ export const TenantProfileForm: React.FC = () => {
 
         {/* Workspace Slug */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#7A6E68]">
             Workspace Slug
           </label>
           <div className="pt-1">
-            <span className="px-2.5 py-1 rounded-lg bg-slate-100/80 border border-slate-200/80 font-mono text-xs text-slate-700">
+            <span className="px-2.5 py-1 rounded-md bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.20)] font-mono text-xs text-[#DDD0C8]">
               {tenant?.slug || "—"}
             </span>
           </div>
@@ -136,7 +138,7 @@ export const TenantProfileForm: React.FC = () => {
 
         {/* Subscription Plan */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#7A6E68]">
             Subscription Tier
           </label>
           <div className="pt-1">
@@ -148,12 +150,12 @@ export const TenantProfileForm: React.FC = () => {
 
         {/* Tenant Partition ID */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#7A6E68]">
             Partition Tenant ID
           </label>
           <div className="flex items-center gap-2 pt-1">
             <span
-              className="font-mono text-xs text-slate-600 truncate max-w-[140px]"
+              className="font-mono text-xs text-[#DDD0C8] truncate max-w-[140px]"
               title={tenant?.id}
             >
               {tenant?.id || "—"}

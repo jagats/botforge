@@ -3,7 +3,7 @@
 import React, { ButtonHTMLAttributes, forwardRef } from "react";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "ghost" | "danger" | "purple";
+  variant?: "primary" | "accent" | "secondary" | "ghost" | "danger" | "purple";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
@@ -27,9 +27,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    // Base styles
+    // Base styles - capped at rounded-md (8px)
     const baseStyles =
-      "inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed";
+      "inline-flex items-center justify-center font-medium rounded-md transition-all duration-200 cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-[#1E1A17] disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed";
 
     // Size variants
     const sizeStyles = {
@@ -38,18 +38,20 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       lg: "text-base px-6 py-3 gap-2.5",
     }[size];
 
-    // Style variants (light-glassmorphic aligned)
+    // Style variants (Dark Charcoal & Beige Design Refresh)
     const variantStyles = {
       primary:
-        "bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white shadow-sm hover:shadow-indigo-500/25 focus:ring-indigo-500",
+        "bg-[#323232] hover:bg-[#1a1a1a] active:scale-[0.98] text-[#F5EDE8] border border-[rgba(221,208,200,0.20)] shadow-xs hover:shadow-[#323232]/50 focus:ring-[#DDD0C8]",
+      accent:
+        "bg-[#DDD0C8] hover:bg-[#C4B4A8] active:scale-[0.98] text-[#323232] font-semibold shadow-xs hover:shadow-[#DDD0C8]/25 focus:ring-[#323232]",
       secondary:
-        "bg-white/80 hover:bg-white text-slate-700 hover:text-slate-900 border border-slate-200 hover:border-slate-300 shadow-xs focus:ring-slate-400 backdrop-blur-md",
+        "bg-[rgba(221,208,200,0.12)] hover:bg-[rgba(221,208,200,0.22)] active:scale-[0.98] text-[#DDD0C8] border border-[rgba(221,208,200,0.25)] shadow-xs focus:ring-[#DDD0C8] backdrop-blur-md",
       ghost:
-        "bg-transparent hover:bg-slate-100/80 text-slate-600 hover:text-slate-900 focus:ring-slate-400",
+        "bg-transparent hover:bg-[rgba(221,208,200,0.10)] text-[#C4B4A8] hover:text-[#F5EDE8] focus:ring-[#DDD0C8]",
       danger:
-        "bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white shadow-sm hover:shadow-rose-500/25 focus:ring-rose-500",
+        "bg-rose-500/20 hover:bg-rose-500/30 active:scale-[0.98] text-rose-300 border border-rose-500/30 shadow-xs focus:ring-rose-400",
       purple:
-        "bg-purple-600 hover:bg-purple-700 active:scale-[0.98] text-white shadow-sm hover:shadow-purple-500/25 focus:ring-purple-500",
+        "bg-[#423a35] hover:bg-[#342e2a] active:scale-[0.98] text-[#DDD0C8] border border-[rgba(221,208,200,0.30)] shadow-xs focus:ring-[#DDD0C8]",
     }[variant];
 
     const widthStyle = fullWidth ? "w-full" : "";

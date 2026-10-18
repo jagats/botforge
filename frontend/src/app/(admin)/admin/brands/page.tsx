@@ -11,6 +11,7 @@ import { Modal } from "@/components/ui/Modal";
 import { BrandTable } from "@/components/brands/BrandTable";
 import { BrandCreateForm } from "@/components/brands/BrandCreateForm";
 import { BrandDeleteConfirm } from "@/components/brands/BrandDeleteConfirm";
+import { PiPlusLight } from "react-icons/pi";
 
 export default function AdminBrandsPage() {
   const { brands, isLoading, refetch } = useBrands(0, 500);
@@ -19,8 +20,8 @@ export default function AdminBrandsPage() {
 
   // Compute stats
   const totalCount = brands.length;
-  const activeCount = brands.filter((b) => b.status === "active").length;
-  const suspendedCount = brands.filter((b) => b.status === "suspended").length;
+  const activeCount = brands.filter((b) => b.is_active).length;
+  const suspendedCount = brands.filter((b) => !b.is_active).length;
   const enterpriseCount = brands.filter((b) => b.plan === "enterprise").length;
 
   return (
@@ -36,11 +37,12 @@ export default function AdminBrandsPage() {
               </Button>
             </Link>
             <Button
-              variant="purple"
+              variant="accent"
               size="sm"
               onClick={() => setIsOnboardModalOpen(true)}
+              leftIcon={<PiPlusLight size={16} />}
             >
-              + Onboard Brand
+              Onboard Brand
             </Button>
           </div>
         }
@@ -49,37 +51,37 @@ export default function AdminBrandsPage() {
       {/* Metrics Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <GlassCard className="p-4 hover:shadow-md transition-all">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <p className="text-xs font-semibold text-[#C4B4A8] uppercase tracking-wider">
             Total Brands
           </p>
-          <p className="text-2xl font-extrabold text-slate-900 mt-1">
+          <p className="text-2xl font-extrabold text-[#F5EDE8] mt-1">
             {isLoading ? "..." : totalCount}
           </p>
         </GlassCard>
 
         <GlassCard className="p-4 hover:shadow-md transition-all">
-          <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">
+          <p className="text-xs font-semibold text-[#4ADE80] uppercase tracking-wider">
             Active Brands
           </p>
-          <p className="text-2xl font-extrabold text-emerald-600 mt-1">
+          <p className="text-2xl font-extrabold text-[#4ADE80] mt-1">
             {isLoading ? "..." : activeCount}
           </p>
         </GlassCard>
 
         <GlassCard className="p-4 hover:shadow-md transition-all">
-          <p className="text-xs font-semibold text-rose-500 uppercase tracking-wider">
+          <p className="text-xs font-semibold text-[#F87171] uppercase tracking-wider">
             Suspended
           </p>
-          <p className="text-2xl font-extrabold text-rose-600 mt-1">
+          <p className="text-2xl font-extrabold text-[#F87171] mt-1">
             {isLoading ? "..." : suspendedCount}
           </p>
         </GlassCard>
 
         <GlassCard className="p-4 hover:shadow-md transition-all">
-          <p className="text-xs font-semibold text-purple-600 uppercase tracking-wider">
+          <p className="text-xs font-semibold text-[#DDD0C8] uppercase tracking-wider">
             Enterprise Tier
           </p>
-          <p className="text-2xl font-extrabold text-purple-600 mt-1">
+          <p className="text-2xl font-extrabold text-[#DDD0C8] mt-1">
             {isLoading ? "..." : enterpriseCount}
           </p>
         </GlassCard>

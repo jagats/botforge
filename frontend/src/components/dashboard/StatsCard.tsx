@@ -26,11 +26,11 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   className = "",
 }) => {
   const iconBgStyles = {
-    indigo: "bg-indigo-50 text-indigo-600 border-indigo-100",
-    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
-    amber: "bg-amber-50 text-amber-600 border-amber-100",
-    purple: "bg-purple-50 text-purple-600 border-purple-100",
-    cyan: "bg-cyan-50 text-cyan-600 border-cyan-100",
+    indigo: "bg-[rgba(221,208,200,0.12)] text-[#DDD0C8] border-[rgba(221,208,200,0.25)]",
+    emerald: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    amber: "bg-amber-400/20 text-amber-300 border-amber-400/30",
+    purple: "bg-[#323232] text-[#DDD0C8] border-[rgba(221,208,200,0.25)]",
+    cyan: "bg-sky-400/20 text-sky-300 border-sky-400/30",
   }[color];
 
   return (
@@ -39,17 +39,17 @@ export const StatsCard: React.FC<StatsCardProps> = ({
     >
       <div className="flex items-start justify-between">
         <div className="space-y-1">
-          <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+          <p className="text-xs font-semibold text-[#C4B4A8] uppercase tracking-wider">
             {title}
           </p>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <span className="text-2xl sm:text-3xl font-extrabold text-[#F5EDE8] tracking-tight">
               {value}
             </span>
             {trend && (
               <span
                 className={`text-xs font-semibold inline-flex items-center gap-0.5 ${
-                  trend.positive ? "text-emerald-600" : "text-rose-600"
+                  trend.positive ? "text-emerald-400" : "text-rose-400"
                 }`}
               >
                 <span>{trend.positive ? "↑" : "↓"}</span>
@@ -58,13 +58,13 @@ export const StatsCard: React.FC<StatsCardProps> = ({
             )}
           </div>
           {subtitle && (
-            <p className="text-xs text-slate-600 font-medium">{subtitle}</p>
+            <p className="text-xs text-[#7A6E68] font-medium">{subtitle}</p>
           )}
         </div>
 
         {icon && (
           <div
-            className={`h-11 w-11 rounded-2xl flex items-center justify-center border shadow-xs shrink-0 ${iconBgStyles}`}
+            className={`h-11 w-11 rounded-md flex items-center justify-center border shadow-xs shrink-0 ${iconBgStyles}`}
           >
             {icon}
           </div>

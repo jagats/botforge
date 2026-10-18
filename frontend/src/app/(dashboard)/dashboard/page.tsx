@@ -13,6 +13,7 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { CopyButton } from "@/components/ui/CopyButton";
+import { PiPlusCircleLight, PiChatCircleDotsLight } from "react-icons/pi";
 
 export default function DashboardOverviewPage() {
   const { user } = useAuth();
@@ -36,11 +37,11 @@ export default function DashboardOverviewPage() {
 
   return (
     <div className="space-y-8">
-      {/* Light Glassmorphic Welcome Banner */}
-      <GlassCard className="relative overflow-hidden p-6 sm:p-8 border-indigo-100/80 bg-gradient-to-br from-white/90 via-indigo-50/30 to-purple-50/40">
+      {/* Dark Glassmorphic Welcome Banner */}
+      <GlassCard className="relative overflow-hidden p-6 sm:p-8 border border-[rgba(255,248,245,0.20)] bg-gradient-to-br from-[rgba(221,208,200,0.15)] via-[rgba(221,208,200,0.08)] to-[rgba(50,50,50,0.25)]">
         {/* Subtle decorative glow orbs */}
-        <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-indigo-400/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-purple-400/10 blur-3xl pointer-events-none" />
+        <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-[radial-gradient(circle,rgba(221,208,200,0.15),transparent_70%)] blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-[radial-gradient(circle,rgba(196,180,168,0.12),transparent_70%)] blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="space-y-2">
@@ -55,13 +56,13 @@ export default function DashboardOverviewPage() {
               )}
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F5EDE8] tracking-tight">
               Welcome back, {brandName}
             </h1>
 
-            <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#C4B4A8] max-w-2xl leading-relaxed">
               Your dedicated Qdrant vector memory is live and secured under isolated Tenant ID:{" "}
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-white/90 border border-slate-200 font-mono text-xs font-semibold text-slate-800 shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#1E1A17] border border-[rgba(221,208,200,0.20)] font-mono text-xs font-semibold text-[#DDD0C8] shadow-2xs">
                 {tenantId || "..."}
                 {tenantId && <CopyButton text={tenantId} size="sm" />}
               </span>
@@ -70,15 +71,20 @@ export default function DashboardOverviewPage() {
 
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <Button
-              variant="purple"
+              variant="accent"
               size="md"
               onClick={() => setIsUploadModalOpen(true)}
+              leftIcon={<PiPlusCircleLight size={18} />}
             >
-              + Ingest Knowledge
+              Ingest Knowledge
             </Button>
             <Link href="/dashboard/chat-playground">
-              <Button variant="secondary" size="md">
-                💬 Chat Playground
+              <Button
+                variant="secondary"
+                size="md"
+                leftIcon={<PiChatCircleDotsLight size={18} />}
+              >
+                Chat Playground
               </Button>
             </Link>
           </div>

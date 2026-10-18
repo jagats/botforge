@@ -10,6 +10,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { brandCreateSchema, BrandCreateFormValues } from "@/lib/validations";
 import { PLAN_TIERS } from "@/lib/constants";
 import { Brand } from "@/types";
+import { PiWarningCircleLight } from "react-icons/pi";
 
 export interface BrandCreateFormProps {
   onSuccess?: (brand: Brand) => void;
@@ -54,8 +55,8 @@ export const BrandCreateForm: React.FC<BrandCreateFormProps> = ({
   return (
     <form onSubmit={formik.handleSubmit} noValidate className="space-y-4">
       {serverError && (
-        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-700 text-xs flex items-center gap-2">
-          <span>⚠️</span>
+        <div className="p-3.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+          <PiWarningCircleLight size={16} className="shrink-0 text-rose-400" />
           <span>{serverError}</span>
         </div>
       )}
@@ -115,7 +116,7 @@ export const BrandCreateForm: React.FC<BrandCreateFormProps> = ({
         disabled={isCreating}
       />
 
-      <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+      <div className="flex items-center justify-end gap-3 pt-3 border-t border-[rgba(221,208,200,0.15)]">
         {onCancel && (
           <Button
             type="button"
@@ -129,7 +130,7 @@ export const BrandCreateForm: React.FC<BrandCreateFormProps> = ({
         )}
         <Button
           type="submit"
-          variant="purple"
+          variant="accent"
           size="md"
           isLoading={isCreating}
           disabled={isCreating}

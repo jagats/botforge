@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { useDocuments } from "@/hooks/useDocuments";
 import { documentUrlSchema, DocumentUrlFormValues } from "@/lib/validations";
 import { useToast } from "@/contexts/ToastContext";
+import { PiWarningCircleLight, PiLinkLight } from "react-icons/pi";
 
 export interface UploadUrlFormProps {
   onSuccess?: () => void;
@@ -43,8 +44,8 @@ export const UploadUrlForm: React.FC<UploadUrlFormProps> = ({ onSuccess }) => {
   return (
     <form onSubmit={formik.handleSubmit} noValidate className="space-y-4">
       {error && (
-        <div className="p-3 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-700 text-xs flex items-center gap-2">
-          <span>⚠️</span>
+        <div className="p-3 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+          <PiWarningCircleLight size={16} className="shrink-0 text-rose-400" />
           <span>{error}</span>
         </div>
       )}
@@ -55,6 +56,7 @@ export const UploadUrlForm: React.FC<UploadUrlFormProps> = ({ onSuccess }) => {
         type="url"
         label="Web Page Address (URL)"
         placeholder="https://acmehealth.com/patient-faqs"
+        leftIcon={<PiLinkLight size={16} />}
         value={formik.values.url}
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
@@ -79,7 +81,7 @@ export const UploadUrlForm: React.FC<UploadUrlFormProps> = ({ onSuccess }) => {
       <div className="flex items-center justify-end gap-3 pt-2">
         <Button
           type="submit"
-          variant="primary"
+          variant="accent"
           size="md"
           isLoading={isUploadingUrl}
           disabled={isUploadingUrl}

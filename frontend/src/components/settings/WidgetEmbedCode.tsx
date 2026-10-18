@@ -6,6 +6,7 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/Button";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { useTenant } from "@/hooks/useTenant";
+import { PiCodeLight } from "react-icons/pi";
 
 export interface WidgetEmbedCodeProps {
   showPreviewLink?: boolean;
@@ -23,12 +24,13 @@ export const WidgetEmbedCode: React.FC<WidgetEmbedCodeProps> = ({
 
   return (
     <GlassCard elevated padding="lg" className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200/60">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[rgba(221,208,200,0.15)]">
         <div>
-          <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <span>🔌</span> Embed Chatbot on Your Website
+          <h2 className="text-base font-bold text-[#F5EDE8] tracking-tight flex items-center gap-2">
+            <PiCodeLight size={18} className="text-[#DDD0C8]" />
+            <span>Embed Chatbot on Your Website</span>
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-[#C4B4A8] mt-0.5">
             Integrate your grounded AI assistant into any HTML, WordPress, or Next.js site with a single script tag.
           </p>
         </div>
@@ -46,7 +48,7 @@ export const WidgetEmbedCode: React.FC<WidgetEmbedCodeProps> = ({
 
           {showPreviewLink && (
             <Link href="/dashboard/widget-embed">
-              <Button variant="primary" size="sm">
+              <Button variant="accent" size="sm">
                 Interactive Preview →
               </Button>
             </Link>
@@ -56,7 +58,7 @@ export const WidgetEmbedCode: React.FC<WidgetEmbedCodeProps> = ({
 
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500">
+          <span className="text-xs font-semibold text-[#C4B4A8]">
             HTML Script Tag Snippet:
           </span>
           {embedSnippet && (
@@ -64,13 +66,13 @@ export const WidgetEmbedCode: React.FC<WidgetEmbedCodeProps> = ({
           )}
         </div>
 
-        <pre className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-sky-400 font-mono text-xs overflow-x-auto whitespace-pre-wrap break-all shadow-inner leading-relaxed">
+        <pre className="p-4 rounded-md bg-[#1E1A17] border border-[rgba(221,208,200,0.20)] text-[#DDD0C8] font-mono text-xs overflow-x-auto whitespace-pre-wrap break-all shadow-inner leading-relaxed">
           {embedSnippet || "Generating widget script snippet..."}
         </pre>
       </div>
 
-      <p className="text-[11px] text-slate-400 leading-relaxed">
-        Paste this script tag directly into the <code>&lt;head&gt;</code> or <code>&lt;body&gt;</code> of your website. The widget loads asynchronously, isolates its styles using Shadow DOM, and automatically creates a floating chat drawer.
+      <p className="text-[11px] text-[#7A6E68] leading-relaxed">
+        Paste this script tag directly into the <code className="text-[#DDD0C8]">&lt;head&gt;</code> or <code className="text-[#DDD0C8]">&lt;body&gt;</code> of your website. The widget loads asynchronously, isolates its styles using Shadow DOM, and automatically creates a floating chat drawer.
       </p>
     </GlassCard>
   );

@@ -6,6 +6,7 @@ import { Tabs, TabItem } from "@/components/ui/Tabs";
 import { UploadPdfForm } from "./UploadPdfForm";
 import { UploadUrlForm } from "./UploadUrlForm";
 import { UploadFaqForm } from "./UploadFaqForm";
+import { PiFilePdfLight, PiLinkLight, PiChatTextLight } from "react-icons/pi";
 
 export interface UploadModalProps {
   isOpen: boolean;
@@ -26,9 +27,9 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   };
 
   const tabs: TabItem[] = [
-    { id: "pdf", label: "PDF Document" },
-    { id: "url", label: "Web Page URL" },
-    { id: "faq", label: "FAQ Snippet" },
+    { id: "pdf", label: "PDF Document", icon: <PiFilePdfLight size={16} /> },
+    { id: "url", label: "Web Page URL", icon: <PiLinkLight size={16} /> },
+    { id: "faq", label: "FAQ Snippet", icon: <PiChatTextLight size={16} /> },
   ];
 
   return (

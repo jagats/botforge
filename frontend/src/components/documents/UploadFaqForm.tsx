@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { useDocuments } from "@/hooks/useDocuments";
 import { documentFaqSchema, DocumentFaqFormValues } from "@/lib/validations";
 import { useToast } from "@/contexts/ToastContext";
+import { PiWarningCircleLight, PiChatTextLight } from "react-icons/pi";
 
 export interface UploadFaqFormProps {
   onSuccess?: () => void;
@@ -44,8 +45,8 @@ export const UploadFaqForm: React.FC<UploadFaqFormProps> = ({ onSuccess }) => {
   return (
     <form onSubmit={formik.handleSubmit} noValidate className="space-y-4">
       {error && (
-        <div className="p-3 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-700 text-xs flex items-center gap-2">
-          <span>⚠️</span>
+        <div className="p-3 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+          <PiWarningCircleLight size={16} className="shrink-0 text-rose-400" />
           <span>{error}</span>
         </div>
       )}
@@ -56,6 +57,7 @@ export const UploadFaqForm: React.FC<UploadFaqFormProps> = ({ onSuccess }) => {
         type="text"
         label="FAQ Topic Title"
         placeholder="e.g. Return & Refund Policy 2026"
+        leftIcon={<PiChatTextLight size={16} />}
         value={formik.values.title}
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
@@ -80,7 +82,7 @@ export const UploadFaqForm: React.FC<UploadFaqFormProps> = ({ onSuccess }) => {
       <div className="flex items-center justify-end gap-3 pt-2">
         <Button
           type="submit"
-          variant="primary"
+          variant="accent"
           size="md"
           isLoading={isUploadingFaq}
           disabled={isUploadingFaq}
