@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ChatSourceItem } from "@/types";
 import { SourceCard } from "./SourceCard";
+import { PiBookOpenLight, PiCaretRightLight } from "react-icons/pi";
 
 export interface SourceChipProps {
   chunks?: ChatSourceItem[];
@@ -16,18 +17,20 @@ export const SourceChip: React.FC<SourceChipProps> = ({ chunks = [], sources = [
   if (count === 0) return null;
 
   return (
-    <div className="mt-3 pt-2.5 border-t border-slate-200/60">
+    <div className="mt-3 pt-2.5 border-t border-[rgba(221,208,200,0.15)]">
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition cursor-pointer"
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-[#DDD0C8] hover:text-[#F5EDE8] transition cursor-pointer"
       >
-        <span className={`transform transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}>
-          ▸
-        </span>
+        <PiBookOpenLight size={14} />
         <span>
           {count} Grounded Context {count === 1 ? "Chunk" : "Chunks"}
         </span>
+        <PiCaretRightLight
+          size={12}
+          className={`transform transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
+        />
       </button>
 
       {isExpanded && (
@@ -41,7 +44,7 @@ export const SourceChip: React.FC<SourceChipProps> = ({ chunks = [], sources = [
               {sources.map((s, idx) => (
                 <div
                   key={idx}
-                  className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200/60 text-xs text-slate-600 font-mono"
+                  className="px-3 py-1.5 rounded-md bg-[#232020] border border-[rgba(221,208,200,0.20)] text-xs text-[#DDD0C8] font-mono"
                 >
                   {s}
                 </div>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { DocumentTable } from "@/components/documents/DocumentTable";
 import { UploadModal } from "@/components/documents/UploadModal";
 import { useDocuments } from "@/hooks/useDocuments";
+import { PiPlusLight } from "react-icons/pi";
 
 export default function DocumentsPage() {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -22,14 +23,10 @@ export default function DocumentsPage() {
         ]}
         action={
           <Button
-            variant="primary"
+            variant="accent"
             size="md"
             onClick={() => setIsUploadOpen(true)}
-            leftIcon={
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-              </svg>
-            }
+            leftIcon={<PiPlusLight size={16} />}
           >
             Add Content
           </Button>

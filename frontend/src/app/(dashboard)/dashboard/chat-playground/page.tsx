@@ -5,12 +5,12 @@ import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { ChatMessageProps } from "@/components/chat/ChatMessage";
 import { useChat } from "@/hooks/useChat";
 import { useDocuments } from "@/hooks/useDocuments";
+import { PiArrowsClockwiseLight, PiInfoLight } from "react-icons/pi";
 
 export default function ChatPlaygroundPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -30,6 +30,12 @@ export default function ChatPlaygroundPage() {
   const totalChunks = readyDocs.reduce((acc, d) => acc + (d.chunk_count || 0), 0);
 
   const { sendMessage, isSending } = useChat();
+
+  const samplePrompts = [
+    "What services or products are detailed in the knowledge base?",
+    "Summarize the key policies or return guidelines.",
+    "Can you provide a breakdown of pricing and support tiers?",
+  ];
 
   const handleSend = async () => {
     const text = inputMessage.trim();
@@ -66,7 +72,7 @@ export default function ChatPlaygroundPage() {
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err: any) {
+    } catch {
       const errorMsg: ChatMessageProps = {
         id: `error-${Date.now()}`,
         role: "assistant",
@@ -89,37 +95,27 @@ export default function ChatPlaygroundPage() {
         createdAt: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       },
     ]);
+    setInputMessage("");
   };
 
-  const samplePrompts = [
-    "What are your refund and return terms?",
-    "What pricing tiers or plans do you offer?",
-    "How can clients contact support?",
-  ];
-
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] space-y-4">
+    <div className="flex flex-col h-[calc(100vh-6rem)] space-y-4">
       <PageHeader
-        title="Chat Playground & RAG Inspector"
-        description="Test your AI bot in real time. Inspect exact chunk citations and vector search results."
+        title="Interactive Chat Playground"
+        description="Verify how your chatbot synthesizes grounded responses and produces accurate citation snippets."
         breadcrumbs={[
           { label: "Dashboard", href: "/dashboard" },
           { label: "Chat Playground" },
         ]}
-        badge={
-          <Badge variant="purple" size="sm">
-            Phase 3 Grounded
-          </Badge>
-        }
         action={
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/80 border border-slate-200/80 text-xs">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.20)] text-xs">
               <span
                 className={`h-2 w-2 rounded-full ${
-                  readyDocs.length > 0 ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                  readyDocs.length > 0 ? "bg-[#4ADE80] animate-pulse" : "bg-[#FCD34D]"
                 }`}
               />
-              <span className="font-medium text-slate-700">
+              <span className="font-medium text-[#DDD0C8]">
                 {readyDocs.length} {readyDocs.length === 1 ? "doc" : "docs"} indexed ({totalChunks} chunks)
               </span>
             </div>
@@ -128,11 +124,7 @@ export default function ChatPlaygroundPage() {
               variant="secondary"
               size="sm"
               onClick={handleResetSession}
-              leftIcon={
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              }
+              leftIcon={<PiArrowsClockwiseLight size={16} />}
             >
               New Session
             </Button>
@@ -142,15 +134,15 @@ export default function ChatPlaygroundPage() {
 
       {/* Warning when 0 docs are ready */}
       {!isLoadingDocs && readyDocs.length === 0 && (
-        <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-center justify-between text-xs text-amber-800 animate-fade-in shadow-2xs">
+        <div className="p-3.5 rounded-md bg-amber-400/10 border border-amber-400/25 flex items-center justify-between text-xs text-amber-300 animate-fade-in shadow-2xs">
           <div className="flex items-center gap-2">
-            <span className="text-base">💡</span>
+            <PiInfoLight size={18} className="text-amber-300 shrink-0" />
             <span>
               You do not have any ready knowledge base documents yet. The bot will respond with polite fallback answers until documents are ingested.
             </span>
           </div>
           <Link href="/dashboard/documents">
-            <Button variant="secondary" size="sm" className="!bg-white">
+            <Button variant="accent" size="sm">
               Upload Documents →
             </Button>
           </Link>
@@ -165,7 +157,7 @@ export default function ChatPlaygroundPage() {
           className="flex-1"
         />
 
-        <div className="p-4 border-t border-slate-200/70 bg-white/70 backdrop-blur-md">
+        <div className="p-4 border-t border-[rgba(221,208,200,0.15)] bg-[#1E1A17]/85 backdrop-blur-md">
           <ChatInput
             value={inputMessage}
             onChange={setInputMessage}

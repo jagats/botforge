@@ -12,7 +12,7 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthGuard>
-      <div className="min-h-screen flex bg-mesh font-sans antialiased text-slate-900">
+      <div className="min-h-screen flex bg-mesh font-sans antialiased text-[#F5EDE8]">
         {/* Sidebar */}
         <Sidebar />
 

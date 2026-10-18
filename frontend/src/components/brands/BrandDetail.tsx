@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { formatDate } from "@/lib/utils";
+import { PiWarningCircleLight } from "react-icons/pi";
 
 export interface BrandDetailProps {
   brand: Brand;
@@ -43,16 +44,16 @@ export const BrandDetail: React.FC<BrandDetailProps> = ({ brand }) => {
               ← Back to Brands
             </Button>
           </Link>
-          <div className="h-6 w-px bg-slate-200" />
+          <div className="h-6 w-px bg-[rgba(221,208,200,0.15)]" />
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-purple-600 text-white font-bold text-sm flex items-center justify-center shadow-xs">
+            <div className="h-8 w-8 rounded-md bg-[#323232] text-[#DDD0C8] border border-[rgba(221,208,200,0.20)] font-bold text-sm flex items-center justify-center shadow-xs">
               {brand.name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900 leading-tight">
+              <h2 className="text-lg font-bold text-[#F5EDE8] leading-tight">
                 {brand.name}
               </h2>
-              <p className="text-xs text-slate-600 font-mono">
+              <p className="text-xs text-[#7A6E68] font-mono">
                 /{brand.slug}
               </p>
             </div>
@@ -75,11 +76,11 @@ export const BrandDetail: React.FC<BrandDetailProps> = ({ brand }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Tenant ID */}
         <GlassCard className="p-4 space-y-1.5 hover:shadow-md transition-all">
-          <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+          <p className="text-xs font-semibold text-[#C4B4A8] uppercase tracking-wider">
             Tenant ID
           </p>
           <div className="flex items-center justify-between gap-2">
-            <span className="font-mono text-xs font-semibold text-slate-800 truncate">
+            <span className="font-mono text-xs font-semibold text-[#DDD0C8] truncate">
               {brand.tenant_id}
             </span>
             <CopyButton text={brand.tenant_id} size="sm" />
@@ -88,17 +89,17 @@ export const BrandDetail: React.FC<BrandDetailProps> = ({ brand }) => {
 
         {/* Owner Account */}
         <GlassCard className="p-4 space-y-1.5 hover:shadow-md transition-all">
-          <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+          <p className="text-xs font-semibold text-[#C4B4A8] uppercase tracking-wider">
             Owner Email
           </p>
-          <p className="text-sm font-semibold text-slate-900 truncate">
+          <p className="text-sm font-semibold text-[#F5EDE8] truncate">
             {brand.owner_email}
           </p>
         </GlassCard>
 
         {/* Plan Tier */}
         <GlassCard className="p-4 space-y-1.5 hover:shadow-md transition-all">
-          <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+          <p className="text-xs font-semibold text-[#C4B4A8] uppercase tracking-wider">
             Subscription Tier
           </p>
           <div className="flex items-center gap-2">
@@ -113,10 +114,10 @@ export const BrandDetail: React.FC<BrandDetailProps> = ({ brand }) => {
 
         {/* Provisioned Date */}
         <GlassCard className="p-4 space-y-1.5 hover:shadow-md transition-all">
-          <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+          <p className="text-xs font-semibold text-[#C4B4A8] uppercase tracking-wider">
             Provisioned On
           </p>
-          <p className="text-sm font-semibold text-slate-900">
+          <p className="text-sm font-semibold text-[#F5EDE8]">
             {formatDate(brand.created_at)}
           </p>
         </GlassCard>
@@ -127,29 +128,30 @@ export const BrandDetail: React.FC<BrandDetailProps> = ({ brand }) => {
         <GlassCard className="p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">
+              <h3 className="text-sm font-bold text-[#F5EDE8]">
                 Public Client API Key
               </h3>
-              <p className="text-xs text-slate-600">
+              <p className="text-xs text-[#C4B4A8]">
                 Used by the client&apos;s embed script or external REST integrations to authenticate query requests.
               </p>
             </div>
             <CopyButton text={brand.public_api_key} size="sm" />
           </div>
 
-          <div className="bg-slate-900 text-slate-100 rounded-xl p-3.5 font-mono text-xs overflow-x-auto border border-slate-800 shadow-inner">
+          <div className="bg-[#1E1A17] text-[#DDD0C8] rounded-md p-3.5 font-mono text-xs overflow-x-auto border border-[rgba(221,208,200,0.20)] shadow-inner">
             <code>{brand.public_api_key}</code>
           </div>
         </GlassCard>
       )}
 
       {/* Danger Zone */}
-      <div className="rounded-2xl border border-rose-200/90 bg-rose-50/40 p-6 space-y-4">
+      <div className="rounded-md border border-rose-500/30 bg-rose-500/10 p-6 space-y-4">
         <div>
-          <h3 className="text-sm font-bold text-rose-900 flex items-center gap-2">
-            <span>⚠️</span> Danger Zone — Brand Offboarding
+          <h3 className="text-sm font-bold text-rose-300 flex items-center gap-2">
+            <PiWarningCircleLight size={18} className="text-rose-400" />
+            <span>Danger Zone — Brand Offboarding</span>
           </h3>
-          <p className="text-xs text-rose-700/80 mt-1">
+          <p className="text-xs text-rose-200/80 mt-1">
             Permanently deletes this brand tenant, revoking all user credentials, flushing vector embeddings from Qdrant, and wiping document metadata.
           </p>
         </div>

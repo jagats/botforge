@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { SuperadminGuard } from "@/components/auth/SuperadminGuard";
 import { Badge } from "@/components/ui/Badge";
+import { Logo } from "@/components/layout/Logo";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -14,39 +15,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <SuperadminGuard>
-      <div className="min-h-screen bg-mesh text-slate-900 flex flex-col font-sans antialiased">
+      <div className="min-h-screen bg-mesh text-[#F5EDE8] flex flex-col font-sans antialiased">
         {/* Top Admin Header */}
-        <header className="sticky top-0 z-50 w-full glass-topbar border-b border-purple-200/50">
+        <header className="sticky top-0 z-50 w-full glass-topbar border-b border-[rgba(221,208,200,0.15)]">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <Link href="/admin/brands" className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-600 text-white shadow-xs shadow-purple-500/30">
-                  <span className="text-base font-bold">🛡️</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-base font-extrabold tracking-tight text-slate-900 leading-none">
-                    BotForge
-                  </span>
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-purple-700">
-                    Superadmin Portal
-                  </span>
-                </div>
-              </Link>
+              <div className="flex items-center gap-3">
+                <Logo size="md" href="/admin/brands" />
+                <Badge variant="purple" size="sm">
+                  Superadmin Portal
+                </Badge>
+              </div>
 
-              <nav className="hidden md:flex items-center gap-1.5 pl-4 border-l border-slate-200">
+              <nav className="hidden md:flex items-center gap-1.5 pl-4 border-l border-[rgba(221,208,200,0.15)]">
                 <Link
                   href="/admin/brands"
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                     pathname === "/admin/brands"
-                      ? "bg-purple-100 text-purple-800 border border-purple-200/80 shadow-2xs"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                      ? "bg-[rgba(221,208,200,0.18)] text-[#F5EDE8] border border-[rgba(221,208,200,0.30)] font-semibold"
+                      : "text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.08)]"
                   }`}
                 >
                   Client Brands
                 </Link>
                 <Link
                   href="/dashboard"
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                  className="px-3 py-1.5 rounded-md text-xs font-medium text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.08)] transition-colors"
                 >
                   Client Dashboard View →
                 </Link>
@@ -55,8 +49,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             <div className="flex items-center gap-3">
               {user && (
-                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/80 border border-slate-200/80 text-xs shadow-2xs">
-                  <span className="text-slate-700 font-medium">{user.email}</span>
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.18)] text-xs shadow-2xs">
+                  <span className="text-[#DDD0C8] font-medium">{user.email}</span>
                   <Badge variant="purple" size="sm">
                     Superadmin
                   </Badge>
@@ -68,7 +62,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   logout();
                   router.push("/login");
                 }}
-                className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200/60 transition-all cursor-pointer"
+                className="px-3 py-1.5 rounded-md text-xs font-medium text-[#C4B4A8] hover:text-rose-400 hover:bg-rose-500/20 border border-transparent transition-all cursor-pointer"
               >
                 Sign Out
               </button>

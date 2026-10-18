@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useBrands } from "@/hooks/useBrands";
 import { useToast } from "@/contexts/ToastContext";
+import { PiWarningCircleLight } from "react-icons/pi";
 
 export interface BrandDeleteConfirmProps {
   brand: Brand | null;
@@ -77,9 +78,10 @@ export const BrandDeleteConfirm: React.FC<BrandDeleteConfirmProps> = ({
       }
     >
       <div className="space-y-4">
-        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-800 text-xs space-y-1.5">
-          <p className="font-bold flex items-center gap-1.5">
-            <span>⚠️</span> Critical Action — Irreversible Data Loss
+        <div className="p-3.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs space-y-1.5">
+          <p className="font-bold flex items-center gap-1.5 text-rose-200">
+            <PiWarningCircleLight size={16} className="text-rose-400 shrink-0" />
+            <span>Critical Action — Irreversible Data Loss</span>
           </p>
           <p className="leading-relaxed">
             This will permanently offboard <strong>{brand.name}</strong>, delete all associated user accounts, documents, conversation sessions, and purge all vector embeddings from Qdrant.
@@ -87,9 +89,9 @@ export const BrandDeleteConfirm: React.FC<BrandDeleteConfirmProps> = ({
         </div>
 
         <div className="space-y-1.5">
-          <p className="text-xs text-slate-600">
+          <p className="text-xs text-[#C4B4A8]">
             To confirm deletion, please type the brand slug:{" "}
-            <code className="px-1.5 py-0.5 rounded bg-slate-100 font-mono font-bold text-rose-600 border border-slate-200">
+            <code className="px-1.5 py-0.5 rounded-sm bg-[#1E1A17] font-mono font-bold text-rose-400 border border-rose-500/30">
               {brand.slug}
             </code>
           </p>

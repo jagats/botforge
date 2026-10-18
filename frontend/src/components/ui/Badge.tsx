@@ -24,31 +24,31 @@ export const Badge: React.FC<BadgeProps> = ({
 
   const variantStyles = {
     success:
-      "bg-emerald-50 text-emerald-700 border-emerald-200/80 shadow-xs",
+      "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 shadow-xs",
     warning:
-      "bg-amber-50 text-amber-700 border-amber-200/80 shadow-xs",
+      "bg-amber-400/15 text-amber-300 border-amber-400/30 shadow-xs",
     error:
-      "bg-rose-50 text-rose-700 border-rose-200/80 shadow-xs",
+      "bg-rose-500/15 text-rose-400 border-rose-500/30 shadow-xs",
     info:
-      "bg-blue-50 text-blue-700 border-blue-200/80 shadow-xs",
+      "bg-sky-400/15 text-sky-300 border-sky-400/30 shadow-xs",
     neutral:
-      "bg-slate-100 text-slate-700 border-slate-200/80 shadow-xs",
+      "bg-[rgba(221,208,200,0.12)] text-[#C4B4A8] border-[rgba(221,208,200,0.25)] shadow-xs",
     purple:
-      "bg-purple-50 text-purple-700 border-purple-200/80 shadow-xs",
+      "bg-[rgba(221,208,200,0.18)] text-[#DDD0C8] border-[rgba(221,208,200,0.35)] shadow-xs",
   }[variant];
 
   const dotColors = {
-    success: "bg-emerald-500",
-    warning: "bg-amber-500",
-    error: "bg-rose-500",
-    info: "bg-blue-500",
-    neutral: "bg-slate-400",
-    purple: "bg-purple-500",
+    success: "bg-emerald-400",
+    warning: "bg-amber-400",
+    error: "bg-rose-400",
+    info: "bg-sky-400",
+    neutral: "bg-[#C4B4A8]",
+    purple: "bg-[#DDD0C8]",
   }[variant];
 
   return (
     <span
-      className={`inline-flex items-center font-medium rounded-full border ${sizeStyles} ${variantStyles} ${className}`}
+      className={`inline-flex items-center font-medium rounded-md border ${sizeStyles} ${variantStyles} ${className}`}
     >
       {dot && (
         <span

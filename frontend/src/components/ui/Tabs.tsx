@@ -24,7 +24,7 @@ export const Tabs: React.FC<TabsProps> = ({
 }) => {
   return (
     <div
-      className={`flex items-center gap-1.5 p-1 rounded-xl bg-slate-100/80 border border-slate-200/60 backdrop-blur-xs ${className}`}
+      className={`flex items-center gap-1.5 p-1 rounded-md bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.18)] backdrop-blur-xs ${className}`}
     >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
@@ -33,10 +33,10 @@ export const Tabs: React.FC<TabsProps> = ({
             key={tab.id}
             type="button"
             onClick={() => onChange(tab.id)}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 cursor-pointer ${
               isActive
-                ? "bg-white text-indigo-700 shadow-xs border border-slate-200/50"
-                : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+                ? "bg-[#323232] text-[#F5EDE8] shadow-xs border border-[rgba(221,208,200,0.25)] font-semibold"
+                : "text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.08)]"
             }`}
           >
             {tab.icon && <span className="text-current">{tab.icon}</span>}
@@ -45,8 +45,8 @@ export const Tabs: React.FC<TabsProps> = ({
               <span
                 className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
                   isActive
-                    ? "bg-indigo-50 text-indigo-600"
-                    : "bg-slate-200 text-slate-600"
+                    ? "bg-[rgba(221,208,200,0.20)] text-[#DDD0C8]"
+                    : "bg-[rgba(221,208,200,0.10)] text-[#7A6E68]"
                 }`}
               >
                 {tab.badge}
