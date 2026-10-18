@@ -4,8 +4,41 @@ import { inter, jetbrainsMono } from "../lib/fonts";
 import { Providers } from "../components/Providers";
 
 export const metadata: Metadata = {
-  title: "BotForge — AI Bot-as-a-Service Platform",
-  description: "Deploy grounded AI chatbots on your website in minutes",
+  title: {
+    default: "BotForge — Grounded AI Bot-as-a-Service Platform",
+    template: "%s | BotForge",
+  },
+  description:
+    "Deploy strictly-grounded, multi-tenant AI customer support chatbots on your website in minutes. Powered by LangChain, FastAPI, and Qdrant vector memory.",
+  keywords: [
+    "AI Chatbot",
+    "RAG",
+    "Qdrant",
+    "LangChain",
+    "Multi-tenant AI",
+    "BotForge",
+    "Customer Support AI",
+  ],
+  authors: [{ name: "BotForge Team" }],
+  openGraph: {
+    title: "BotForge — Grounded AI Bot-as-a-Service Platform",
+    description:
+      "Deploy strictly-grounded, multi-tenant AI customer support chatbots on your website in minutes.",
+    url: "https://botforge.ai",
+    siteName: "BotForge",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BotForge — Grounded AI Bot-as-a-Service Platform",
+    description:
+      "Deploy strictly-grounded, multi-tenant AI customer support chatbots on your website in minutes.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

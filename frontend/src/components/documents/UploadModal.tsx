@@ -10,10 +10,20 @@ import { UploadFaqForm } from "./UploadFaqForm";
 export interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => {
+export const UploadModal: React.FC<UploadModalProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+}) => {
   const [activeTab, setActiveTab] = useState<string>("pdf");
+
+  const handleSuccess = () => {
+    onSuccess?.();
+    onClose();
+  };
 
   const tabs: TabItem[] = [
     { id: "pdf", label: "PDF Document" },
@@ -38,9 +48,9 @@ export const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => 
         />
 
         <div className="pt-2">
-          {activeTab === "pdf" && <UploadPdfForm onSuccess={onClose} />}
-          {activeTab === "url" && <UploadUrlForm onSuccess={onClose} />}
-          {activeTab === "faq" && <UploadFaqForm onSuccess={onClose} />}
+          {activeTab === "pdf" && <UploadPdfForm onSuccess={handleSuccess} />}
+          {activeTab === "url" && <UploadUrlForm onSuccess={handleSuccess} />}
+          {activeTab === "faq" && <UploadFaqForm onSuccess={handleSuccess} />}
         </div>
       </div>
     </Modal>
