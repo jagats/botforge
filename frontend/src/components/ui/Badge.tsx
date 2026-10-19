@@ -18,8 +18,8 @@ export const Badge: React.FC<BadgeProps> = ({
   children,
 }) => {
   const sizeStyles = {
-    sm: "px-2 py-0.5 text-[11px] gap-1",
-    md: "px-2.5 py-1 text-xs gap-1.5",
+    sm: "px-3 py-1 text-xs gap-1.5",
+    md: "px-4 py-2 text-xs gap-2",
   }[size];
 
   const variantStyles = {
@@ -48,7 +48,7 @@ export const Badge: React.FC<BadgeProps> = ({
 
   return (
     <span
-      className={`inline-flex items-center font-medium rounded-md border ${sizeStyles} ${variantStyles} ${className}`}
+      className={`inline-flex items-center font-medium rounded-[4px] border ${sizeStyles} ${variantStyles} ${className}`}
     >
       {dot && (
         <span

@@ -21,7 +21,7 @@ export const SourceChip: React.FC<SourceChipProps> = ({ chunks = [], sources = [
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="inline-flex items-center gap-1.5 text-xs font-medium text-[#DDD0C8] hover:text-[#F5EDE8] transition cursor-pointer"
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-[#DDD0C8] hover:text-text-primary transition cursor-pointer"
       >
         <PiBookOpenLight size={14} />
         <span>
@@ -44,7 +44,7 @@ export const SourceChip: React.FC<SourceChipProps> = ({ chunks = [], sources = [
               {sources.map((s, idx) => (
                 <div
                   key={idx}
-                  className="px-3 py-1.5 rounded-md bg-[#232020] border border-[rgba(221,208,200,0.20)] text-xs text-[#DDD0C8] font-mono"
+                  className="px-3.5 py-2 rounded-sm bg-bg-panel border border-[rgba(221,208,200,0.20)] text-xs text-[#DDD0C8] font-mono"
                 >
                   {s}
                 </div>

@@ -17,16 +17,16 @@ export const Topbar: React.FC = () => {
         <button
           onClick={openMobile}
           aria-label="Open navigation menu"
-          className="md:hidden p-2 rounded-md text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.10)] transition-colors cursor-pointer"
+          className="md:hidden p-2 rounded-md text-[#C4B4A8] hover:text-text-primary hover:bg-[rgba(221,208,200,0.10)] transition-colors cursor-pointer"
         >
           <PiListLight size={22} />
         </button>
 
         <div className="flex items-center gap-2">
-          <span className="hidden sm:inline-block text-xs font-medium text-[#7A6E68]">
+          <span className="hidden sm:inline-block text-xs font-medium text-text-tertiary">
             Workspace:
           </span>
-          <span className="text-xs font-bold text-[#F5EDE8]">
+          <span className="text-xs font-bold text-text-primary">
             {user?.company_name || "Client Portal"}
           </span>
         </div>
@@ -35,16 +35,16 @@ export const Topbar: React.FC = () => {
       {/* Right: Tenant ID info & status pill */}
       <div className="flex items-center gap-3">
         {user?.tenant_id && (
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.18)] text-[11px] font-mono text-[#DDD0C8]">
-            <span className="text-[#7A6E68]">ID:</span>
-            <span className="truncate max-w-[120px]">{user.tenant_id}</span>
-            <CopyButton text={user.tenant_id} size="sm" className="!p-0.5 !border-0 !bg-transparent text-[#C4B4A8] hover:text-[#F5EDE8]" />
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.18)] text-[11px] font-mono text-text-primary">
+            <span className="text-text-tertiary">ID:</span>
+            <span className="truncate max-w-30">{user.tenant_id}</span>
+            <CopyButton text={user.tenant_id} size="sm" className="p-0.5! border-0! bg-transparent! text-text-tertiary hover:text-text-primary" />
           </div>
         )}
 
         <button
           aria-label="Notifications"
-          className="p-1.5 rounded-md text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.10)] transition-colors cursor-pointer"
+          className="p-1.5 rounded-md text-[#C4B4A8] hover:text-text-pr hover:bg-[rgba(221,208,200,0.10)] transition-colors cursor-pointer"
         >
           <PiBellLight size={18} />
         </button>

@@ -30,15 +30,15 @@ export const CopyButton: React.FC<CopyButtonProps> = ({
   };
 
   const sizeStyles = {
-    sm: "px-2.5 py-1 text-xs gap-1.5",
-    md: "px-3.5 py-1.5 text-sm gap-2",
+    sm: "px-3 py-1.5 text-xs gap-1.5",
+    md: "px-4 py-2 text-sm gap-2",
   }[size];
 
   return (
     <button
       type="button"
       onClick={handleCopy}
-      className={`inline-flex items-center font-medium rounded-md border border-[rgba(221,208,200,0.22)] bg-[rgba(221,208,200,0.10)] text-[#DDD0C8] hover:text-[#F5EDE8] hover:border-[rgba(221,208,200,0.40)] shadow-2xs transition-all active:scale-95 cursor-pointer backdrop-blur-xs ${sizeStyles} ${className}`}
+      className={`inline-flex items-center font-medium rounded-[4px] border border-[rgba(221,208,200,0.22)] bg-[rgba(221,208,200,0.10)] text-[#DDD0C8] hover:text-[#F5EDE8] hover:border-[rgba(221,208,200,0.40)] shadow-2xs transition-all active:scale-95 cursor-pointer backdrop-blur-xs ${sizeStyles} ${className}`}
     >
       {copied ? (
         <>
