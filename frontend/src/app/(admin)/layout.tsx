@@ -30,7 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <nav className="hidden md:flex items-center gap-1.5 pl-4 border-l border-[rgba(221,208,200,0.15)]">
                 <Link
                   href="/admin/brands"
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  className={`px-3.5 py-1.5 rounded-[4px] text-xs font-medium transition-colors ${
                     pathname === "/admin/brands"
                       ? "bg-[rgba(221,208,200,0.18)] text-[#F5EDE8] border border-[rgba(221,208,200,0.30)] font-semibold"
                       : "text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.08)]"
@@ -40,7 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </Link>
                 <Link
                   href="/dashboard"
-                  className="px-3 py-1.5 rounded-md text-xs font-medium text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.08)] transition-colors"
+                  className="px-3.5 py-1.5 rounded-[4px] text-xs font-medium text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.08)] transition-colors"
                 >
                   Client Dashboard View →
                 </Link>
@@ -49,7 +49,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             <div className="flex items-center gap-3">
               {user && (
-                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.18)] text-xs shadow-2xs">
+                <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-[4px] bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.18)] text-xs shadow-2xs">
                   <span className="text-[#DDD0C8] font-medium">{user.email}</span>
                   <Badge variant="purple" size="sm">
                     Superadmin

@@ -46,7 +46,7 @@ export default function LoginPage() {
 
         {/* Hero Narrative */}
         <div className="relative z-10 my-auto py-8 max-w-xl space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[rgba(221,208,200,0.12)] border border-[rgba(221,208,200,0.25)] text-xs text-[#DDD0C8] font-medium">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] bg-[rgba(221,208,200,0.12)] border border-[rgba(221,208,200,0.25)] text-xs text-[#DDD0C8] font-medium">
             <PiSparkleLight size={15} />
             <span>Multi-Tenant AI Bot-as-a-Service Platform</span>
           </div>
@@ -71,7 +71,7 @@ export default function LoginPage() {
             ].map((feature) => (
               <span
                 key={feature}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.18)] text-[#DDD0C8]"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[4px] text-xs bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.18)] text-[#DDD0C8]"
               >
                 <PiCheckCircleLight size={14} className="text-[#4ADE80]" />
                 {feature}

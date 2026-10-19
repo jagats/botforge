@@ -11,14 +11,14 @@ export const Navbar: React.FC = () => {
 
   return (
     <nav className="w-full glass-topbar sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <Logo size="md" />
 
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
-              <span className="text-xs text-[#C4B4A8] hidden sm:inline">
-                Signed in as <strong className="text-[#F5EDE8]">{user?.email}</strong>
+              <span className="text-xs text-text-secondary hidden sm:inline">
+                Signed in as <strong className="text-text-primary">{user?.email}</strong>
               </span>
               <Link href={user?.role === "superadmin" ? "/admin/brands" : "/dashboard"}>
                 <Button variant="accent" size="sm">
@@ -28,8 +28,8 @@ export const Navbar: React.FC = () => {
             </div>
           ) : (
             <Link href="/login">
-              <Button variant="accent" size="sm">
-                Sign In →
+              <Button variant="accent" size="md">
+                Sign In
               </Button>
             </Link>
           )}

@@ -22,20 +22,21 @@ export const Logo = ({
       href={href}
       className={`flex items-center gap-2.5 group shrink-0 select-none ${className}`}
     >
-      <div
-        style={{ width: dim, height: dim }}
+      {/* <div
+        style={{ width: 60, height: 60 }}
         className="relative rounded-md overflow-hidden shrink-0 bg-[#323232] border border-[rgba(221,208,200,0.25)] shadow-xs"
-      >
+      > */}
         <Image
-          src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed=botforge&backgroundColor=323232&scale=80"
+          src="/assets/logo.png"
           alt="BotForge"
-          fill
-          className="object-cover"
+          width={50}
+          height={50}
+          className="object-cover object-center"
           unoptimized
         />
-      </div>
+      {/* </div> */}
       {!collapsed && (
-        <span className="text-sm font-bold tracking-tight text-[#F5EDE8] group-hover:text-[#DDD0C8] transition-colors">
+        <span className="text-lg italic tracking-tight text-text-primary group-hover:text-[#DDD0C8] transition-colors">
           BotForge
         </span>
       )}

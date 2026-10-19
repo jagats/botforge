@@ -49,7 +49,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({ onUploadClick }) => 
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-bold text-[#F5EDE8] tracking-tight">
+      <h3 className="text-sm font-bold text-text-primary tracking-tight">
         Quick Action Hub
       </h3>
 
@@ -63,11 +63,11 @@ export const QuickActions: React.FC<QuickActionsProps> = ({ onUploadClick }) => 
                 <span className="p-2.5 rounded-md bg-[#323232] text-[#DDD0C8] border border-[rgba(221,208,200,0.20)] shadow-2xs group-hover:scale-110 transition-transform">
                   {act.icon}
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[rgba(221,208,200,0.12)] text-[#DDD0C8] border border-[rgba(221,208,200,0.18)] font-mono">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-sm bg-[rgba(221,208,200,0.12)] text-[#DDD0C8] border border-[rgba(221,208,200,0.18)] font-mono">
                   {act.badge}
                 </span>
               </div>
-              <h4 className="font-bold text-sm text-[#F5EDE8] group-hover:text-[#DDD0C8] transition-colors">
+              <h4 className="font-bold text-sm text-text-primary group-hover:text-[#DDD0C8] transition-colors">
                 {act.title}
               </h4>
               <p className="text-xs text-[#C4B4A8] mt-1 line-clamp-2 leading-relaxed">
