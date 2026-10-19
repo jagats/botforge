@@ -213,3 +213,55 @@ def test_brand_provisioning_lifecycle_and_lockout():
     # 11. Verify brand is removed
     get_res = client.get(f"/api/v1/admin/brands/{tenant_id}", headers=headers)
     assert get_res.status_code == 404
+
+
+def test_superadmin_impersonate_brand():
+    """Verify superadmin can impersonate a client brand dashboard and non-admins are forbidden."""
+    headers = {"Authorization": f"Bearer {get_superadmin_token()}"}
+
+    # 1. Onboard a test brand
+    company_name = f"ImpersonateTest_{uuid.uuid4().hex[:6]}"
+    brand_email = f"owner_{uuid.uuid4().hex[:6]}@example.com"
+    onboard_res = client.post(
+        "/api/v1/admin/brands",
+        headers=headers,
+        json={
+            "company_name": company_name,
+            "email": brand_email,
+            "password": "SecurePassword123!",
+            "plan": "pro",
+        },
+    )
+    assert onboard_res.status_code == 201
+    tenant_id = onboard_res.json()["tenant_id"]
+
+    try:
+        # 2. Superadmin requests impersonation token
+        impersonate_res = client.post(
+            f"/api/v1/admin/brands/{tenant_id}/impersonate",
+            headers=headers,
+        )
+        assert impersonate_res.status_code == 200
+        data = impersonate_res.json()
+        assert "access_token" in data
+        assert data["tenant_id"] == tenant_id
+        assert data["brand_name"] == company_name
+        assert data["is_impersonated"] is True
+        assert data["impersonated_by"] == settings.SUPERADMIN_EMAIL.lower().strip()
+
+        # 3. Use impersonation token to query client's /tenants/me
+        impersonated_headers = {"Authorization": f"Bearer {data['access_token']}"}
+        me_res = client.get("/api/v1/tenants/me", headers=impersonated_headers)
+        assert me_res.status_code == 200
+        assert me_res.json()["id"] == tenant_id
+        assert me_res.json()["name"] == company_name
+
+        # 4. Verify non-superadmin cannot impersonate
+        forbidden_res = client.post(
+            f"/api/v1/admin/brands/{tenant_id}/impersonate",
+            headers=impersonated_headers,
+        )
+        assert forbidden_res.status_code == 403
+    finally:
+        client.delete(f"/api/v1/admin/brands/{tenant_id}", headers=headers)
+

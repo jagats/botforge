@@ -31,18 +31,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link
                   href="/admin/brands"
                   className={`px-3.5 py-1.5 rounded-[4px] text-xs font-medium transition-colors ${
-                    pathname === "/admin/brands"
+                    pathname.startsWith("/admin/brands")
                       ? "bg-[rgba(221,208,200,0.18)] text-[#F5EDE8] border border-[rgba(221,208,200,0.30)] font-semibold"
                       : "text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.08)]"
                   }`}
                 >
                   Client Brands
-                </Link>
-                <Link
-                  href="/dashboard"
-                  className="px-3.5 py-1.5 rounded-[4px] text-xs font-medium text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.08)] transition-colors"
-                >
-                  Client Dashboard View →
                 </Link>
               </nav>
             </div>

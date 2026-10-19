@@ -1,5 +1,5 @@
 import { apiFetch } from "./client";
-import { Brand, BrandCreateInput, BrandListResponse } from "@/types";
+import { Brand, BrandCreateInput, BrandImpersonateResponse, BrandListResponse } from "@/types";
 
 export const adminApi = {
   listBrands: async (skip: number = 0, limit: number = 100): Promise<BrandListResponse> => {
@@ -27,6 +27,12 @@ export const adminApi = {
   deleteBrand: async (tenantId: string): Promise<void> => {
     await apiFetch<void>(`/api/v1/admin/brands/${tenantId}`, {
       method: "DELETE",
+    });
+  },
+
+  impersonateBrand: async (tenantId: string): Promise<BrandImpersonateResponse> => {
+    return apiFetch<BrandImpersonateResponse>(`/api/v1/admin/brands/${tenantId}/impersonate`, {
+      method: "POST",
     });
   },
 };

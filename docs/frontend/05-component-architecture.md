@@ -64,6 +64,8 @@
 │   │   ├── NavItem × 5 (Overview, Docs, Chat, Settings, Widget)
 │   │   ├── User info (email, company)
 │   │   └── Logout button
+│   ├── ImpersonationBanner                   → components/layout/ImpersonationBanner.tsx
+│   │   └── Sticky amber warning & "Return to Superadmin Portal" action
 │   ├── Topbar                                → components/layout/Topbar.tsx
 │   │   ├── BreadcrumbNav
 │   │   └── User menu / role badge
@@ -268,7 +270,7 @@
 │       ├── Document count
 │       ├── Chat session count
 │       ├── Created date
-│       └── Actions: View | Delete
+│       └── Actions: Inspect | Dashboard (View as Client) | Delete
 │           └── BrandDeleteConfirm           → components/brands/BrandDeleteConfirm.tsx
 │               ├── Warning message
 │               ├── Input[slug confirmation]

@@ -115,6 +115,10 @@ Single developer, single monorepo, fully dockerized. Estimates assume full-time 
 - [x] **Chunk 6.7: Automated Test Suite & Verification**
   - Wrote integration test suite `tests/test_admin_brands.py` (verified onboarding, RBAC barriers, deactivation lockout, widget blocking).
   - All 32 automated tests passing cleanly. Next.js production build verified.
+- [x] **Chunk 6.8: Superadmin Client Dashboard Row View & Tenant Impersonation**
+  - Relocated "Client Dashboard View" from global superadmin header to individual client brand rows (`BrandTable`) and brand detail view (`BrandDetail`).
+  - Added backend impersonation endpoint `POST /api/v1/admin/brands/{tenant_id}/impersonate` returning scoped tenant JWT with audit logging.
+  - Implemented persistent sticky `ImpersonationBanner` with one-click return to `/admin/brands`, preserving and restoring admin tokens via `localStorage`.
 
 ## Business next steps (parallel, not code)
 Validate with 2–3 DVIO clients who asked for a chatbot; define pricing tiers (e.g. by messages or documents); plan phased rollout.

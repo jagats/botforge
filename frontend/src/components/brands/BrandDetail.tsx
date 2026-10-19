@@ -11,7 +11,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { formatDate } from "@/lib/utils";
-import { PiWarningCircleLight } from "react-icons/pi";
+import { adminApi, getStoredToken, setStoredToken } from "@/lib/api";
+import { PiWarningCircleLight, PiArrowSquareOutLight } from "react-icons/pi";
 
 export interface BrandDetailProps {
   brand: Brand;
@@ -20,6 +21,32 @@ export interface BrandDetailProps {
 export const BrandDetail: React.FC<BrandDetailProps> = ({ brand }) => {
   const router = useRouter();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isImpersonating, setIsImpersonating] = useState(false);
+
+  const handleViewDashboard = async () => {
+    try {
+      setIsImpersonating(true);
+      const currentToken = getStoredToken();
+      if (currentToken) {
+        localStorage.setItem("botforge_admin_backup_token", currentToken);
+      }
+      const impersonateRes = await adminApi.impersonateBrand(brand.tenant_id);
+      localStorage.setItem(
+        "botforge_impersonation",
+        JSON.stringify({
+          brandName: impersonateRes.brand_name,
+          tenantId: impersonateRes.tenant_id,
+          impersonatedBy: impersonateRes.impersonated_by,
+        })
+      );
+      setStoredToken(impersonateRes.access_token);
+      window.location.href = "/dashboard";
+    } catch (err: any) {
+      console.error("Failed to enter client dashboard:", err);
+      alert(err?.message || "Failed to enter client dashboard session.");
+      setIsImpersonating(false);
+    }
+  };
 
   const getPlanBadgeVariant = (plan: string) => {
     switch (plan.toLowerCase()) {
@@ -60,7 +87,18 @@ export const BrandDetail: React.FC<BrandDetailProps> = ({ brand }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleViewDashboard}
+            isLoading={isImpersonating}
+            className="h-9 px-3 text-xs flex items-center gap-1.5 bg-[rgba(221,208,200,0.14)] hover:bg-[rgba(221,208,200,0.24)] text-[#F5EDE8] border border-[rgba(221,208,200,0.28)]"
+            title={`View & manage ${brand.name} dashboard`}
+          >
+            <PiArrowSquareOutLight size={15} className="text-[#DDD0C8]" />
+            <span>Client Dashboard</span>
+          </Button>
           <BrandStatusToggle brand={brand} />
           <Button
             variant="danger"
