@@ -9,6 +9,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.admin import (
     BrandCreateRequest,
+    BrandImpersonateResponse,
     BrandListResponse,
     BrandResponse,
     BrandStatusUpdateRequest,
@@ -16,6 +17,7 @@ from app.schemas.admin import (
 from app.services.admin_service import (
     delete_brand,
     get_brand,
+    impersonate_brand,
     list_brands,
     onboard_brand,
     update_brand_status,
@@ -102,3 +104,19 @@ def remove_brand(
 ) -> None:
     """Purge all database records (cascade) and associated Qdrant vectors for this brand."""
     delete_brand(db, tenant_id)
+
+
+@router.post(
+    "/{tenant_id}/impersonate",
+    response_model=BrandImpersonateResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Impersonate client brand dashboard as superadmin",
+)
+def impersonate_brand_session(
+    tenant_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_superadmin),
+) -> BrandImpersonateResponse:
+    """Generate an audit-logged tenant access token for superadmin to view and manage client dashboard."""
+    return impersonate_brand(db, tenant_id, admin)
+

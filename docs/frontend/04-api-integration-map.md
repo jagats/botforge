@@ -214,6 +214,7 @@ All endpoints live under `/api/v1/`:
 | `brands/[tenantId]/page.tsx` | `useBrands().get` | `adminApi.getBrand(id)` | `GET /api/v1/admin/brands/:id` | Query / SSR |
 | `BrandStatusToggle.tsx` | `useBrands().updateStatus` | `adminApi.updateStatus(id, status)` | `PATCH /api/v1/admin/brands/:id/status` | Mutation |
 | `BrandDeleteConfirm.tsx` | `useBrands().remove` | `adminApi.deleteBrand(id)` | `DELETE /api/v1/admin/brands/:id` | Mutation |
+| `BrandTable.tsx` / `BrandDetail.tsx` | — | `adminApi.impersonateBrand(id)` | `POST /api/v1/admin/brands/:id/impersonate` | Mutation |
 
 ### TanStack Query Keys
 

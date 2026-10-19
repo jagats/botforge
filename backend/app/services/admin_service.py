@@ -6,7 +6,7 @@ from typing import List
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.security import hash_password
+from app.core.security import create_access_token, hash_password
 from app.models.api_key import ApiKey
 from app.models.chat_session import ChatSession
 from app.models.document import Document
@@ -14,6 +14,7 @@ from app.models.tenant import Tenant
 from app.models.user import User
 from app.schemas.admin import (
     BrandCreateRequest,
+    BrandImpersonateResponse,
     BrandListResponse,
     BrandResponse,
 )
@@ -212,3 +213,71 @@ def delete_brand(db: Session, tenant_id: uuid.UUID) -> None:
     db.delete(tenant)
     db.commit()
     logger.info("Brand '%s' (tenant_id=%s) completely offboarded.", tenant.name, tenant_id)
+
+
+def impersonate_brand(
+    db: Session,
+    tenant_id: uuid.UUID,
+    admin_user: User,
+) -> BrandImpersonateResponse:
+    """Issue a tenant-scoped access token for a superadmin to view and manage a client brand dashboard.
+
+    Includes full audit logging and impersonation claims.
+    """
+    tenant = (
+        db.query(Tenant)
+        .filter(Tenant.id == tenant_id, Tenant.slug != SYSTEM_TENANT_SLUG)
+        .first()
+    )
+    if not tenant:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Brand with ID '{tenant_id}' not found.",
+        )
+
+    # Find owner user (or any primary user of this tenant)
+    owner = (
+        db.query(User)
+        .filter(User.tenant_id == tenant.id, User.role == "owner")
+        .first()
+    )
+    if not owner:
+        owner = db.query(User).filter(User.tenant_id == tenant.id).first()
+
+    if not owner:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Brand '{tenant.name}' has no active user account to manage.",
+        )
+
+    # Issue access token with impersonation metadata
+    token = create_access_token(
+        {
+            "user_id": str(owner.id),
+            "tenant_id": str(tenant.id),
+            "role": owner.role,
+            "is_impersonated": True,
+            "impersonated_by": admin_user.email,
+            "original_admin_id": str(admin_user.id),
+        }
+    )
+
+    logger.info(
+        "AUDIT: Superadmin '%s' (id=%s) initiated dashboard impersonation for brand '%s' (tenant_id=%s, owner_id=%s)",
+        admin_user.email,
+        admin_user.id,
+        tenant.name,
+        tenant.id,
+        owner.id,
+    )
+
+    return BrandImpersonateResponse(
+        access_token=token,
+        tenant_id=tenant.id,
+        role=owner.role,
+        token_type="bearer",
+        brand_name=tenant.name,
+        is_impersonated=True,
+        impersonated_by=admin_user.email,
+    )
+

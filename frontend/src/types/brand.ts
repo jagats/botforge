@@ -28,3 +28,14 @@ export interface BrandCreateInput {
 export interface BrandStatusUpdateInput {
   status: "active" | "suspended";
 }
+
+export interface BrandImpersonateResponse {
+  access_token: string;
+  tenant_id: string;
+  role: string;
+  token_type: string;
+  brand_name: string;
+  is_impersonated: boolean;
+  impersonated_by: string;
+}
+

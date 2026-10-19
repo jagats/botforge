@@ -15,6 +15,7 @@
 | Frontend state | TanStack Query + React Context | No Redux |
 | Repo | Single monorepo, fully dockerized | |
 | First phase to build | Multi-tenant DB + auth (Phase 1) | Out of: DB/auth, ingestion, RAG chat, widget |
+| Superadmin Dashboard Access | Row-level tenant impersonation with audit log & sticky exit banner | Removed generic header link; added per-brand row buttons and audit-logged JWT session switching |
 
 ## The original proposal is partly outdated
 `AI_Bot_as_a_Service_Platform_Proposal.docx` mentions Node.js, pgvector, and Claude. The business goals and RAG concept still hold; the tech choices above **override** it.

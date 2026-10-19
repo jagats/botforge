@@ -21,6 +21,11 @@ Upon entering credentials on `/login`:
 - If `user.role === 'owner'` or `'member'` ➔ automatically redirects to `/dashboard`.
 - If `user.is_active === false` or `tenant.status !== 'active'` ➔ displays error: *"Account suspended. Please contact platform administrator."*
 
+## Superadmin Client Dashboard View & Impersonation
+- **Row-level Access:** The "Client Dashboard View" button is located on each individual client brand row in the Brand Directory table (`BrandTable.tsx`) as well as on the Brand Details page (`BrandDetail.tsx`). It is removed from the global header navigation to keep multi-tenant context explicit.
+- **Audit-Logged Impersonation:** Clicking "Dashboard" on a client row requests an impersonation token (`POST /api/v1/admin/brands/:id/impersonate`), saves the original superadmin token to `botforge_admin_backup_token`, and redirects to `/dashboard`.
+- **Persistent Exit Banner (`ImpersonationBanner`):** When in impersonation mode, a persistent amber banner is rendered at the top of the client dashboard layout: *"Viewing as Superadmin: Managing [Brand Name]. All live changes apply."* with a one-click button: *"Return to Superadmin Portal"*, safely restoring the superadmin session.
+
 ## State and data fetching
 - **Server state** (documents, tenant info, chat history): **TanStack Query** — handles loading/error and polling.
 - **Auth state**: small React Context (`AuthProvider`), filled once from `GET /api/v1/auth/me` on app load.

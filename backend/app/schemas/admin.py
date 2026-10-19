@@ -60,3 +60,14 @@ class BrandResponse(BaseModel):
 class BrandListResponse(BaseModel):
     brands: List[BrandResponse]
     total: int
+
+
+class BrandImpersonateResponse(BaseModel):
+    access_token: str
+    tenant_id: uuid.UUID
+    role: str
+    token_type: str = "bearer"
+    brand_name: str
+    is_impersonated: bool = True
+    impersonated_by: str
+

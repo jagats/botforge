@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatDate } from "@/lib/utils";
-import { PiTrashLight, PiMagnifyingGlassLight } from "react-icons/pi";
+import { adminApi, getStoredToken, setStoredToken } from "@/lib/api";
+import { PiTrashLight, PiMagnifyingGlassLight, PiArrowSquareOutLight } from "react-icons/pi";
 
 export interface BrandTableProps {
   brands: Brand[];
@@ -27,7 +28,33 @@ export const BrandTable: React.FC<BrandTableProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "suspended">("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [impersonatingTenantId, setImpersonatingTenantId] = useState<string | null>(null);
   const pageSize = 10;
+
+  const handleViewDashboard = async (brand: Brand) => {
+    try {
+      setImpersonatingTenantId(brand.tenant_id);
+      const currentToken = getStoredToken();
+      if (currentToken) {
+        localStorage.setItem("botforge_admin_backup_token", currentToken);
+      }
+      const impersonateRes = await adminApi.impersonateBrand(brand.tenant_id);
+      localStorage.setItem(
+        "botforge_impersonation",
+        JSON.stringify({
+          brandName: impersonateRes.brand_name,
+          tenantId: impersonateRes.tenant_id,
+          impersonatedBy: impersonateRes.impersonated_by,
+        })
+      );
+      setStoredToken(impersonateRes.access_token);
+      window.location.href = "/dashboard";
+    } catch (err: any) {
+      console.error("Failed to enter client dashboard:", err);
+      alert(err?.message || "Failed to enter client dashboard session.");
+      setImpersonatingTenantId(null);
+    }
+  };
 
   // Filter brands based on search & status
   const filteredBrands = useMemo(() => {
@@ -219,6 +246,17 @@ export const BrandTable: React.FC<BrandTableProps> = ({
                     {/* Action buttons */}
                     <td className="py-3.5 px-4 sm:px-6 text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleViewDashboard(brand)}
+                          isLoading={impersonatingTenantId === brand.tenant_id}
+                          className="h-8 px-2.5 text-xs flex items-center gap-1.5 bg-[rgba(221,208,200,0.14)] hover:bg-[rgba(221,208,200,0.24)] text-[#F5EDE8] border border-[rgba(221,208,200,0.28)]"
+                          title={`View & manage ${brand.name} dashboard`}
+                        >
+                          <PiArrowSquareOutLight size={14} className="text-[#DDD0C8]" />
+                          <span>Dashboard</span>
+                        </Button>
                         <Link href={`/admin/brands/${brand.tenant_id}`}>
                           <Button
                             variant="secondary"

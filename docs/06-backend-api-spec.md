@@ -49,6 +49,20 @@ JWT payload: `{ "user_id": "...", "tenant_id": "...", "role": "superadmin" | "ow
 | GET | `/admin/brands/{tenant_id}` | — | `BrandResponse` | Retrieves single brand metadata, knowledge stats, and widget public API key. |
 | PATCH | `/admin/brands/{tenant_id}/status` | `{status: "active" \| "suspended"}` | `BrandResponse` | Activates or suspends client brand; instantly locks/unlocks owner logins and blocks widget chat. |
 | DELETE | `/admin/brands/{tenant_id}` | — | `204 No Content` | Offboards brand; cascades and purges DB records and Qdrant vector points. |
+| POST | `/admin/brands/{tenant_id}/impersonate` | — | `BrandImpersonateResponse` | Issues scoped tenant token for Superadmin to view & manage client dashboard with audit log. |
+
+### `BrandImpersonateResponse` Schema
+```json
+{
+  "access_token": "eyJhbGciOi...",
+  "tenant_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "role": "owner",
+  "token_type": "bearer",
+  "brand_name": "Apex Logistics",
+  "is_impersonated": true,
+  "impersonated_by": "admin@botforge.com"
+}
+```
 
 ### `BrandResponse` Schema
 ```json
