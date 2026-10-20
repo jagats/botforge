@@ -61,8 +61,8 @@ OPENAI_API_KEY=sk-your-actual-openai-api-key
 SECRET_KEY=replace_with_a_long_random_secret_string
 
 # 3. Define the initial master superadmin credentials
-SUPERADMIN_EMAIL=admin@botforge.com
-SUPERADMIN_PASSWORD=Admin@BotForge2026!
+SUPERADMIN_EMAIL=your registerd email id
+SUPERADMIN_PASSWORD=valid password
 
 # Database and ports (defaults work out-of-the-box for local development)
 POSTGRES_USER=aibot_user
