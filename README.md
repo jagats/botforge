@@ -61,13 +61,13 @@ OPENAI_API_KEY=sk-your-actual-openai-api-key
 SECRET_KEY=replace_with_a_long_random_secret_string
 
 # 3. Define the initial master superadmin credentials
-SUPERADMIN_EMAIL=your registerd email id
-SUPERADMIN_PASSWORD=valid password
+SUPERADMIN_EMAIL=your registerd and valid email id
+SUPERADMIN_PASSWORD=your valid password
 
 # Database and ports (defaults work out-of-the-box for local development)
-POSTGRES_USER=aibot_user
-POSTGRES_PASSWORD=change_me_locally
-POSTGRES_DB=aibot_platform
+POSTGRES_USER=your_username
+POSTGRES_PASSWORD=your_password
+POSTGRES_DB=your_database_name
 ```
 
 ### 3. Build and Start the Docker Stack
