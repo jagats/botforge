@@ -20,6 +20,7 @@ A multi-tenant platform where DVIO Digital (Product Admin) onboards client brand
 | 09 | `09-development-plan.md` | Phases, timeline, **current status**, next tasks |
 | 10 | `10-coding-rules.md` | Conventions and rules the assistant must follow |
 | 11 | `11-decisions-and-open-questions.md` | Decisions made, things that changed, open items |
+| 12 | `12-audit-report.md` | Full-stack audit: performance, role separation, and HttpOnly cookies |
 
 ## The 5 rules that matter most
 1. **Every table has `tenant_id`, and every query filters by it.** Missing this leaks one client's data to another.
