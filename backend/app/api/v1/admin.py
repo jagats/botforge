@@ -1,9 +1,10 @@
 """Superadmin brand provisioning and management API endpoints."""
 
 import uuid
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.security import require_superadmin
 from app.db.session import get_db
 from app.models.user import User
@@ -114,9 +115,41 @@ def remove_brand(
 )
 def impersonate_brand_session(
     tenant_id: uuid.UUID,
+    response: Response,
     db: Session = Depends(get_db),
     admin: User = Depends(require_superadmin),
 ) -> BrandImpersonateResponse:
-    """Generate an audit-logged tenant access token for superadmin to view and manage client dashboard."""
-    return impersonate_brand(db, tenant_id, admin)
+    """Generate an audit-logged tenant access token and set isolated HttpOnly impersonation cookie."""
+    impersonate_res = impersonate_brand(db, tenant_id, admin)
+    
+    max_age_secs = settings.JWT_EXPIRE_MINUTES * 60
+    is_prod = settings.ENVIRONMENT.lower() == "production"
+
+    response.set_cookie(
+        key="botforge_impersonation_token",
+        value=impersonate_res.access_token,
+        httponly=True,
+        secure=is_prod,
+        samesite="lax",
+        max_age=max_age_secs,
+        path="/",
+    )
+    return impersonate_res
+
+
+@router.post(
+    "/exit-impersonation",
+    status_code=status.HTTP_200_OK,
+    summary="Exit impersonation mode and return cleanly to superadmin context",
+)
+def exit_impersonation_session(response: Response):
+    """Clear the botforge_impersonation_token cookie."""
+    response.delete_cookie(
+        key="botforge_impersonation_token",
+        path="/",
+        httponly=True,
+        samesite="lax",
+    )
+    return {"message": "Successfully exited impersonation session"}
+
 

@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { formatDate } from "@/lib/utils";
-import { adminApi, getStoredToken, setStoredToken } from "@/lib/api";
+import { adminApi } from "@/lib/api";
 import { PiWarningCircleLight, PiArrowSquareOutLight } from "react-icons/pi";
 
 export interface BrandDetailProps {
@@ -26,20 +26,15 @@ export const BrandDetail: React.FC<BrandDetailProps> = ({ brand }) => {
   const handleViewDashboard = async () => {
     try {
       setIsImpersonating(true);
-      const currentToken = getStoredToken();
-      if (currentToken) {
-        localStorage.setItem("botforge_admin_backup_token", currentToken);
-      }
       const impersonateRes = await adminApi.impersonateBrand(brand.tenant_id);
-      localStorage.setItem(
-        "botforge_impersonation",
+      sessionStorage.setItem(
+        "botforge_impersonation_meta",
         JSON.stringify({
           brandName: impersonateRes.brand_name,
           tenantId: impersonateRes.tenant_id,
           impersonatedBy: impersonateRes.impersonated_by,
         })
       );
-      setStoredToken(impersonateRes.access_token);
       window.location.href = "/dashboard";
     } catch (err: any) {
       console.error("Failed to enter client dashboard:", err);

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatDate } from "@/lib/utils";
-import { adminApi, getStoredToken, setStoredToken } from "@/lib/api";
+import { adminApi } from "@/lib/api";
 import { PiTrashLight, PiMagnifyingGlassLight, PiArrowSquareOutLight } from "react-icons/pi";
 
 export interface BrandTableProps {
@@ -34,20 +34,15 @@ export const BrandTable: React.FC<BrandTableProps> = ({
   const handleViewDashboard = async (brand: Brand) => {
     try {
       setImpersonatingTenantId(brand.tenant_id);
-      const currentToken = getStoredToken();
-      if (currentToken) {
-        localStorage.setItem("botforge_admin_backup_token", currentToken);
-      }
       const impersonateRes = await adminApi.impersonateBrand(brand.tenant_id);
-      localStorage.setItem(
-        "botforge_impersonation",
+      sessionStorage.setItem(
+        "botforge_impersonation_meta",
         JSON.stringify({
           brandName: impersonateRes.brand_name,
           tenantId: impersonateRes.tenant_id,
           impersonatedBy: impersonateRes.impersonated_by,
         })
       );
-      setStoredToken(impersonateRes.access_token);
       window.location.href = "/dashboard";
     } catch (err: any) {
       console.error("Failed to enter client dashboard:", err);

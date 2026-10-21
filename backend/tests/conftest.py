@@ -11,11 +11,16 @@ from app.services.admin_service import onboard_brand
 
 
 @pytest.fixture(autouse=True)
-def reset_rate_limiter_slate():
-    """Reset the in-memory rate limiter before and after each test."""
+def reset_test_state(request):
+    """Reset rate limiter and clear test client cookies before and after each test."""
     limiter.reset()
+    client = getattr(request.module, "client", None)
+    if client and hasattr(client, "cookies"):
+        client.cookies.clear()
     yield
     limiter.reset()
+    if client and hasattr(client, "cookies"):
+        client.cookies.clear()
 
 
 def provision_test_brand(

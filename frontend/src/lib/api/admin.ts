@@ -35,4 +35,10 @@ export const adminApi = {
       method: "POST",
     });
   },
+
+  exitImpersonation: async (): Promise<void> => {
+    await apiFetch<void>("/api/v1/admin/brands/exit-impersonation", {
+      method: "POST",
+    });
+  },
 };

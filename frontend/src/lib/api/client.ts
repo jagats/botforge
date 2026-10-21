@@ -1,22 +1,14 @@
-const TOKEN_KEY = "botforge_access_token";
-
 export function getStoredToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
+  // Tokens are stored strictly in server-managed HttpOnly cookies
+  return null;
 }
 
-export function setStoredToken(token: string): void {
-  if (typeof window !== "undefined") {
-    localStorage.setItem(TOKEN_KEY, token);
-    document.cookie = `botforge_token=${token}; path=/; max-age=604800; SameSite=Lax`;
-  }
+export function setStoredToken(_token: string): void {
+  // No-op: Tokens are managed strictly via HttpOnly cookies
 }
 
 export function removeStoredToken(): void {
-  if (typeof window !== "undefined") {
-    localStorage.removeItem(TOKEN_KEY);
-    document.cookie = `botforge_token=; path=/; max-age=0; SameSite=Lax`;
-  }
+  // No-op: Logout endpoint clears cookies
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -25,7 +17,6 @@ export async function apiFetch<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = getStoredToken();
   const headers = new Headers(options.headers || {});
 
   // Set default JSON Content-Type only if not sending FormData
@@ -33,12 +24,9 @@ export async function apiFetch<T>(
     headers.set("Content-Type", "application/json");
   }
 
-  if (token && !headers.has("Authorization")) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-
   const url = `${BASE_URL}${path}`;
   const response = await fetch(url, {
+    credentials: "include", // Transmit HttpOnly cookies automatically
     ...options,
     headers,
   });

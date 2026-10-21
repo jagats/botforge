@@ -242,6 +242,7 @@ def test_superadmin_impersonate_brand():
             headers=headers,
         )
         assert impersonate_res.status_code == 200
+        assert "botforge_impersonation_token" in impersonate_res.cookies
         data = impersonate_res.json()
         assert "access_token" in data
         assert data["tenant_id"] == tenant_id
@@ -264,4 +265,14 @@ def test_superadmin_impersonate_brand():
         assert forbidden_res.status_code == 403
     finally:
         client.delete(f"/api/v1/admin/brands/{tenant_id}", headers=headers)
+
+
+def test_exit_impersonation_endpoint():
+    """Verify exit-impersonation clears the botforge_impersonation_token cookie."""
+    token = get_superadmin_token()
+    headers = {"Authorization": f"Bearer {token}"}
+    exit_res = client.post("/api/v1/admin/brands/exit-impersonation", headers=headers)
+    assert exit_res.status_code == 200
+    assert exit_res.json()["message"] == "Successfully exited impersonation session"
+
 

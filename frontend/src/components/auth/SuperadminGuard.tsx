@@ -15,10 +15,8 @@ export const SuperadminGuard: React.FC<SuperadminGuardProps> = ({ children }) =>
 
   useEffect(() => {
     if (!isLoading) {
-      if (!isAuthenticated) {
+      if (!isAuthenticated || user?.role !== "superadmin") {
         router.push("/login");
-      } else if (user?.role !== "superadmin") {
-        router.push("/dashboard");
       }
     }
   }, [isLoading, isAuthenticated, user, router]);

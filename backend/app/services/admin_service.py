@@ -2,8 +2,8 @@
 
 import logging
 import uuid
-from typing import List
 from fastapi import HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core.security import create_access_token, hash_password
@@ -141,7 +141,7 @@ def onboard_brand(db: Session, req: BrandCreateRequest) -> BrandResponse:
 
 
 def list_brands(db: Session, skip: int = 0, limit: int = 100) -> BrandListResponse:
-    """List all onboarded client brands, excluding internal system tenant."""
+    """List all onboarded client brands with batched aggregation queries (eliminating N+1 overhead)."""
     query = (
         db.query(Tenant)
         .filter(Tenant.slug != SYSTEM_TENANT_SLUG)
@@ -150,7 +150,65 @@ def list_brands(db: Session, skip: int = 0, limit: int = 100) -> BrandListRespon
     total = query.count()
     tenants = query.offset(skip).limit(limit).all()
 
-    brands = [_build_brand_response(db, t) for t in tenants]
+    if not tenants:
+        return BrandListResponse(brands=[], total=total)
+
+    tenant_ids = [t.id for t in tenants]
+
+    # 1. Batch fetch owner/primary users for these tenants
+    all_users = db.query(User).filter(User.tenant_id.in_(tenant_ids)).all()
+    owner_map = {}
+    for u in all_users:
+        if u.tenant_id not in owner_map or u.role == "owner":
+            owner_map[u.tenant_id] = u
+
+    # 2. Batch fetch document counts
+    doc_count_rows = (
+        db.query(Document.tenant_id, func.count(Document.id))
+        .filter(Document.tenant_id.in_(tenant_ids))
+        .group_by(Document.tenant_id)
+        .all()
+    )
+    doc_count_map = {t_id: count for t_id, count in doc_count_rows}
+
+    # 3. Batch fetch chat session counts
+    chat_count_rows = (
+        db.query(ChatSession.tenant_id, func.count(ChatSession.id))
+        .filter(ChatSession.tenant_id.in_(tenant_ids))
+        .group_by(ChatSession.tenant_id)
+        .all()
+    )
+    chat_count_map = {t_id: count for t_id, count in chat_count_rows}
+
+    # 4. Batch fetch active API keys
+    api_key_rows = (
+        db.query(ApiKey)
+        .filter(ApiKey.tenant_id.in_(tenant_ids), ApiKey.is_active.is_(True))
+        .all()
+    )
+    api_key_map = {k.tenant_id: k.public_key for k in api_key_rows}
+
+    # 5. Build responses in memory
+    brands = []
+    for t in tenants:
+        owner = owner_map.get(t.id)
+        brands.append(
+            BrandResponse(
+                tenant_id=t.id,
+                name=t.name,
+                slug=t.slug,
+                plan=t.plan,
+                status=t.status,
+                owner_email=owner.email if owner else "",
+                owner_user_id=owner.id if owner else t.id,
+                is_active=(owner.is_active if owner else (t.status == "active")),
+                document_count=doc_count_map.get(t.id, 0),
+                chat_session_count=chat_count_map.get(t.id, 0),
+                public_api_key=api_key_map.get(t.id),
+                created_at=t.created_at,
+            )
+        )
+
     return BrandListResponse(brands=brands, total=total)
 
 

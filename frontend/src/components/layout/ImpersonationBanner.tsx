@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { setStoredToken } from "@/lib/api";
+import { adminApi } from "@/lib/api";
 import { PiShieldWarningLight, PiArrowLeftLight } from "react-icons/pi";
 
 interface ImpersonationData {
@@ -15,32 +15,26 @@ export const ImpersonationBanner: React.FC = () => {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const backupToken = localStorage.getItem("botforge_admin_backup_token");
-    if (!backupToken) {
-      setImpersonation(null);
-      return;
-    }
-
     try {
-      const raw = localStorage.getItem("botforge_impersonation");
+      const raw = sessionStorage.getItem("botforge_impersonation_meta");
       if (raw) {
         const parsed = JSON.parse(raw);
         setImpersonation(parsed);
       } else {
-        setImpersonation({ brandName: "Client Account", tenantId: "" });
+        setImpersonation(null);
       }
     } catch {
-      setImpersonation({ brandName: "Client Account", tenantId: "" });
+      setImpersonation(null);
     }
   }, []);
 
-  const handleReturnToAdmin = () => {
-    const backupToken = localStorage.getItem("botforge_admin_backup_token");
-    if (backupToken) {
-      setStoredToken(backupToken);
-      localStorage.removeItem("botforge_admin_backup_token");
-      localStorage.removeItem("botforge_impersonation");
+  const handleReturnToAdmin = async () => {
+    try {
+      await adminApi.exitImpersonation();
+    } catch {
+      // Ignore network errors on exit
     }
+    sessionStorage.removeItem("botforge_impersonation_meta");
     window.location.href = "/admin/brands";
   };
 

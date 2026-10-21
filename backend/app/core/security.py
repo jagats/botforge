@@ -8,14 +8,14 @@ from typing import Any, Dict, Optional
 
 import bcrypt
 import jwt
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import settings
 from app.db.session import get_db
 
-bearer_scheme = HTTPBearer(auto_error=True)
+bearer_scheme = HTTPBearer(auto_error=False)
 logger = logging.getLogger(__name__)
 
 
@@ -96,11 +96,58 @@ def decode_access_token(token: str) -> Dict[str, Any]:
         )
 
 
+def extract_token(
+    request: Request,
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme),
+    x_auth_role: Optional[str] = Header(None, alias="X-Auth-Role"),
+) -> str:
+    """Extract JWT token from Authorization header or role-isolated HttpOnly cookies.
+    
+    Priority order:
+    1. Authorization Bearer header (if provided, e.g. for external API or tests)
+    2. Admin route or explicit superadmin role requested: check 'botforge_admin_token'
+    3. Impersonation cookie: 'botforge_impersonation_token'
+    4. Tenant user cookie: 'botforge_user_token'
+    5. Admin cookie: 'botforge_admin_token'
+    6. Legacy fallback cookie names: 'botforge_access_token', 'botforge_token'
+    """
+    if credentials and credentials.credentials:
+        return credentials.credentials
+
+    cookies = request.cookies
+    role_hint = (x_auth_role or "").lower().strip()
+    path = request.url.path
+
+    # If accessing superadmin route or explicitly requesting admin role
+    if role_hint in ("admin", "superadmin") or path.startswith("/api/v1/admin"):
+        token = cookies.get("botforge_admin_token")
+        if token:
+            return token
+
+    # Check cookies in priority order
+    for cookie_name in (
+        "botforge_impersonation_token",
+        "botforge_user_token",
+        "botforge_admin_token",
+        "botforge_access_token",
+        "botforge_token",
+    ):
+        token = cookies.get(cookie_name)
+        if token:
+            return token
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Not authenticated. No credentials provided.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
 def get_current_token_payload(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    raw_token: str = Depends(extract_token),
 ) -> Dict[str, Any]:
     """FastAPI dependency to extract and decode the JWT payload."""
-    return decode_access_token(credentials.credentials)
+    return decode_access_token(raw_token)
 
 
 def get_current_tenant_id(
@@ -133,7 +180,7 @@ def get_current_user(
 ):
     """FastAPI dependency that returns the authenticated User DB model.
 
-    Ensures both user_id and tenant_id match the token.
+    Ensures both user_id and tenant_id match the token. Eager-loads tenant to avoid N+1 queries.
     """
     from app.models.user import User
 
@@ -157,6 +204,7 @@ def get_current_user(
 
     user = (
         db.query(User)
+        .options(joinedload(User.tenant))
         .filter(User.id == user_uuid, User.tenant_id == tenant_id)
         .first()
     )

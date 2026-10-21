@@ -14,7 +14,7 @@ import { BrandDeleteConfirm } from "@/components/brands/BrandDeleteConfirm";
 import { PiPlusLight } from "react-icons/pi";
 
 export default function AdminBrandsPage() {
-  const { brands, isLoading, refetch } = useBrands(0, 500);
+  const { brands, isLoading, refetch } = useBrands(0, 100);
   const [isOnboardModalOpen, setIsOnboardModalOpen] = useState(false);
   const [brandToDelete, setBrandToDelete] = useState<Brand | null>(null);
 

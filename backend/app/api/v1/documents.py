@@ -29,7 +29,7 @@ router = APIRouter(prefix="/documents", tags=["Documents"])
 
 
 @router.post("/upload", response_model=DocumentResponse, status_code=status.HTTP_202_ACCEPTED)
-async def upload_pdf_document(
+def upload_pdf_document(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     tenant_id: uuid.UUID = Depends(get_current_tenant_id),
@@ -142,7 +142,7 @@ async def ingest_url_document(
 
 
 @router.post("/faq", response_model=DocumentResponse, status_code=status.HTTP_202_ACCEPTED)
-async def ingest_faq_document(
+def ingest_faq_document(
     payload: DocumentFaqCreate,
     background_tasks: BackgroundTasks,
     tenant_id: uuid.UUID = Depends(get_current_tenant_id),

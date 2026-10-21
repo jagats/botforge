@@ -125,7 +125,10 @@ export const Sidebar: React.FC = () => {
 
           {!isCollapsed && (
             <button
-              onClick={logout}
+              onClick={async () => {
+                await logout();
+                window.location.href = "/login";
+              }}
               title="Sign out"
               aria-label="Sign out"
               className="p-1.5 rounded-md text-[#C4B4A8] hover:text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
