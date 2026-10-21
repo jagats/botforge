@@ -4,6 +4,7 @@ from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import api_v1_router
+from app.core.config import settings
 from app.core.qdrant import init_qdrant_collection
 from app.db.seed import seed_superadmin
 from app.db.session import SessionLocal
@@ -29,10 +30,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Enable CORS for local Next.js frontend and widget embedding
+# Enable CORS for Next.js frontend with HttpOnly credentials support
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$" if settings.ENVIRONMENT == "development" else None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

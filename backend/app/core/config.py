@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "insecure-default-secret-change-in-production"
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRE_MINUTES: int = 1440  # 24 hours
+    CORS_ORIGINS: list[str] = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+    ]
 
     # Vector DB (Qdrant)
     QDRANT_URL: str = "http://qdrant:6333"

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { authApi, getStoredToken } from "@/lib/api";
+import { authApi } from "@/lib/api";
 import { LoginInput, User } from "@/types";
 
 interface AuthContextType {
@@ -10,7 +10,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isSuperadmin: boolean;
   login: (data: LoginInput) => Promise<User>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -21,18 +21,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchCurrentUser = async () => {
-    const token = getStoredToken();
-    if (!token) {
-      setUser(null);
-      setIsLoading(false);
-      return;
-    }
     try {
-      const profile = await authApi.getMe();
+      const isPathAdmin =
+        typeof window !== "undefined" && window.location.pathname.startsWith("/admin");
+      const profile = await authApi.getMe(isPathAdmin ? "superadmin" : undefined);
       setUser(profile);
-    } catch (err) {
-      console.warn("Session expired or invalid, logging out:", err);
-      authApi.logout();
+    } catch {
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -44,19 +38,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (data: LoginInput): Promise<User> => {
-    await authApi.login(data);
-    const profile = await authApi.getMe();
+    const authRes = await authApi.login(data);
+    const profile = await authApi.getMe(
+      authRes.role === "superadmin" ? "superadmin" : undefined
+    );
     setUser(profile);
     return profile;
   };
 
-  const logout = () => {
-    authApi.logout();
+  const logout = async () => {
+    await authApi.logout();
     setUser(null);
   };
 
   const refreshUser = async () => {
-    const profile = await authApi.getMe();
+    const isPathAdmin =
+      typeof window !== "undefined" && window.location.pathname.startsWith("/admin");
+    const profile = await authApi.getMe(isPathAdmin ? "superadmin" : undefined);
     setUser(profile);
   };
 

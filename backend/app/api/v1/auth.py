@@ -1,6 +1,6 @@
 """Authentication endpoints: signup, login, me."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -27,10 +27,50 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 )
 def login(
     payload: LoginRequest,
+    response: Response,
     db: Session = Depends(get_db),
 ) -> LoginResponse:
-    """Verify email and password, check tenant status, and issue a JWT bearer token."""
-    return login_user(db, payload)
+    """Verify email and password, check tenant status, issue JWT, and set role-separated HttpOnly cookie."""
+    auth_res = login_user(db, payload)
+    
+    # Isolate superadmin session cookie from owner/tenant session cookie
+    cookie_name = "botforge_admin_token" if auth_res.role == "superadmin" else "botforge_user_token"
+    max_age_secs = settings.JWT_EXPIRE_MINUTES * 60
+    is_prod = settings.ENVIRONMENT.lower() == "production"
+
+    response.set_cookie(
+        key=cookie_name,
+        value=auth_res.access_token,
+        httponly=True,
+        secure=is_prod,
+        samesite="lax",
+        max_age=max_age_secs,
+        path="/",
+    )
+    return auth_res
+
+
+@router.post(
+    "/logout",
+    status_code=status.HTTP_200_OK,
+    summary="Clear authentication session cookies",
+)
+def logout(response: Response):
+    """Clear all session cookies (admin, user, and impersonation)."""
+    for cookie_name in (
+        "botforge_admin_token",
+        "botforge_user_token",
+        "botforge_impersonation_token",
+        "botforge_access_token",
+        "botforge_token",
+    ):
+        response.delete_cookie(
+            key=cookie_name,
+            path="/",
+            httponly=True,
+            samesite="lax",
+        )
+    return {"message": "Successfully logged out"}
 
 
 @router.get(

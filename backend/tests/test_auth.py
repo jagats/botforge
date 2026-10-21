@@ -92,3 +92,31 @@ def test_me_unauthenticated():
         headers={"Authorization": "Bearer invalid_garbage_token"},
     )
     assert res2.status_code == 401
+
+
+def test_login_sets_httponly_cookie_and_authenticates():
+    """Verify login sets HttpOnly cookie and subsequent requests authenticate via cookie alone."""
+    email = f"user_{uuid.uuid4().hex[:8]}@example.com"
+    password = "CorrectPassword123!"
+    provision_test_brand(company_name="Cookie Co", email=email, password=password)
+
+    login_res = client.post(
+        "/api/v1/auth/login",
+        json={"email": email, "password": password},
+    )
+    assert login_res.status_code == 200
+    assert "botforge_user_token" in login_res.cookies
+
+    # Authenticate via cookie only (no Authorization header)
+    me_res = client.get("/api/v1/auth/me")
+    assert me_res.status_code == 200
+    assert me_res.json()["email"] == email
+
+    # Logout to clear cookies
+    logout_res = client.post("/api/v1/auth/logout")
+    assert logout_res.status_code == 200
+
+    # Unauthenticated access rejected after logout
+    after_res = client.get("/api/v1/auth/me")
+    assert after_res.status_code in [401, 403]
+
