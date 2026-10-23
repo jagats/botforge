@@ -265,3 +265,5 @@ To connect local frontend with backend you need to change frontend .env file
 NEXT_PUBLIC_API_URL=http://localhost:8000
 
 By default , frontend and backend run on port 3000 and 8000 respectively . If you need to change them, you can do so in docker-compose.yml file.
+
+Need to work on UI for better user experience.
