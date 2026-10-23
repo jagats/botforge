@@ -258,3 +258,10 @@ For in-depth architectural and implementation specifications, see the documentat
 - [`09-development-plan.md`](./docs/09-development-plan.md) — Implementation roadmap and completed phases.
 - [`10-coding-rules.md`](./docs/10-coding-rules.md) — Coding conventions and multi-tenancy safeguards.
 - [`11-decisions-and-open-questions.md`](./docs/11-decisions-and-open-questions.md) — Architectural decisions and trade-offs.
+
+
+
+To connect local frontend with backend you need to change frontend .env file
+NEXT_PUBLIC_API_URL=http://localhost:8000
+
+By default , frontend and backend run on port 3000 and 8000 respectively . If you need to change them, you can do so in docker-compose.yml file.
