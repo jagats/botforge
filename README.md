@@ -258,6 +258,12 @@ For in-depth architectural and implementation specifications, see the documentat
 - [`09-development-plan.md`](./docs/09-development-plan.md) — Implementation roadmap and completed phases.
 - [`10-coding-rules.md`](./docs/10-coding-rules.md) — Coding conventions and multi-tenancy safeguards.
 - [`11-decisions-and-open-questions.md`](./docs/11-decisions-and-open-questions.md) — Architectural decisions and trade-offs.
+- [`12-audit-report.md`](./docs/12-audit-report.md) — Full-stack audit: performance, role separation, and HttpOnly cookies.
+- [`13-fixes-plan.md`](./docs/13-fixes-plan.md) — Audit fixes plan & task breakdown into modular chunks.
+- [`14-pre-deployment-checklist.md`](./docs/14-pre-deployment-checklist.md) — Pre-deployment checklist & sign-off matrix.
+- [`15-deployment-guide.md`](./docs/15-deployment-guide.md) — Production deployment guidance, topology, and Nginx SSL setup.
+- [`16-admin-and-superadmin-guide.md`](./docs/16-admin-and-superadmin-guide.md) — Operational manual & functional guide for Superadmin and Tenant Admin.
+- [`17-security-and-performance-audit.md`](./docs/17-security-and-performance-audit.md) — Security vulnerability audit, live API latency benchmarks, and navigation bottlenecks.
 
 
 

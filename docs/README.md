@@ -25,6 +25,7 @@ A multi-tenant platform where DVIO Digital (Product Admin) onboards client brand
 | 14 | `14-pre-deployment-checklist.md` | Comprehensive pre-deployment checklist & sign-off matrix for Staging and Production |
 | 15 | `15-deployment-guide.md` | Full deployment guidance, topology, Docker prod, Nginx SSL, and rollback procedures |
 | 16 | `16-admin-and-superadmin-guide.md` | Operational manual & functional guide for Super-Admin and Tenant Admin with diagrams |
+| 17 | `17-security-and-performance-audit.md` | Security vulnerability audit, live API latency benchmarks, and navigation bottlenecks |
 
 ## The 5 rules that matter most
 1. **Every table has `tenant_id`, and every query filters by it.** Missing this leaks one client's data to another.
