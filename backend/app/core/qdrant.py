@@ -10,15 +10,21 @@ logger = logging.getLogger(__name__)
 # Vector dimensions for OpenAI text-embedding-3-small
 EMBEDDING_VECTOR_SIZE = 1536
 
+_qdrant_client: QdrantClient | None = None
+
 
 def get_qdrant_client() -> QdrantClient:
-    """Return an active Qdrant client instance.
+    """Return a shared, reused Qdrant client (finding PERF-01/P-01).
 
-    Sends QDRANT_API_KEY when configured so a locked-down Qdrant (production)
-    is reachable; an empty key means no auth (dev only).
+    Constructing a client per call reopens the HTTP connection pool each time;
+    a module-level singleton reuses connections. Sends QDRANT_API_KEY when
+    configured so a locked-down Qdrant (production) is reachable.
     """
-    api_key = settings.QDRANT_API_KEY or None
-    return QdrantClient(url=settings.QDRANT_URL, api_key=api_key)
+    global _qdrant_client
+    if _qdrant_client is None:
+        api_key = settings.QDRANT_API_KEY or None
+        _qdrant_client = QdrantClient(url=settings.QDRANT_URL, api_key=api_key)
+    return _qdrant_client
 
 
 def init_qdrant_collection() -> None:

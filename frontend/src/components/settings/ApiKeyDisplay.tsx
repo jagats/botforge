@@ -8,7 +8,7 @@ import { useTenant } from "@/hooks/useTenant";
 import { PiKeyLight, PiShieldCheckLight } from "react-icons/pi";
 
 export const ApiKeyDisplay: React.FC = () => {
-  const { apiKey, isLoadingApiKey } = useTenant();
+  const { apiKey, isLoadingApiKey } = useTenant({ includeApiKey: true });
 
   return (
     <GlassCard elevated padding="lg" className="space-y-4">

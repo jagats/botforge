@@ -5,6 +5,7 @@ import uuid
 from dataclasses import dataclass
 from typing import List, Optional
 from qdrant_client.http import models
+from starlette.concurrency import run_in_threadpool
 
 from app.core.config import settings
 from app.core.qdrant import get_qdrant_client
@@ -40,22 +41,25 @@ async def retrieve_context_chunks(
         return []
     query_vector = vectors[0]
 
-    # 2. Query Qdrant with tenant filter
+    # 2. Query Qdrant with tenant filter. The client is synchronous, so run it in a
+    # threadpool to avoid blocking the event loop for other requests (finding P-01).
     client = get_qdrant_client()
     try:
-        response = client.query_points(
-            collection_name=settings.QDRANT_COLLECTION_NAME,
-            query=query_vector,
-            query_filter=models.Filter(
-                must=[
-                    models.FieldCondition(
-                        key="tenant_id",
-                        match=models.MatchValue(value=str(tenant_id)),
-                    )
-                ]
-            ),
-            limit=top_k,
-            with_payload=True,
+        response = await run_in_threadpool(
+            lambda: client.query_points(
+                collection_name=settings.QDRANT_COLLECTION_NAME,
+                query=query_vector,
+                query_filter=models.Filter(
+                    must=[
+                        models.FieldCondition(
+                            key="tenant_id",
+                            match=models.MatchValue(value=str(tenant_id)),
+                        )
+                    ]
+                ),
+                limit=top_k,
+                with_payload=True,
+            )
         )
     except Exception as exc:
         # Do not log the visitor's question text (finding M-04).
@@ -72,13 +76,20 @@ async def retrieve_context_chunks(
         if not chunk_id_str or not doc_id_str:
             continue
 
+        # Drop weak matches below the configured relevance floor (finding P-08).
+        # Only applied when a positive threshold is set, so the 0.0 default keeps all
+        # results (cosine scores can legitimately be negative).
+        score = float(pt.score or 0.0)
+        if settings.RETRIEVAL_MIN_SCORE > 0.0 and score < settings.RETRIEVAL_MIN_SCORE:
+            continue
+
         try:
             retrieved_chunks.append(
                 RetrievedChunk(
                     chunk_id=uuid.UUID(chunk_id_str),
                     document_id=uuid.UUID(doc_id_str),
                     text=text,
-                    score=float(pt.score or 0.0),
+                    score=score,
                 )
             )
         except ValueError:

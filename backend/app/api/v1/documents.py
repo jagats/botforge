@@ -3,7 +3,7 @@
 import os
 import uuid
 from typing import List, Optional
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -20,6 +20,8 @@ from app.services.document_service import (
     create_document_record,
     run_document_ingestion,
     get_tenant_documents,
+    count_tenant_documents,
+    count_document_chunks,
     get_document_by_id,
     delete_document,
 )
@@ -212,16 +214,19 @@ def ingest_faq_document(
 
 @router.get("", response_model=DocumentListResponse)
 def list_documents(
+    skip: int = Query(0, ge=0, description="Pagination offset"),
+    limit: int = Query(50, ge=1, le=200, description="Max documents to return"),
     tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     db: Session = Depends(get_db),
 ):
     """
-    List all documents and their indexing status for the authenticated tenant.
+    List documents and their indexing status for the authenticated tenant (paginated).
     """
-    documents = get_tenant_documents(db, tenant_id)
+    documents = get_tenant_documents(db, tenant_id, skip=skip, limit=limit)
+    total = count_tenant_documents(db, tenant_id)
     return DocumentListResponse(
         documents=[DocumentResponse(**doc) for doc in documents],
-        total=len(documents),
+        total=total,
     )
 
 
@@ -241,7 +246,8 @@ def get_document(
             detail="Document not found.",
         )
 
-    chunk_count = len(doc.chunks) if doc.chunks else 0
+    # Count chunks with a query instead of loading every chunk row (finding P-07).
+    chunk_count = count_document_chunks(db, document_id)
     return DocumentResponse(
         id=doc.id,
         tenant_id=doc.tenant_id,

@@ -1,6 +1,8 @@
 # FastAPI and ASGI server
 fastapi>=0.111.0,<0.116.0
 uvicorn[standard]>=0.30.0,<0.32.0
+# Production ASGI process manager (referenced by the prod deployment command)
+gunicorn>=22.0.0,<24.0.0
 
 # Settings and Validation
 pydantic>=2.7.0,<3.0.0

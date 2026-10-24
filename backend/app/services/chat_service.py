@@ -144,8 +144,10 @@ def get_chat_session_history(
     db: Session,
     tenant_id: uuid.UUID,
     session_id: uuid.UUID,
+    skip: int = 0,
+    limit: int = 500,
 ) -> ChatSessionDetailResponse:
-    """Retrieve message history for a given chat session scoped to tenant_id."""
+    """Retrieve a page of message history for a chat session scoped to tenant_id (finding P-07)."""
     session = (
         db.query(ChatSession)
         .filter(
@@ -167,6 +169,8 @@ def get_chat_session_history(
             ChatMessage.tenant_id == tenant_id,
         )
         .order_by(ChatMessage.created_at.asc())
+        .offset(skip)
+        .limit(limit)
         .all()
     )
 

@@ -1,7 +1,7 @@
 """Chat API routes for dashboard testing and conversation grounding."""
 
 import uuid
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.rate_limiter import rate_limit_chat
@@ -43,10 +43,14 @@ async def chat_message_endpoint(
 @router.get("/sessions/{session_id}", response_model=ChatSessionDetailResponse)
 def get_chat_session_endpoint(
     session_id: uuid.UUID,
+    skip: int = Query(0, ge=0, description="Pagination offset"),
+    limit: int = Query(500, ge=1, le=1000, description="Max messages to return"),
     tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     db: Session = Depends(get_db),
 ) -> ChatSessionDetailResponse:
     """
-    Get full message history for a specific chat session owned by the authenticated tenant.
+    Get message history for a chat session owned by the authenticated tenant (paginated).
     """
-    return get_chat_session_history(db=db, tenant_id=tenant_id, session_id=session_id)
+    return get_chat_session_history(
+        db=db, tenant_id=tenant_id, session_id=session_id, skip=skip, limit=limit
+    )

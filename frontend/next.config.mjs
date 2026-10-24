@@ -3,6 +3,10 @@ const nextConfig = {
   output: 'standalone',
   turbopack: {},
   reactStrictMode: true,
+  // Avoid parsing the entire react-icons barrel on every route compile (finding PERF-06).
+  experimental: {
+    optimizePackageImports: ['react-icons', 'react-icons/pi'],
+  },
   images: {
     remotePatterns: [
       {

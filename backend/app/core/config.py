@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     DATABASE_URL: str = (
         "postgresql+psycopg://aibot_user:aibot_local_secret_2026@postgres:5432/aibot_platform"
     )
+    # Connection pool sizing. Keep (DB_POOL_SIZE + DB_MAX_OVERFLOW) * workers under
+    # Postgres max_connections (default 100). Defaults: 10 conns/worker (finding P-02).
+    DB_POOL_SIZE: int = 5
+    DB_MAX_OVERFLOW: int = 5
 
     # Auth & Security
     SECRET_KEY: str = "insecure-default-secret-change-in-production"
@@ -45,6 +49,9 @@ class Settings(BaseSettings):
     QDRANT_COLLECTION_NAME: str = "document_chunks"
     # API key sent to Qdrant. Empty = no auth (dev only). MUST be set in production.
     QDRANT_API_KEY: str = ""
+    # Minimum cosine score for a retrieved chunk to be used (finding P-08). 0.0 keeps
+    # all results (default); raise toward ~0.2-0.3 in production to drop weak matches.
+    RETRIEVAL_MIN_SCORE: float = 0.0
 
     # LLM (OpenAI)
     OPENAI_API_KEY: str = "sk-replace-me"

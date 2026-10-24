@@ -8,7 +8,14 @@ export const tenantQueryKeys = {
   apiKey: ["tenant", "api-key"] as const,
 };
 
-export function useTenant() {
+interface UseTenantOptions {
+  /** Fetch the widget public API key too. Off by default so pages that only need
+   *  the profile (e.g. the dashboard overview) don't over-fetch (finding PERF-06/UI-01). */
+  includeApiKey?: boolean;
+}
+
+export function useTenant(options: UseTenantOptions = {}) {
+  const { includeApiKey = false } = options;
   const queryClient = useQueryClient();
 
   const profileQuery = useQuery({
@@ -19,6 +26,8 @@ export function useTenant() {
   const apiKeyQuery = useQuery({
     queryKey: tenantQueryKeys.apiKey,
     queryFn: tenantApi.getApiKey,
+    enabled: includeApiKey,
+    retry: false, // a brand without a key returns 404 — don't retry it
   });
 
   const updateProfileMutation = useMutation({
