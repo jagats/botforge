@@ -35,3 +35,5 @@
 
 ## Change log
 - Docs folder created for AI assistant project memory. Phase 0 started: root `docker-compose.yml` and `.env.example` done.
+- 2026-10-24: Deep pen test completed. Findings added as the Version 2.0 addendum in `17-security-and-performance-audit.md`; fix plan in `18-remediation-plan.md`. Key new items: SSRF is a read primitive + Qdrant unauthenticated (C-01), insecure default secrets (C-02), suspension not enforced on most routes (H-01), silent fake-AI fallback (H-02).
+- 2026-10-24: Multi-bot architecture proposed in `19-multi-bot-architecture.md` (design only, not yet built): introduce a `bots` entity so one tenant can run several bot types via a BotType registry. **Decide before building the 2nd bot type** — retrofitting `bot_id` after real data exists is costly.
