@@ -107,21 +107,30 @@ async def run_document_ingestion(
         # 4. Generate embeddings
         embeddings = await generate_embeddings(chunks)
 
-        # 5. Insert DocumentChunk rows in Postgres and collect Qdrant points
-        chunk_data = []  # (chunk_db_id, qdrant_point_id, chunk_text, vector)
-
+        # 5. Insert DocumentChunk rows in Postgres (one bulk flush, not per-chunk) and
+        # collect Qdrant points (finding P-04).
+        chunk_rows: list[DocumentChunk] = []
+        chunk_meta: list = []  # (qdrant_point_id, chunk_text, vector)
         for idx, (chunk_str, vector) in enumerate(zip(chunks, embeddings)):
             qdrant_point_id = uuid.uuid4()
-            chunk_row = DocumentChunk(
-                tenant_id=tenant_id,
-                document_id=doc.id,
-                chunk_index=idx,
-                content=chunk_str,
-                qdrant_point_id=qdrant_point_id,
+            chunk_rows.append(
+                DocumentChunk(
+                    tenant_id=tenant_id,
+                    document_id=doc.id,
+                    chunk_index=idx,
+                    content=chunk_str,
+                    qdrant_point_id=qdrant_point_id,
+                )
             )
-            db.add(chunk_row)
-            db.flush()  # Flush to get chunk_row.id
-            chunk_data.append((chunk_row.id, qdrant_point_id, chunk_str, vector))
+            chunk_meta.append((qdrant_point_id, chunk_str, vector))
+
+        db.add_all(chunk_rows)
+        db.flush()  # single flush populates all chunk_row.id values
+
+        chunk_data = [  # (chunk_db_id, qdrant_point_id, chunk_text, vector)
+            (row.id, meta[0], meta[1], meta[2])
+            for row, meta in zip(chunk_rows, chunk_meta)
+        ]
 
         # 6. Upsert vectors to Qdrant scoped to this tenant
         upsert_chunks_to_qdrant(
@@ -161,8 +170,20 @@ async def run_document_ingestion(
         db.close()
 
 
-def get_tenant_documents(db: Session, tenant_id: uuid.UUID) -> List[dict]:
-    """Retrieve all documents for a tenant, including chunk counts."""
+def count_tenant_documents(db: Session, tenant_id: uuid.UUID) -> int:
+    """Total document count for a tenant (for pagination metadata)."""
+    return db.scalar(
+        select(func.count(Document.id)).where(Document.tenant_id == tenant_id)
+    ) or 0
+
+
+def get_tenant_documents(
+    db: Session,
+    tenant_id: uuid.UUID,
+    skip: int = 0,
+    limit: int = 50,
+) -> List[dict]:
+    """Retrieve a page of documents for a tenant, including chunk counts (finding P-07)."""
     # Query documents with a subquery count of chunks
     stmt = (
         select(
@@ -173,6 +194,8 @@ def get_tenant_documents(db: Session, tenant_id: uuid.UUID) -> List[dict]:
         .where(Document.tenant_id == tenant_id)
         .group_by(Document.id)
         .order_by(Document.created_at.desc())
+        .offset(skip)
+        .limit(limit)
     )
 
     results = db.execute(stmt).all()
@@ -192,6 +215,13 @@ def get_tenant_documents(db: Session, tenant_id: uuid.UUID) -> List[dict]:
         }
         output.append(doc_dict)
     return output
+
+
+def count_document_chunks(db: Session, document_id: uuid.UUID) -> int:
+    """Count a document's chunks without loading the rows (finding P-07)."""
+    return db.scalar(
+        select(func.count(DocumentChunk.id)).where(DocumentChunk.document_id == document_id)
+    ) or 0
 
 
 def get_document_by_id(db: Session, tenant_id: uuid.UUID, document_id: uuid.UUID) -> Optional[Document]:

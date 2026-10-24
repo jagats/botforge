@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, List
 from sqlalchemy import DateTime, String, Text, text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -29,6 +29,13 @@ class Tenant(Base):
     slug: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     plan: Mapped[str] = mapped_column(String(50), nullable=False, default="trial", server_default="trial")
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="active", server_default="active")
+    # Origins allowed to use this tenant's widget public key. Empty = allow any (finding SEC-02).
+    allowed_domains: Mapped[list[str]] = mapped_column(
+        ARRAY(String),
+        nullable=False,
+        default=list,
+        server_default=text("'{}'::text[]"),
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

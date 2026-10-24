@@ -47,6 +47,10 @@ def login(
         max_age=max_age_secs,
         path="/",
     )
+    # Optionally withhold the token from the JSON body so only the HttpOnly cookie
+    # carries it, keeping it out of reach of XSS (finding M-01).
+    if not settings.EXPOSE_TOKEN_IN_BODY:
+        auth_res.access_token = ""
     return auth_res
 
 

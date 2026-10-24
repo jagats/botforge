@@ -9,6 +9,9 @@ from app.db.session import SessionLocal
 from app.schemas.admin import BrandCreateRequest
 from app.services.admin_service import onboard_brand
 
+# Tests run without a real OpenAI key, so force deterministic mock AI for the suite.
+settings.USE_MOCK_AI = True
+
 
 @pytest.fixture(autouse=True)
 def reset_test_state(request):

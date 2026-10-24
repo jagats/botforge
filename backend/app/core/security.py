@@ -4,7 +4,8 @@ import logging
 import re
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
 
 import bcrypt
 import jwt
@@ -83,12 +84,8 @@ def decode_access_token(token: str) -> Dict[str, Any]:
             headers={"WWW-Authenticate": "Bearer"},
         )
     except jwt.PyJWTError as exc:
-        logger.warning(
-            "JWT decode validation failed: %s (token length: %d, token repr: %r)",
-            exc,
-            len(token),
-            token,
-        )
+        # Never log the token itself (finding M-04) — length only, for debugging.
+        logger.warning("JWT decode validation failed: %s (token length: %d)", exc, len(token))
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
@@ -230,6 +227,18 @@ def get_current_user(
     return user
 
 
+def get_active_tenant_id(
+    current_user=Depends(get_current_user),
+) -> uuid.UUID:
+    """Return tenant_id only for an active user of an active tenant (finding H-01).
+
+    Unlike get_current_tenant_id (which only decodes the JWT), this loads the user
+    and tenant via get_current_user, which rejects deactivated users and suspended
+    tenants. Use this on every tenant-scoped route so suspension takes effect at once.
+    """
+    return current_user.tenant_id
+
+
 def require_superadmin(
     current_user=Depends(get_current_user),
 ):
@@ -242,7 +251,41 @@ def require_superadmin(
     return current_user
 
 
+_LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1"}
+
+
+def _host_matches(host: str, allowed: str) -> bool:
+    """Match a request host against one allowed-domain entry (supports `*.example.com`)."""
+    host = host.lower().strip()
+    allowed = allowed.lower().strip().rstrip("/")
+    # Allow entries stored as full origins/URLs.
+    if "://" in allowed:
+        allowed = urlparse(allowed).hostname or allowed
+    if allowed.startswith("*."):
+        return host == allowed[2:] or host.endswith(allowed[1:])  # *.x.com -> x.com / a.x.com
+    return host == allowed
+
+
+def _origin_allowed(request: "Request", allowed_domains: List[str]) -> bool:
+    """Return True if the request's Origin/Referer is permitted for this tenant.
+
+    Empty allow-list = allow any origin (backward compatible). When a list is set
+    but the request carries no Origin/Referer (non-browser client), we allow it,
+    since the browser same-origin policy is what this control protects.
+    """
+    if not allowed_domains:
+        return True
+    source = request.headers.get("origin") or request.headers.get("referer")
+    if not source:
+        return True
+    host = (urlparse(source).hostname or "").lower()
+    if not host or host in _LOCAL_HOSTS:
+        return True
+    return any(_host_matches(host, entry) for entry in allowed_domains)
+
+
 def get_tenant_by_api_key(
+    request: Request,
     x_public_key: Optional[str] = Header(None, alias="X-Public-Key"),
     authorization: Optional[str] = Header(None),
     db: Session = Depends(get_db),
@@ -282,6 +325,13 @@ def get_tenant_by_api_key(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Organization account is suspended or inactive",
+        )
+
+    # Enforce per-tenant origin whitelist for the widget key (finding SEC-02).
+    if not _origin_allowed(request, tenant.allowed_domains or []):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This domain is not authorized to use this widget key.",
         )
 
     return tenant

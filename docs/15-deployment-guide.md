@@ -87,8 +87,19 @@ services:
     image: qdrant/qdrant:v1.9.0
     container_name: botforge_prod_qdrant
     restart: always
+    environment:
+      # REQUIRED in production — must match QDRANT_API_KEY in the backend .env.production
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY}
     volumes:
       - qdrant_prod_data:/qdrant/storage
+    networks:
+      - botforge_prod_network
+
+  # ---------------- Redis: shared rate-limit / lockout store ----------------
+  redis:
+    image: redis:7-alpine
+    container_name: botforge_prod_redis
+    restart: always
     networks:
       - botforge_prod_network
 
@@ -104,12 +115,21 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       QDRANT_URL: http://qdrant:6333
+      QDRANT_API_KEY: ${QDRANT_API_KEY}
+      # Shared limiter across all 4 workers (required so rate limits actually hold).
+      REDIS_URL: redis://redis:6379/0
+      # Exactly one nginx proxy sits in front, so trust one X-Forwarded-For hop.
+      TRUSTED_PROXY_HOPS: "1"
+      # Deliver auth tokens only via HttpOnly cookie (keep them out of JS reach).
+      EXPOSE_TOKEN_IN_BODY: "false"
     volumes:
       - backend_prod_uploads:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
       qdrant:
+        condition: service_started
+      redis:
         condition: service_started
     networks:
       - botforge_prod_network

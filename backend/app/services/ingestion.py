@@ -1,18 +1,73 @@
 """Ingestion service for extracting text from PDFs, URLs, and FAQs, and segmenting into chunks."""
 
+import ipaddress
 import re
 import logging
+import socket
 from typing import List, Tuple, Optional
+from urllib.parse import urlparse
 import httpx
 from bs4 import BeautifulSoup
 from pypdf import PdfReader
 
+from app.core.config import settings
+
 logger = logging.getLogger(__name__)
+
+# Hostnames that must never be fetched (internal service names / loopback).
+_BLOCKED_HOSTNAMES = {"localhost", "postgres", "qdrant", "backend", "redis"}
+_MAX_REDIRECTS = 3
+
+
+def _assert_public_url(url: str) -> None:
+    """Reject URLs that could reach internal infrastructure (SSRF guard, finding C-01).
+
+    Validates the scheme, blocks internal service names, and resolves the host
+    to ensure every resolved IP is a public address.
+    """
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError("Only http and https URLs can be ingested.")
+
+    host = (parsed.hostname or "").lower().strip()
+    if not host:
+        raise ValueError("URL has no host.")
+    if host in _BLOCKED_HOSTNAMES:
+        raise ValueError("This URL points to an internal host and cannot be ingested.")
+
+    # Resolve every address the host maps to and reject non-public ranges.
+    try:
+        addrinfos = socket.getaddrinfo(host, parsed.port or (443 if parsed.scheme == "https" else 80))
+    except socket.gaierror as exc:
+        raise ValueError(f"Could not resolve host for URL: {host}") from exc
+
+    for family, _type, _proto, _canon, sockaddr in addrinfos:
+        ip_str = sockaddr[0]
+        try:
+            ip = ipaddress.ip_address(ip_str)
+        except ValueError:
+            raise ValueError("URL resolved to an invalid address.")
+        if (
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_link_local
+            or ip.is_reserved
+            or ip.is_multicast
+            or ip.is_unspecified
+        ):
+            raise ValueError("This URL resolves to a non-public address and cannot be ingested.")
 
 
 def extract_text_from_pdf(file_path: str) -> str:
     """Extract text from a PDF file using pypdf."""
     reader = PdfReader(file_path)
+
+    # Guard against decompression-bomb PDFs with an excessive page count (finding M-06).
+    if len(reader.pages) > settings.MAX_PDF_PAGES:
+        raise ValueError(
+            f"PDF has too many pages (limit {settings.MAX_PDF_PAGES}). Please split it and re-upload."
+        )
+
     extracted_pages: List[str] = []
 
     for idx, page in enumerate(reader.pages):
@@ -36,12 +91,44 @@ async def extract_text_from_url(url: str) -> Tuple[str, str]:
     headers = {
         "User-Agent": "BotForge-Crawler/1.0 (+https://botforge.ai; Bot Knowledge Extractor)"
     }
-    async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
-        try:
-            response = await client.get(url, headers=headers)
-            response.raise_for_status()
-        except httpx.HTTPError as exc:
-            raise ValueError(f"Failed to fetch content from URL {url}: {exc}")
+
+    # Follow redirects manually so every hop is re-validated against the SSRF guard.
+    current_url = url
+    response: Optional[httpx.Response] = None
+    async with httpx.AsyncClient(timeout=15.0, follow_redirects=False) as client:
+        for _ in range(_MAX_REDIRECTS + 1):
+            _assert_public_url(current_url)
+            try:
+                resp = await client.get(current_url, headers=headers)
+            except httpx.HTTPError as exc:
+                # Generic message only — do not echo internal errors back to the user.
+                raise ValueError("Failed to fetch content from the provided URL.") from exc
+
+            if resp.is_redirect:
+                location = resp.headers.get("location")
+                if not location:
+                    raise ValueError("Failed to fetch content from the provided URL.")
+                current_url = str(resp.url.join(location))
+                continue
+
+            # Cap the body size to guard against huge/zip-bomb responses.
+            body = b""
+            max_bytes = settings.MAX_FETCH_BYTES
+            async for part in resp.aiter_bytes():
+                body += part
+                if len(body) > max_bytes:
+                    await resp.aclose()
+                    raise ValueError("The provided webpage is too large to ingest.")
+            resp._content = body  # finalize so resp.text works
+            if resp.status_code >= 400:
+                raise ValueError("Failed to fetch content from the provided URL.")
+            response = resp
+            break
+        else:
+            raise ValueError("Too many redirects while fetching the URL.")
+
+    if response is None:
+        raise ValueError("Failed to fetch content from the provided URL.")
 
     soup = BeautifulSoup(response.text, "html.parser")
 

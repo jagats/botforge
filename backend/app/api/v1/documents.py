@@ -1,14 +1,13 @@
 """Document API routes for uploading, listing, and deleting tenant knowledge sources."""
 
 import os
-import shutil
 import uuid
 from typing import List, Optional
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.security import get_current_tenant_id, get_current_user
+from app.core.security import get_active_tenant_id, get_current_user
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.document import (
@@ -21,9 +20,12 @@ from app.services.document_service import (
     create_document_record,
     run_document_ingestion,
     get_tenant_documents,
+    count_tenant_documents,
+    count_document_chunks,
     get_document_by_id,
     delete_document,
 )
+from app.services.quota import enforce_document_quota
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
@@ -32,7 +34,7 @@ router = APIRouter(prefix="/documents", tags=["Documents"])
 def upload_pdf_document(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -45,6 +47,9 @@ def upload_pdf_document(
             detail="Only PDF documents are supported for file upload.",
         )
 
+    # Enforce the tenant's plan document quota before writing anything to disk.
+    enforce_document_quota(db, tenant_id, current_user.tenant.plan if current_user.tenant else "trial")
+
     # Ensure upload directory exists
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 
@@ -52,25 +57,47 @@ def upload_pdf_document(
     safe_filename = f"{tenant_id}_{uuid.uuid4().hex[:8]}_{os.path.basename(file.filename)}"
     destination_path = os.path.join(settings.UPLOAD_DIR, safe_filename)
 
-    # Write file to disk
+    # Stream the upload to disk, aborting as soon as it exceeds the size cap (finding H-04).
+    max_bytes = settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024
+    written = 0
     try:
         with open(destination_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-    except Exception as exc:
+            while True:
+                chunk = file.file.read(1024 * 1024)
+                if not chunk:
+                    break
+                written += len(chunk)
+                if written > max_bytes:
+                    buffer.close()
+                    os.remove(destination_path)
+                    raise HTTPException(
+                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                        detail=f"File exceeds maximum upload size of {settings.MAX_UPLOAD_SIZE_MB}MB.",
+                    )
+                buffer.write(chunk)
+    except HTTPException:
+        raise
+    except Exception:
+        if os.path.exists(destination_path):
+            os.remove(destination_path)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to save uploaded file: {exc}",
+            detail="Failed to save the uploaded file.",
         )
     finally:
         file.file.close()
 
-    # Check file size limit
-    file_size_mb = os.path.getsize(destination_path) / (1024 * 1024)
-    if file_size_mb > settings.MAX_UPLOAD_SIZE_MB:
+    # Verify the file really is a PDF by its magic bytes, not just the extension (finding M-06).
+    try:
+        with open(destination_path, "rb") as fh:
+            signature = fh.read(5)
+    except OSError:
+        signature = b""
+    if signature != b"%PDF-":
         os.remove(destination_path)
         raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"File exceeds maximum upload size of {settings.MAX_UPLOAD_SIZE_MB}MB.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The uploaded file is not a valid PDF.",
         )
 
     # Clean title
@@ -107,13 +134,15 @@ def upload_pdf_document(
 async def ingest_url_document(
     payload: DocumentUrlCreate,
     background_tasks: BackgroundTasks,
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
     Ingest text from a web page URL.
     """
+    enforce_document_quota(db, tenant_id, current_user.tenant.plan if current_user.tenant else "trial")
+
     title = payload.title or payload.url
 
     document = create_document_record(
@@ -145,13 +174,15 @@ async def ingest_url_document(
 def ingest_faq_document(
     payload: DocumentFaqCreate,
     background_tasks: BackgroundTasks,
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
     Ingest a raw text FAQ entry or business knowledge snippet.
     """
+    enforce_document_quota(db, tenant_id, current_user.tenant.plan if current_user.tenant else "trial")
+
     document = create_document_record(
         db=db,
         tenant_id=tenant_id,
@@ -183,23 +214,26 @@ def ingest_faq_document(
 
 @router.get("", response_model=DocumentListResponse)
 def list_documents(
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    skip: int = Query(0, ge=0, description="Pagination offset"),
+    limit: int = Query(50, ge=1, le=200, description="Max documents to return"),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     db: Session = Depends(get_db),
 ):
     """
-    List all documents and their indexing status for the authenticated tenant.
+    List documents and their indexing status for the authenticated tenant (paginated).
     """
-    documents = get_tenant_documents(db, tenant_id)
+    documents = get_tenant_documents(db, tenant_id, skip=skip, limit=limit)
+    total = count_tenant_documents(db, tenant_id)
     return DocumentListResponse(
         documents=[DocumentResponse(**doc) for doc in documents],
-        total=len(documents),
+        total=total,
     )
 
 
 @router.get("/{document_id:uuid}", response_model=DocumentResponse)
 def get_document(
     document_id: uuid.UUID,
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     db: Session = Depends(get_db),
 ):
     """
@@ -212,7 +246,8 @@ def get_document(
             detail="Document not found.",
         )
 
-    chunk_count = len(doc.chunks) if doc.chunks else 0
+    # Count chunks with a query instead of loading every chunk row (finding P-07).
+    chunk_count = count_document_chunks(db, document_id)
     return DocumentResponse(
         id=doc.id,
         tenant_id=doc.tenant_id,
@@ -230,7 +265,7 @@ def get_document(
 @router.delete("/{document_id:uuid}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_document_endpoint(
     document_id: uuid.UUID,
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     db: Session = Depends(get_db),
 ):
     """

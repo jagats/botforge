@@ -7,7 +7,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { PiLockLight, PiArrowsClockwiseLight } from "react-icons/pi";
 
 export const WidgetPreview: React.FC = () => {
-  const { apiKey } = useTenant();
+  const { apiKey } = useTenant({ includeApiKey: true });
   const [iframeKey, setIframeKey] = useState(0);
   const [isIframeLoading, setIsIframeLoading] = useState(true);
 

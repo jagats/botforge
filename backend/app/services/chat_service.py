@@ -15,7 +15,9 @@ from app.schemas.chat import (
     ChatMessageItem,
     ChatSessionDetailResponse,
 )
+from app.models.tenant import Tenant
 from app.services.llm import generate_rag_answer
+from app.services.quota import enforce_message_quota
 from app.services.retrieval import retrieve_context_chunks
 
 logger = logging.getLogger(__name__)
@@ -34,6 +36,10 @@ async def process_chat_message(
     4. Call LLM for grounded answer generation.
     5. Save assistant response with retrieved source chunk references.
     """
+    # 0. Enforce the tenant's monthly message quota (finding H-04).
+    tenant = db.query(Tenant).filter(Tenant.id == tenant_id).first()
+    enforce_message_quota(db, tenant_id, tenant.plan if tenant else "trial")
+
     # 1. Resolve or create session
     if req.session_id:
         session = (
@@ -83,19 +89,26 @@ async def process_chat_message(
     db.add(user_message)
     db.flush()
 
-    # 4. Retrieve top-k context chunks from Qdrant scoped to tenant
-    chunks = await retrieve_context_chunks(
-        tenant_id=tenant_id,
-        query_text=req.message,
-        top_k=5,
-    )
-
-    # 5. Generate grounded answer via LLM
-    answer = await generate_rag_answer(
-        query=req.message,
-        context_chunks=chunks,
-        history=history,
-    )
+    # 4 + 5. Retrieve context and generate a grounded answer. If the AI backend is
+    # unavailable, surface a 503 rather than persisting a fake answer (finding H-02).
+    try:
+        chunks = await retrieve_context_chunks(
+            tenant_id=tenant_id,
+            query_text=req.message,
+            top_k=5,
+        )
+        answer = await generate_rag_answer(
+            query=req.message,
+            context_chunks=chunks,
+            history=history,
+        )
+    except RuntimeError as exc:
+        logger.error("AI backend unavailable for tenant=%s: %s", tenant_id, exc)
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The assistant is temporarily unavailable. Please try again shortly.",
+        )
 
     # 6. Save Assistant message with citation chunk IDs
     chunk_ids = [c.chunk_id for c in chunks]
@@ -131,8 +144,10 @@ def get_chat_session_history(
     db: Session,
     tenant_id: uuid.UUID,
     session_id: uuid.UUID,
+    skip: int = 0,
+    limit: int = 500,
 ) -> ChatSessionDetailResponse:
-    """Retrieve message history for a given chat session scoped to tenant_id."""
+    """Retrieve a page of message history for a chat session scoped to tenant_id (finding P-07)."""
     session = (
         db.query(ChatSession)
         .filter(
@@ -154,6 +169,8 @@ def get_chat_session_history(
             ChatMessage.tenant_id == tenant_id,
         )
         .order_by(ChatMessage.created_at.asc())
+        .offset(skip)
+        .limit(limit)
         .all()
     )
 

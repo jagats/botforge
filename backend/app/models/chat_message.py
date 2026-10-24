@@ -59,6 +59,8 @@ class ChatMessage(Base):
 
     __table_args__ = (
         Index("idx_messages_session", "session_id"),
+        # Supports "latest N messages in a session" without a filesort (finding PERF-04).
+        Index("idx_chat_messages_session_created", "session_id", "created_at"),
     )
 
     def __repr__(self) -> str:

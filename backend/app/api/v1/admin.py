@@ -23,6 +23,7 @@ from app.services.admin_service import (
     onboard_brand,
     update_brand_status,
 )
+from app.services.audit import record_audit
 
 router = APIRouter(
     prefix="/admin/brands",
@@ -43,7 +44,12 @@ def create_new_brand(
     admin: User = Depends(require_superadmin),
 ) -> BrandResponse:
     """Create tenant, primary owner user, and widget public API key in a single atomic transaction."""
-    return onboard_brand(db, req)
+    result = onboard_brand(db, req)
+    record_audit(
+        db, admin.email, "brand.create", result.tenant_id, admin.id,
+        detail=f"plan={req.plan}",
+    )
+    return result
 
 
 @router.get(
@@ -90,7 +96,12 @@ def set_brand_status(
     admin: User = Depends(require_superadmin),
 ) -> BrandResponse:
     """Update tenant status and lock/unlock associated user accounts immediately."""
-    return update_brand_status(db, tenant_id, req.status)
+    result = update_brand_status(db, tenant_id, req.status)
+    record_audit(
+        db, admin.email, "brand.status", tenant_id, admin.id,
+        detail=f"status={req.status}",
+    )
+    return result
 
 
 @router.delete(
@@ -105,6 +116,7 @@ def remove_brand(
 ) -> None:
     """Purge all database records (cascade) and associated Qdrant vectors for this brand."""
     delete_brand(db, tenant_id)
+    record_audit(db, admin.email, "brand.delete", tenant_id, admin.id)
 
 
 @router.post(
@@ -121,8 +133,9 @@ def impersonate_brand_session(
 ) -> BrandImpersonateResponse:
     """Generate an audit-logged tenant access token and set isolated HttpOnly impersonation cookie."""
     impersonate_res = impersonate_brand(db, tenant_id, admin)
-    
-    max_age_secs = settings.JWT_EXPIRE_MINUTES * 60
+
+    # Impersonation sessions are short-lived (finding M-02).
+    max_age_secs = settings.IMPERSONATION_EXPIRE_MINUTES * 60
     is_prod = settings.ENVIRONMENT.lower() == "production"
 
     response.set_cookie(
@@ -134,6 +147,12 @@ def impersonate_brand_session(
         max_age=max_age_secs,
         path="/",
     )
+    record_audit(
+        db, admin.email, "brand.impersonate", tenant_id, admin.id,
+        detail=f"brand={impersonate_res.brand_name}",
+    )
+    if not settings.EXPOSE_TOKEN_IN_BODY:
+        impersonate_res.access_token = ""
     return impersonate_res
 
 

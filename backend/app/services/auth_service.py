@@ -5,6 +5,12 @@ import uuid
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
+from app.core.rate_limiter import (
+    clear_login_failures,
+    is_login_locked,
+    record_login_failure,
+)
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models.api_key import ApiKey
 from app.models.tenant import Tenant
@@ -14,6 +20,10 @@ from app.schemas.auth import (
     LoginResponse,
     UserMeResponse,
 )
+
+# Precomputed hash compared against when an email is unknown, so the response time
+# matches the real-user path and does not leak which emails exist (finding H-05).
+_DUMMY_PASSWORD_HASH = hash_password("timing-equalizer-not-a-real-password")
 
 
 def slugify(text: str) -> str:
@@ -44,8 +54,25 @@ def login_user(db: Session, req: LoginRequest) -> LoginResponse:
     """Authenticate user with email and password and return a JWT access token."""
     email_clean = req.email.lower().strip()
 
+    # Temporary lockout after repeated failures (finding H-05)
+    if is_login_locked(email_clean):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many failed login attempts. Please try again later.",
+            headers={"Retry-After": str(settings.LOGIN_LOCKOUT_MINUTES * 60)},
+        )
+
     user = db.query(User).filter(User.email == email_clean).first()
-    if not user or not verify_password(req.password, user.hashed_password):
+    if not user:
+        # Run a dummy hash compare so timing doesn't reveal whether the email exists.
+        verify_password(req.password, _DUMMY_PASSWORD_HASH)
+        record_login_failure(email_clean)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+        )
+    if not verify_password(req.password, user.hashed_password):
+        record_login_failure(email_clean)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
@@ -65,6 +92,9 @@ def login_user(db: Session, req: LoginRequest) -> LoginResponse:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Your organization account is not active. Please contact support.",
         )
+
+    # Successful auth — reset the failure counter for this email.
+    clear_login_failures(email_clean)
 
     token = create_access_token(
         {

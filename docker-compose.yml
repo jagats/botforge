@@ -35,11 +35,24 @@ services:
     image: qdrant/qdrant:latest
     container_name: aibot_qdrant
     restart: unless-stopped
+    environment:
+      # Empty by default (open) for local dev; set QDRANT_API_KEY in .env to require auth.
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY:-}
     ports:
       - "${QDRANT_HTTP_PORT:-6333}:6333"   # REST API
       - "${QDRANT_GRPC_PORT:-6334}:6334"   # gRPC API
     volumes:
       - qdrant_data:/qdrant/storage
+    networks:
+      - aibot_network
+
+  # ---------------- Redis: shared rate-limit / lockout store ----------------
+  redis:
+    image: redis:7-alpine
+    container_name: aibot_redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
     networks:
       - aibot_network
 
@@ -55,6 +68,8 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       QDRANT_URL: http://qdrant:6333
+      # Empty by default -> in-memory limiter. Set REDIS_URL in .env to use shared Redis.
+      REDIS_URL: ${REDIS_URL:-}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
@@ -64,6 +79,8 @@ services:
       postgres:
         condition: service_healthy
       qdrant:
+        condition: service_started
+      redis:
         condition: service_started
     networks:
       - aibot_network

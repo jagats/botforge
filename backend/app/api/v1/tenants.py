@@ -4,7 +4,7 @@ import uuid
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from app.core.security import get_current_tenant_id
+from app.core.security import get_active_tenant_id
 from app.db.session import get_db
 from app.schemas.tenant import ApiKeyResponse, TenantResponse, TenantUpdateRequest
 from app.services.tenant_service import (
@@ -23,7 +23,7 @@ router = APIRouter(prefix="/tenants", tags=["Tenants"])
     summary="Get current tenant profile",
 )
 def get_current_tenant_profile(
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     db: Session = Depends(get_db),
 ) -> TenantResponse:
     """Retrieve organization profile for the authenticated tenant."""
@@ -38,7 +38,7 @@ def get_current_tenant_profile(
 )
 def update_current_tenant_profile(
     payload: TenantUpdateRequest,
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     db: Session = Depends(get_db),
 ) -> TenantResponse:
     """Update settings (e.g. company name) for the authenticated tenant."""
@@ -52,7 +52,7 @@ def update_current_tenant_profile(
     summary="Get widget public API key",
 )
 def get_tenant_api_key(
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     db: Session = Depends(get_db),
 ) -> ApiKeyResponse:
     """Retrieve the active public API key for embeddable chatbot widget integration."""

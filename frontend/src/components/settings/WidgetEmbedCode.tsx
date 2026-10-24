@@ -15,7 +15,7 @@ export interface WidgetEmbedCodeProps {
 export const WidgetEmbedCode: React.FC<WidgetEmbedCodeProps> = ({
   showPreviewLink = true,
 }) => {
-  const { apiKey } = useTenant();
+  const { apiKey } = useTenant({ includeApiKey: true });
 
   const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const embedSnippet = apiKey?.public_key
