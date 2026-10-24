@@ -4,7 +4,7 @@ import uuid
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from app.core.security import get_current_tenant_id
+from app.core.security import get_active_tenant_id
 from app.db.session import get_db
 from app.schemas.chat import (
     ChatRequest,
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/chat", tags=["Chat"])
 @router.post("", response_model=ChatResponse, status_code=status.HTTP_200_OK)
 async def chat_message_endpoint(
     req: ChatRequest,
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     db: Session = Depends(get_db),
 ) -> ChatResponse:
     """
@@ -37,7 +37,7 @@ async def chat_message_endpoint(
 @router.get("/sessions/{session_id}", response_model=ChatSessionDetailResponse)
 def get_chat_session_endpoint(
     session_id: uuid.UUID,
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     db: Session = Depends(get_db),
 ) -> ChatSessionDetailResponse:
     """

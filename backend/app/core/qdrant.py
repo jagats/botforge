@@ -12,8 +12,13 @@ EMBEDDING_VECTOR_SIZE = 1536
 
 
 def get_qdrant_client() -> QdrantClient:
-    """Return an active Qdrant client instance."""
-    return QdrantClient(url=settings.QDRANT_URL)
+    """Return an active Qdrant client instance.
+
+    Sends QDRANT_API_KEY when configured so a locked-down Qdrant (production)
+    is reachable; an empty key means no auth (dev only).
+    """
+    api_key = settings.QDRANT_API_KEY or None
+    return QdrantClient(url=settings.QDRANT_URL, api_key=api_key)
 
 
 def init_qdrant_collection() -> None:

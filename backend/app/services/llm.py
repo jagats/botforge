@@ -1,5 +1,6 @@
 """LLM generation service for grounded RAG answers using OpenAI GPT-4o."""
 
+import asyncio
 import logging
 from typing import Dict, List, Optional
 from openai import AsyncOpenAI
@@ -9,6 +10,17 @@ from app.core.config import settings
 from app.services.retrieval import RetrievedChunk
 
 logger = logging.getLogger(__name__)
+
+_MAX_RETRIES = 3
+_openai_client: Optional[AsyncOpenAI] = None
+
+
+def _get_openai_client() -> AsyncOpenAI:
+    """Lazily build and reuse a single AsyncOpenAI client."""
+    global _openai_client
+    if _openai_client is None:
+        _openai_client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+    return _openai_client
 
 SYSTEM_PROMPT = """You are an AI support assistant for a business.
 Answer the user's question using ONLY the provided context information.
@@ -63,6 +75,10 @@ async def generate_rag_answer(
     if not clean_query:
         return "Please ask a question."
 
+    if settings.USE_MOCK_AI:
+        logger.info("USE_MOCK_AI enabled: returning deterministic mock RAG response.")
+        return _generate_mock_rag_answer(clean_query, context_chunks)
+
     has_real_key = bool(
         settings.OPENAI_API_KEY
         and settings.OPENAI_API_KEY != "sk-replace-me"
@@ -70,8 +86,9 @@ async def generate_rag_answer(
     )
 
     if not has_real_key:
-        logger.warning("OPENAI_API_KEY not configured. Using deterministic mock RAG response.")
-        return _generate_mock_rag_answer(clean_query, context_chunks)
+        raise RuntimeError(
+            "OPENAI_API_KEY is not configured and USE_MOCK_AI is false; cannot generate an answer."
+        )
 
     # Build prompt messages
     context_block = _build_context_block(context_chunks)
@@ -93,16 +110,23 @@ async def generate_rag_answer(
     user_prompt = f"Context:\n{context_block}\n\nQuestion: {clean_query}\n\nAnswer:"
     messages.append({"role": "user", "content": user_prompt})
 
-    try:
-        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-        response = await client.chat.completions.create(
-            model=settings.CHAT_MODEL,
-            messages=messages,
-            temperature=0.2,
-            max_tokens=600,
-        )
-        answer = response.choices[0].message.content or ""
-        return answer.strip()
-    except Exception as exc:
-        logger.error("OpenAI chat completion failed: %s. Falling back to mock generator.", exc)
-        return _generate_mock_rag_answer(clean_query, context_chunks)
+    client = _get_openai_client()
+    last_exc: Optional[Exception] = None
+    for attempt in range(_MAX_RETRIES):
+        try:
+            response = await client.chat.completions.create(
+                model=settings.CHAT_MODEL,
+                messages=messages,
+                temperature=0.2,
+                max_tokens=600,
+            )
+            answer = response.choices[0].message.content or ""
+            return answer.strip()
+        except Exception as exc:  # noqa: BLE001 - retried then re-raised
+            last_exc = exc
+            logger.warning(
+                "OpenAI chat attempt %d/%d failed: %s", attempt + 1, _MAX_RETRIES, exc
+            )
+            await asyncio.sleep(0.5 * (2 ** attempt))
+
+    raise RuntimeError("OpenAI chat completion failed after retries.") from last_exc

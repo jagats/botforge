@@ -230,6 +230,18 @@ def get_current_user(
     return user
 
 
+def get_active_tenant_id(
+    current_user=Depends(get_current_user),
+) -> uuid.UUID:
+    """Return tenant_id only for an active user of an active tenant (finding H-01).
+
+    Unlike get_current_tenant_id (which only decodes the JWT), this loads the user
+    and tenant via get_current_user, which rejects deactivated users and suspended
+    tenants. Use this on every tenant-scoped route so suspension takes effect at once.
+    """
+    return current_user.tenant_id
+
+
 def require_superadmin(
     current_user=Depends(get_current_user),
 ):

@@ -8,7 +8,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Up
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.security import get_current_tenant_id, get_current_user
+from app.core.security import get_active_tenant_id, get_current_user
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.document import (
@@ -32,7 +32,7 @@ router = APIRouter(prefix="/documents", tags=["Documents"])
 def upload_pdf_document(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -107,7 +107,7 @@ def upload_pdf_document(
 async def ingest_url_document(
     payload: DocumentUrlCreate,
     background_tasks: BackgroundTasks,
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -145,7 +145,7 @@ async def ingest_url_document(
 def ingest_faq_document(
     payload: DocumentFaqCreate,
     background_tasks: BackgroundTasks,
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -183,7 +183,7 @@ def ingest_faq_document(
 
 @router.get("", response_model=DocumentListResponse)
 def list_documents(
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     db: Session = Depends(get_db),
 ):
     """
@@ -199,7 +199,7 @@ def list_documents(
 @router.get("/{document_id:uuid}", response_model=DocumentResponse)
 def get_document(
     document_id: uuid.UUID,
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     db: Session = Depends(get_db),
 ):
     """
@@ -230,7 +230,7 @@ def get_document(
 @router.delete("/{document_id:uuid}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_document_endpoint(
     document_id: uuid.UUID,
-    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    tenant_id: uuid.UUID = Depends(get_active_tenant_id),
     db: Session = Depends(get_db),
 ):
     """

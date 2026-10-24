@@ -1,8 +1,12 @@
 """Application configuration via pydantic-settings."""
 
 import socket
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Known insecure defaults that must never be used in production.
+_DEFAULT_SECRET_KEY = "insecure-default-secret-change-in-production"
+_DEFAULT_SUPERADMIN_PASSWORD = "Admin@BotForge2026!"
 
 
 class Settings(BaseSettings):
@@ -35,15 +39,22 @@ class Settings(BaseSettings):
     # Vector DB (Qdrant)
     QDRANT_URL: str = "http://qdrant:6333"
     QDRANT_COLLECTION_NAME: str = "document_chunks"
+    # API key sent to Qdrant. Empty = no auth (dev only). MUST be set in production.
+    QDRANT_API_KEY: str = ""
 
     # LLM (OpenAI)
     OPENAI_API_KEY: str = "sk-replace-me"
     EMBEDDING_MODEL: str = "text-embedding-3-small"
     CHAT_MODEL: str = "gpt-4o"
+    # When true, use deterministic mock embeddings/answers (local dev/tests ONLY).
+    # When false, any OpenAI failure surfaces as a real error instead of fake data.
+    USE_MOCK_AI: bool = False
 
     # File uploads
     MAX_UPLOAD_SIZE_MB: int = 20
     UPLOAD_DIR: str = "/app/uploads"
+    # Max bytes read when fetching a remote URL for ingestion (SSRF/DoS guard).
+    MAX_FETCH_BYTES: int = 5 * 1024 * 1024
 
     # Rate Limiting (Phase 5 Hardening)
     RATE_LIMIT_ENABLED: bool = True
@@ -76,6 +87,23 @@ class Settings(BaseSettings):
             except socket.gaierror:
                 return v.replace("http://qdrant:", "http://localhost:")
         return v
+
+    @model_validator(mode="after")
+    def _forbid_insecure_defaults_in_production(self) -> "Settings":
+        """Refuse to boot in production with known default secrets (finding C-02)."""
+        if self.ENVIRONMENT.lower() == "production":
+            insecure = []
+            if self.SECRET_KEY == _DEFAULT_SECRET_KEY:
+                insecure.append("SECRET_KEY")
+            if self.SUPERADMIN_PASSWORD == _DEFAULT_SUPERADMIN_PASSWORD:
+                insecure.append("SUPERADMIN_PASSWORD")
+            if insecure:
+                raise ValueError(
+                    "Refusing to start in production with insecure default value(s) for: "
+                    f"{', '.join(insecure)}. Set strong values "
+                    "(e.g. generate SECRET_KEY with `openssl rand -hex 64`)."
+                )
+        return self
 
 
 settings = Settings()

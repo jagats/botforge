@@ -87,6 +87,9 @@ services:
     image: qdrant/qdrant:v1.9.0
     container_name: botforge_prod_qdrant
     restart: always
+    environment:
+      # REQUIRED in production — must match QDRANT_API_KEY in the backend .env.production
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY}
     volumes:
       - qdrant_prod_data:/qdrant/storage
     networks:

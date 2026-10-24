@@ -83,19 +83,26 @@ async def process_chat_message(
     db.add(user_message)
     db.flush()
 
-    # 4. Retrieve top-k context chunks from Qdrant scoped to tenant
-    chunks = await retrieve_context_chunks(
-        tenant_id=tenant_id,
-        query_text=req.message,
-        top_k=5,
-    )
-
-    # 5. Generate grounded answer via LLM
-    answer = await generate_rag_answer(
-        query=req.message,
-        context_chunks=chunks,
-        history=history,
-    )
+    # 4 + 5. Retrieve context and generate a grounded answer. If the AI backend is
+    # unavailable, surface a 503 rather than persisting a fake answer (finding H-02).
+    try:
+        chunks = await retrieve_context_chunks(
+            tenant_id=tenant_id,
+            query_text=req.message,
+            top_k=5,
+        )
+        answer = await generate_rag_answer(
+            query=req.message,
+            context_chunks=chunks,
+            history=history,
+        )
+    except RuntimeError as exc:
+        logger.error("AI backend unavailable for tenant=%s: %s", tenant_id, exc)
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The assistant is temporarily unavailable. Please try again shortly.",
+        )
 
     # 6. Save Assistant message with citation chunk IDs
     chunk_ids = [c.chunk_id for c in chunks]
