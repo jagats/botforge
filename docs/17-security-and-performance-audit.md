@@ -370,3 +370,94 @@ gantt
 | **PERF-04**| Performance | Composite database index on `(session_id, created_at)` | 0.2 day | **Medium** | Backend: `models/chat_message.py` |
 | **SEC-06** | Security | Magic byte checking for PDF uploads | 0.2 day | **Medium** | Backend: `documents.py` |
 | **SEC-07** | Security | Enforce structured boundary tags in LLM context | 0.2 day | **Medium** | Backend: `llm.py` |
+
+---
+
+# Addendum — Version 2.0 (Live-Verified Deep Pen Test)
+
+> **Date:** 2026-10-24
+> **Method:** Full code-level pen test of every feature (auth, admin, tenants, documents, ingestion, chat, widget, frontend middleware, Docker/deploy config), plus read-only confirmation against the running local stack. No destructive or live-exploit actions were run.
+> **Note:** This addendum *adds to* and *corrects* the Version 1.0 findings above. Where they overlap, this section is authoritative.
+
+## Read-only facts confirmed against the running stack
+| Check | Result | Confirms |
+| :--- | :--- | :--- |
+| `GET http://localhost:8000/docs` | `200` (public) | Swagger UI exposed; see M-04 |
+| `GET http://localhost:6333/collections` | `200`, no auth | **Qdrant has no API key** — critical to C-01 |
+| Backend container command | `uvicorn … --reload` | Dev server in use; prod uses `gunicorn -w 4` (see P-03) |
+| `grep gunicorn backend/requirements.txt` | not present | Prod start command in doc 15 will fail (P-03) |
+| `.env` `OPENAI_API_KEY` | `sk-replace-me` (placeholder) | App silently runs in **mock LLM/embedding mode** (H-02) |
+
+---
+
+## Critical
+
+### C-01 — SSRF is a full read primitive, and Qdrant is unauthenticated
+Extends **SEC-01**. In [`ingestion.py`](../backend/app/services/ingestion.py) `extract_text_from_url` follows redirects and the fetched body is **stored as a document and returned to the attacker** via `/chat` -> `source_chunks`. So this is not blind SSRF — the attacker reads the response.
+- Qdrant (`http://qdrant:6333`) has **no API key** in dev *or* in the prod compose (doc 15). An attacker ingests `http://qdrant:6333/collections/document_chunks/points/scroll` and reads **other tenants' vectors and chunk text**, defeating the whole multi-tenant model.
+- AWS IMDSv1 (`http://169.254.169.254/...`) returns IAM credentials.
+- Error strings are stored (`document_service.py` saves `str(exc)`) and shown in the dashboard -> works as an internal port scanner.
+- **Fix must include:** post-DNS-resolution IP checks, re-validation on each redirect (or `follow_redirects=False`), a response-size cap, **and** setting `QDRANT__SERVICE__API_KEY`.
+
+### C-02 — Default superadmin password and SECRET_KEY are live
+`config.py` defaults `SUPERADMIN_PASSWORD=Admin@BotForge2026!` and `SECRET_KEY=insecure-default-...`, both published in the README. The local `.env` does not override the password. Nothing prevents the app from booting in production on these defaults. A known `SECRET_KEY` lets anyone **forge a superadmin JWT**. **Fix:** refuse to start when `ENVIRONMENT=production` and either value is a known default.
+
+---
+
+## High
+
+### H-01 — Suspending or deactivating a brand does not take effect (auth-gate gap)
+Only `get_current_user` checks `is_active` / `tenant.status`. Routes that depend on [`get_current_tenant_id`](../backend/app/core/security.py) only decode the JWT, so a suspended tenant keeps access for up to 24h to: `/chat` (burns OpenAI credits), document list/delete, `/tenants/me` (GET+PATCH), `/tenants/me/api-key`, chat history. Uploads *are* blocked (they use `get_current_user`). This directly contradicts the "instant deactivation" promise in docs 01–02. **Fix:** a single dependency that re-checks user+tenant status on every protected route (the widget path already checks tenant status — keep that).
+
+### H-02 — Silent fallback to fake embeddings/answers on any OpenAI error
+[`embedding.py`](../backend/app/services/embedding.py) and [`llm.py`](../backend/app/services/llm.py) catch **all** exceptions (including 429) and return deterministic *mock* vectors/answers. Ingestion then marks the doc `ready` with junk vectors; chat pastes raw chunk text to visitors. The whole batch of chunks is sent in one embeddings call, so a large PDF exceeds OpenAI input caps and *always* falls back. **Fix:** fail loudly (mark doc `failed`, return a real error), batch embeddings, add retry/backoff, and gate the mock path behind an explicit `USE_MOCK_AI` flag — never an exception handler.
+
+### H-03 — Rate limiting is bypassable and under-covers
+Extends **SEC-04**. (1) First `X-Forwarded-For` entry is trusted; the doc-15 nginx uses `$proxy_add_x_forwarded_for` (append), so attacker-supplied values win. (2) Prod `gunicorn -w 4` -> 4 independent in-memory counters -> effective limit x4. (3) Entries are created before the limit check and only cleaned every 5 min -> memory-growth vector. (4) `/chat`, document upload and `/widget/config` have **no** limiter. **Fix:** Redis-backed limiter; trust only the proxy hop; limit the uncovered routes.
+
+### H-04 — No input-size / quota limits
+`faq_text` has no max length; URL body is read fully into memory; PDFs are written to disk *before* the size check; there is no per-tenant document or message quota. Enables cost/DoS abuse. **Fix:** cap `faq_text`, stream+cap URL and PDF reads, enforce per-tenant quotas (ties into the usage-metering work in doc 19).
+
+### H-05 — Username enumeration + no lockout on login
+[`auth_service.py`](../backend/app/services/auth_service.py) skips bcrypt when the email is unknown -> ~20 ms vs ~470 ms timing oracle. No account lockout; only the (bypassable) per-IP limiter protects passwords. **Fix:** dummy bcrypt compare on the miss path; add failure-count lockout/backoff.
+
+### H-06 — Widget key abuse and prod CORS (unchanged)
+**SEC-02** (no allowed-domains check on public keys) and **SEC-03** (prod CORS blocks the widget on real client sites) are both confirmed in code and remain High.
+
+---
+
+## Medium
+
+- **M-01 — Access token returned in JSON body.** Login/impersonate responses include `access_token`, so any dashboard XSS can exfiltrate it despite the HttpOnly cookie. Stop returning the raw token to browser clients.
+- **M-02 — Weak impersonation accountability.** Impersonation token carries the *owner's* `user_id`, so all DB writes are attributed to the owner; the only audit trail is a stdout log line; token lives 24h and "exit" just deletes the cookie (token stays valid). Add a persistent audit table and short impersonation TTL; stamp `impersonated_by` on writes.
+- **M-03 — Incomplete brand deletion.** `delete_brand` ignores Qdrant errors (orphaned vectors) and never removes uploaded PDF files from disk.
+- **M-04 — Information disclosure.** Full JWT logged on decode failure (`security.py`); visitor questions logged; upload errors return `str(exc)`; `/docs` + `/openapi.json` public in prod.
+- **M-05 — Prompt injection (SEC-07)** confirmed; also the visitor question is concatenated into the same user message as retrieved context — separate them.
+- **M-06 — PDF handling.** Extension-only check (**SEC-06**) confirmed; also vulnerable to decompression-bomb PDFs via pypdf.
+- **M-07 — Missing security headers.** No CSP / `X-Frame-Options` / HSTS -> dashboard clickjacking and weaker XSS containment.
+
+---
+
+## What passed (verified)
+- Every DB query and Qdrant search filters by `tenant_id`; no cross-tenant read found **through the API** (C-01 bypasses it via the network, not the API).
+- Widget escapes all HTML before render (`escapeHtml` on user content; markdown only on assistant text) — no widget XSS.
+- Upload filenames are `basename`-sanitized -> no path traversal.
+- Admin routes protected at the router level (`Depends(require_superadmin)`).
+- Public keys are random UUID-based -> not guessable.
+- Passwords hashed with bcrypt.
+
+---
+
+## Performance (additions to PERF-01..06)
+| ID | Finding | Impact |
+| :--- | :--- | :--- |
+| **P-01** | Event loop blocked app-wide: `/chat` & `/widget/chat` are `async` but use the sync SQLAlchemy session; ingestion runs pypdf + DB + Qdrant synchronously in an async task. | One big upload freezes the API for **all** tenants on that worker. |
+| **P-02** | Pool 10 + 20 overflow x 4 workers = 120 > Postgres default 100. | "too many connections" under load. |
+| **P-03** | `gunicorn` not in `requirements.txt`. | Prod command in doc 15 won't start. |
+| **P-04** | Ingestion flushes per-chunk, single unbatched embeddings call, no retry; `BackgroundTasks` lost on restart. | Docs stuck in `processing` after deploys. |
+| **P-05** | All 4 workers run `seed_superadmin` + Qdrant collection create at startup. | Boot-time races/crashes. |
+| **P-06** | Widget path: 2 queries per request; `widget.js` re-read from disk each hit. | Wasted work on the hottest public route. |
+| **P-07** | Documents list and chat history unpaginated; single-doc view loads all chunks to count them. | Degrades as tenants grow. |
+| **P-08** | Prod pins Qdrant v1.9 (no tenant-defragmented index); chunk text kept in payload; no min-score cutoff on retrieval. | More memory, weaker answer quality. |
+
+Version 1.0 frontend findings (Turbopack, `react-icons` barrel, `AuthGuard` waterfall, `useTenant` coupling) all remain valid.
