@@ -84,12 +84,8 @@ def decode_access_token(token: str) -> Dict[str, Any]:
             headers={"WWW-Authenticate": "Bearer"},
         )
     except jwt.PyJWTError as exc:
-        logger.warning(
-            "JWT decode validation failed: %s (token length: %d, token repr: %r)",
-            exc,
-            len(token),
-            token,
-        )
+        # Never log the token itself (finding M-04) — length only, for debugging.
+        logger.warning("JWT decode validation failed: %s (token length: %d)", exc, len(token))
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",

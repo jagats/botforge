@@ -58,12 +58,8 @@ async def retrieve_context_chunks(
             with_payload=True,
         )
     except Exception as exc:
-        logger.error(
-            "Error querying Qdrant for tenant=%s query='%s': %s",
-            tenant_id,
-            cleaned_query[:50],
-            exc,
-        )
+        # Do not log the visitor's question text (finding M-04).
+        logger.error("Error querying Qdrant for tenant=%s: %s", tenant_id, exc)
         return []
 
     retrieved_chunks: List[RetrievedChunk] = []
@@ -89,9 +85,8 @@ async def retrieve_context_chunks(
             continue
 
     logger.info(
-        "Retrieved %d context chunks for tenant=%s query='%s'",
+        "Retrieved %d context chunks for tenant=%s",
         len(retrieved_chunks),
         tenant_id,
-        cleaned_query[:40],
     )
     return retrieved_chunks

@@ -23,12 +23,20 @@ async def lifespan(app: FastAPI):
     yield
 
 
+_IS_PROD = settings.ENVIRONMENT.lower() == "production"
+
 app = FastAPI(
     title="BotForge API",
     version="0.1.0",
     description="Multi-tenant AI Bot-as-a-Service Platform",
     lifespan=lifespan,
+    # Disable interactive API docs & schema in production (finding M-04).
+    docs_url=None if _IS_PROD else "/docs",
+    redoc_url=None if _IS_PROD else "/redoc",
+    openapi_url=None if _IS_PROD else "/openapi.json",
 )
+
+_DOCS_PATHS = ("/docs", "/redoc", "/openapi.json")
 
 # Enable CORS for Next.js frontend with HttpOnly credentials support
 app.add_middleware(
@@ -71,6 +79,24 @@ async def widget_cors_middleware(request, call_next):
     response = await call_next(request)
     if is_widget:
         _apply_widget_cors(response, origin)
+    return response
+
+
+@app.middleware("http")
+async def security_headers_middleware(request, call_next):
+    """Add baseline security headers to every response (finding M-07)."""
+    response = await call_next(request)
+    path = request.url.path
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers.setdefault("Referrer-Policy", "no-referrer")
+    if _IS_PROD:
+        response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
+    # Strict CSP for API responses; skip docs so Swagger/ReDoc keep working in dev.
+    if not any(path.startswith(p) for p in _DOCS_PATHS):
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+        )
     return response
 
 

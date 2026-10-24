@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "insecure-default-secret-change-in-production"
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRE_MINUTES: int = 1440  # 24 hours
+    IMPERSONATION_EXPIRE_MINUTES: int = 30  # short-lived impersonation token (M-02)
+    # When false, access tokens are delivered ONLY via HttpOnly cookie and omitted from
+    # JSON bodies, so XSS cannot read them (finding M-01). Recommended false in production.
+    EXPOSE_TOKEN_IN_BODY: bool = True
     CORS_ORIGINS: list[str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
@@ -55,6 +59,8 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "/app/uploads"
     # Max bytes read when fetching a remote URL for ingestion (SSRF/DoS guard).
     MAX_FETCH_BYTES: int = 5 * 1024 * 1024
+    # Max PDF pages accepted (guards against decompression-bomb PDFs, finding M-06).
+    MAX_PDF_PAGES: int = 500
 
     # Rate Limiting (Phase 5 Hardening)
     RATE_LIMIT_ENABLED: bool = True

@@ -120,6 +120,8 @@ services:
       REDIS_URL: redis://redis:6379/0
       # Exactly one nginx proxy sits in front, so trust one X-Forwarded-For hop.
       TRUSTED_PROXY_HOPS: "1"
+      # Deliver auth tokens only via HttpOnly cookie (keep them out of JS reach).
+      EXPOSE_TOKEN_IN_BODY: "false"
     volumes:
       - backend_prod_uploads:/app/uploads
     depends_on:

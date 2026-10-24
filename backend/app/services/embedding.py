@@ -168,23 +168,34 @@ def delete_document_vectors(tenant_id: uuid.UUID, document_id: uuid.UUID) -> Non
 def delete_tenant_vectors(tenant_id: uuid.UUID) -> None:
     """
     Delete all vector points belonging to an entire tenant.
+
+    Retries briefly and RAISES on persistent failure so the caller does not silently
+    leave orphaned vectors behind (finding M-03).
     """
-    try:
-        client = get_qdrant_client()
-        client.delete(
-            collection_name=settings.QDRANT_COLLECTION_NAME,
-            points_selector=models.FilterSelector(
-                filter=models.Filter(
-                    must=[
-                        models.FieldCondition(
-                            key="tenant_id",
-                            match=models.MatchValue(value=str(tenant_id)),
-                        ),
-                    ]
-                )
-            ),
-        )
-        logger.info("Deleted all Qdrant vectors for tenant=%s", tenant_id)
-    except Exception as exc:
-        logger.warning("Could not delete Qdrant vectors for tenant %s: %s", tenant_id, exc)
+    last_exc: Optional[Exception] = None
+    for attempt in range(3):
+        try:
+            client = get_qdrant_client()
+            client.delete(
+                collection_name=settings.QDRANT_COLLECTION_NAME,
+                points_selector=models.FilterSelector(
+                    filter=models.Filter(
+                        must=[
+                            models.FieldCondition(
+                                key="tenant_id",
+                                match=models.MatchValue(value=str(tenant_id)),
+                            ),
+                        ]
+                    )
+                ),
+            )
+            logger.info("Deleted all Qdrant vectors for tenant=%s", tenant_id)
+            return
+        except Exception as exc:  # noqa: BLE001 - retried then re-raised
+            last_exc = exc
+            logger.warning(
+                "Attempt %d/3 to delete Qdrant vectors for tenant %s failed: %s",
+                attempt + 1, tenant_id, exc,
+            )
+    raise RuntimeError(f"Failed to delete Qdrant vectors for tenant {tenant_id}") from last_exc
 

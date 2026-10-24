@@ -85,6 +85,19 @@ def upload_pdf_document(
     finally:
         file.file.close()
 
+    # Verify the file really is a PDF by its magic bytes, not just the extension (finding M-06).
+    try:
+        with open(destination_path, "rb") as fh:
+            signature = fh.read(5)
+    except OSError:
+        signature = b""
+    if signature != b"%PDF-":
+        os.remove(destination_path)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The uploaded file is not a valid PDF.",
+        )
+
     # Clean title
     doc_title = os.path.splitext(file.filename)[0].replace("_", " ").replace("-", " ").title()
 

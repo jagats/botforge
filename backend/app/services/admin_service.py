@@ -1,11 +1,14 @@
 """Superadmin business logic for brand provisioning, tenant lifecycles, and agency management."""
 
 import logging
+import os
 import uuid
+from datetime import timedelta
 from fastapi import HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.security import create_access_token, hash_password
 from app.models.api_key import ApiKey
 from app.models.chat_session import ChatSession
@@ -264,12 +267,37 @@ def delete_brand(db: Session, tenant_id: uuid.UUID) -> None:
             detail=f"Brand with ID '{tenant_id}' not found.",
         )
 
-    # 1. Purge vectors from Qdrant
-    delete_tenant_vectors(tenant_id)
+    # 1. Collect uploaded file paths before the DB rows are gone.
+    file_paths = [
+        d.file_path
+        for d in db.query(Document)
+        .filter(Document.tenant_id == tenant_id, Document.file_path.isnot(None))
+        .all()
+    ]
 
-    # 2. Delete Tenant from DB (cascades to users, api_keys, documents, chunks, chats)
+    # 2. Purge vectors from Qdrant FIRST. If this fails, abort before deleting the DB
+    # rows so we never leave orphaned vectors behind (finding M-03).
+    try:
+        delete_tenant_vectors(tenant_id)
+    except Exception as exc:
+        logger.error("Aborting brand deletion; Qdrant purge failed for %s: %s", tenant_id, exc)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Could not purge vector data for this brand. Brand was not deleted; please retry.",
+        ) from exc
+
+    # 3. Delete Tenant from DB (cascades to users, api_keys, documents, chunks, chats)
     db.delete(tenant)
     db.commit()
+
+    # 4. Best-effort removal of uploaded files from disk.
+    for path in file_paths:
+        try:
+            if path and os.path.exists(path):
+                os.remove(path)
+        except OSError as exc:
+            logger.warning("Failed to remove file %s during brand offboarding: %s", path, exc)
+
     logger.info("Brand '%s' (tenant_id=%s) completely offboarded.", tenant.name, tenant_id)
 
 
@@ -308,7 +336,7 @@ def impersonate_brand(
             detail=f"Brand '{tenant.name}' has no active user account to manage.",
         )
 
-    # Issue access token with impersonation metadata
+    # Issue a short-lived access token with impersonation metadata (finding M-02).
     token = create_access_token(
         {
             "user_id": str(owner.id),
@@ -317,7 +345,8 @@ def impersonate_brand(
             "is_impersonated": True,
             "impersonated_by": admin_user.email,
             "original_admin_id": str(admin_user.id),
-        }
+        },
+        expires_delta=timedelta(minutes=settings.IMPERSONATION_EXPIRE_MINUTES),
     )
 
     logger.info(

@@ -61,6 +61,13 @@ def _assert_public_url(url: str) -> None:
 def extract_text_from_pdf(file_path: str) -> str:
     """Extract text from a PDF file using pypdf."""
     reader = PdfReader(file_path)
+
+    # Guard against decompression-bomb PDFs with an excessive page count (finding M-06).
+    if len(reader.pages) > settings.MAX_PDF_PAGES:
+        raise ValueError(
+            f"PDF has too many pages (limit {settings.MAX_PDF_PAGES}). Please split it and re-upload."
+        )
+
     extracted_pages: List[str] = []
 
     for idx, page in enumerate(reader.pages):
