@@ -13,7 +13,12 @@ class DocumentUrlCreate(BaseModel):
 
 class DocumentFaqCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=255, description="Title for this FAQ entry")
-    faq_text: str = Field(..., min_length=10, description="FAQ or knowledge text content")
+    faq_text: str = Field(
+        ...,
+        min_length=10,
+        max_length=100_000,
+        description="FAQ or knowledge text content",
+    )
 
 
 class DocumentResponse(BaseModel):

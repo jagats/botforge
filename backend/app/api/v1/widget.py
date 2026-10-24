@@ -4,7 +4,7 @@ import uuid
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from app.core.rate_limiter import rate_limit_widget
+from app.core.rate_limiter import rate_limit_widget, rate_limit_widget_config
 from app.core.security import get_tenant_by_api_key, get_tenant_id_by_api_key
 from app.db.session import get_db
 from app.models.tenant import Tenant
@@ -55,6 +55,7 @@ async def widget_chat_endpoint(
     "/config",
     response_model=WidgetConfigResponse,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit_widget_config)],
     summary="Get public configuration and company branding for widget",
 )
 def widget_config_endpoint(

@@ -61,6 +61,25 @@ class Settings(BaseSettings):
     RATE_LIMIT_WIDGET_PER_MINUTE: int = 60
     RATE_LIMIT_WIDGET_IP_PER_MINUTE: int = 20
     RATE_LIMIT_AUTH_PER_MINUTE: int = 15
+    RATE_LIMIT_CHAT_PER_MINUTE: int = 30  # dashboard /chat per client IP
+    # Shared Redis backing for rate limits/lockout (empty = per-process in-memory, dev only).
+    REDIS_URL: str = ""
+    # Number of trusted reverse proxies in front of the app. 0 = trust the socket IP
+    # and IGNORE X-Forwarded-For (prevents header spoofing, finding H-03).
+    TRUSTED_PROXY_HOPS: int = 0
+
+    # Login brute-force protection (finding H-05)
+    LOGIN_MAX_FAILURES: int = 5
+    LOGIN_LOCKOUT_MINUTES: int = 15
+
+    # Input caps & per-tenant quotas (finding H-04)
+    MAX_FAQ_TEXT_CHARS: int = 100_000
+    PLAN_MAX_DOCUMENTS: dict[str, int] = {"trial": 10, "starter": 50, "pro": 500}
+    PLAN_MAX_MESSAGES_PER_MONTH: dict[str, int] = {
+        "trial": 500,
+        "starter": 5_000,
+        "pro": 50_000,
+    }
 
     # RBAC & Superadmin Closed Onboarding (Phase 6)
     SUPERADMIN_EMAIL: str = "admin@botforge.com"

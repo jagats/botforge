@@ -4,7 +4,8 @@ import logging
 import re
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
 
 import bcrypt
 import jwt
@@ -254,7 +255,41 @@ def require_superadmin(
     return current_user
 
 
+_LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1"}
+
+
+def _host_matches(host: str, allowed: str) -> bool:
+    """Match a request host against one allowed-domain entry (supports `*.example.com`)."""
+    host = host.lower().strip()
+    allowed = allowed.lower().strip().rstrip("/")
+    # Allow entries stored as full origins/URLs.
+    if "://" in allowed:
+        allowed = urlparse(allowed).hostname or allowed
+    if allowed.startswith("*."):
+        return host == allowed[2:] or host.endswith(allowed[1:])  # *.x.com -> x.com / a.x.com
+    return host == allowed
+
+
+def _origin_allowed(request: "Request", allowed_domains: List[str]) -> bool:
+    """Return True if the request's Origin/Referer is permitted for this tenant.
+
+    Empty allow-list = allow any origin (backward compatible). When a list is set
+    but the request carries no Origin/Referer (non-browser client), we allow it,
+    since the browser same-origin policy is what this control protects.
+    """
+    if not allowed_domains:
+        return True
+    source = request.headers.get("origin") or request.headers.get("referer")
+    if not source:
+        return True
+    host = (urlparse(source).hostname or "").lower()
+    if not host or host in _LOCAL_HOSTS:
+        return True
+    return any(_host_matches(host, entry) for entry in allowed_domains)
+
+
 def get_tenant_by_api_key(
+    request: Request,
     x_public_key: Optional[str] = Header(None, alias="X-Public-Key"),
     authorization: Optional[str] = Header(None),
     db: Session = Depends(get_db),
@@ -294,6 +329,13 @@ def get_tenant_by_api_key(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Organization account is suspended or inactive",
+        )
+
+    # Enforce per-tenant origin whitelist for the widget key (finding SEC-02).
+    if not _origin_allowed(request, tenant.allowed_domains or []):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This domain is not authorized to use this widget key.",
         )
 
     return tenant

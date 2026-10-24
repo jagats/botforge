@@ -95,6 +95,14 @@ services:
     networks:
       - botforge_prod_network
 
+  # ---------------- Redis: shared rate-limit / lockout store ----------------
+  redis:
+    image: redis:7-alpine
+    container_name: botforge_prod_redis
+    restart: always
+    networks:
+      - botforge_prod_network
+
   # ---------------- Backend: FastAPI (Gunicorn + Uvicorn) ----------------
   backend:
     build:
@@ -107,12 +115,19 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       QDRANT_URL: http://qdrant:6333
+      QDRANT_API_KEY: ${QDRANT_API_KEY}
+      # Shared limiter across all 4 workers (required so rate limits actually hold).
+      REDIS_URL: redis://redis:6379/0
+      # Exactly one nginx proxy sits in front, so trust one X-Forwarded-For hop.
+      TRUSTED_PROXY_HOPS: "1"
     volumes:
       - backend_prod_uploads:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
       qdrant:
+        condition: service_started
+      redis:
         condition: service_started
     networks:
       - botforge_prod_network

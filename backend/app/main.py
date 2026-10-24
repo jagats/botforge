@@ -40,6 +40,40 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+_WIDGET_PATH_PREFIX = "/api/v1/widget"
+
+
+def _apply_widget_cors(response: Response, origin: str | None) -> None:
+    """Permissive CORS for public widget endpoints (finding SEC-03).
+
+    The real access control is the per-tenant domain whitelist + public key checked
+    server-side, so reflecting the origin here is safe and lets the widget work on
+    any client site.
+    """
+    response.headers["Access-Control-Allow-Origin"] = origin or "*"
+    response.headers["Vary"] = "Origin"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Public-Key, Authorization"
+    response.headers["Access-Control-Max-Age"] = "600"
+
+
+@app.middleware("http")
+async def widget_cors_middleware(request, call_next):
+    """Outermost middleware: open CORS for /api/v1/widget/* only; others stay strict."""
+    is_widget = request.url.path.startswith(_WIDGET_PATH_PREFIX)
+    origin = request.headers.get("origin")
+
+    if is_widget and request.method == "OPTIONS":
+        preflight = Response(status_code=200)
+        _apply_widget_cors(preflight, origin)
+        return preflight
+
+    response = await call_next(request)
+    if is_widget:
+        _apply_widget_cors(response, origin)
+    return response
+
+
 # Mount API routes
 app.include_router(api_v1_router)
 

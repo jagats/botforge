@@ -1,7 +1,6 @@
 """Document API routes for uploading, listing, and deleting tenant knowledge sources."""
 
 import os
-import shutil
 import uuid
 from typing import List, Optional
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile, status
@@ -24,6 +23,7 @@ from app.services.document_service import (
     get_document_by_id,
     delete_document,
 )
+from app.services.quota import enforce_document_quota
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
@@ -45,6 +45,9 @@ def upload_pdf_document(
             detail="Only PDF documents are supported for file upload.",
         )
 
+    # Enforce the tenant's plan document quota before writing anything to disk.
+    enforce_document_quota(db, tenant_id, current_user.tenant.plan if current_user.tenant else "trial")
+
     # Ensure upload directory exists
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 
@@ -52,26 +55,35 @@ def upload_pdf_document(
     safe_filename = f"{tenant_id}_{uuid.uuid4().hex[:8]}_{os.path.basename(file.filename)}"
     destination_path = os.path.join(settings.UPLOAD_DIR, safe_filename)
 
-    # Write file to disk
+    # Stream the upload to disk, aborting as soon as it exceeds the size cap (finding H-04).
+    max_bytes = settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024
+    written = 0
     try:
         with open(destination_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-    except Exception as exc:
+            while True:
+                chunk = file.file.read(1024 * 1024)
+                if not chunk:
+                    break
+                written += len(chunk)
+                if written > max_bytes:
+                    buffer.close()
+                    os.remove(destination_path)
+                    raise HTTPException(
+                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                        detail=f"File exceeds maximum upload size of {settings.MAX_UPLOAD_SIZE_MB}MB.",
+                    )
+                buffer.write(chunk)
+    except HTTPException:
+        raise
+    except Exception:
+        if os.path.exists(destination_path):
+            os.remove(destination_path)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to save uploaded file: {exc}",
+            detail="Failed to save the uploaded file.",
         )
     finally:
         file.file.close()
-
-    # Check file size limit
-    file_size_mb = os.path.getsize(destination_path) / (1024 * 1024)
-    if file_size_mb > settings.MAX_UPLOAD_SIZE_MB:
-        os.remove(destination_path)
-        raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"File exceeds maximum upload size of {settings.MAX_UPLOAD_SIZE_MB}MB.",
-        )
 
     # Clean title
     doc_title = os.path.splitext(file.filename)[0].replace("_", " ").replace("-", " ").title()
@@ -114,6 +126,8 @@ async def ingest_url_document(
     """
     Ingest text from a web page URL.
     """
+    enforce_document_quota(db, tenant_id, current_user.tenant.plan if current_user.tenant else "trial")
+
     title = payload.title or payload.url
 
     document = create_document_record(
@@ -152,6 +166,8 @@ def ingest_faq_document(
     """
     Ingest a raw text FAQ entry or business knowledge snippet.
     """
+    enforce_document_quota(db, tenant_id, current_user.tenant.plan if current_user.tenant else "trial")
+
     document = create_document_record(
         db=db,
         tenant_id=tenant_id,

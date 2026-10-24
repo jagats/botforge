@@ -4,6 +4,7 @@ import uuid
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
+from app.core.rate_limiter import rate_limit_chat
 from app.core.security import get_active_tenant_id
 from app.db.session import get_db
 from app.schemas.chat import (
@@ -19,7 +20,12 @@ from app.services.chat_service import (
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
 
-@router.post("", response_model=ChatResponse, status_code=status.HTTP_200_OK)
+@router.post(
+    "",
+    response_model=ChatResponse,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(rate_limit_chat)],
+)
 async def chat_message_endpoint(
     req: ChatRequest,
     tenant_id: uuid.UUID = Depends(get_active_tenant_id),

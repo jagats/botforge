@@ -15,7 +15,9 @@ from app.schemas.chat import (
     ChatMessageItem,
     ChatSessionDetailResponse,
 )
+from app.models.tenant import Tenant
 from app.services.llm import generate_rag_answer
+from app.services.quota import enforce_message_quota
 from app.services.retrieval import retrieve_context_chunks
 
 logger = logging.getLogger(__name__)
@@ -34,6 +36,10 @@ async def process_chat_message(
     4. Call LLM for grounded answer generation.
     5. Save assistant response with retrieved source chunk references.
     """
+    # 0. Enforce the tenant's monthly message quota (finding H-04).
+    tenant = db.query(Tenant).filter(Tenant.id == tenant_id).first()
+    enforce_message_quota(db, tenant_id, tenant.plan if tenant else "trial")
+
     # 1. Resolve or create session
     if req.session_id:
         session = (
