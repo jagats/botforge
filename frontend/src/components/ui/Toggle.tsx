@@ -46,19 +46,19 @@ export const Toggle: React.FC<ToggleProps> = ({
         aria-checked={checked}
         disabled={disabled}
         onClick={() => !disabled && onChange(!checked)}
-        className={`relative inline-flex shrink-0 ${switchSizes} items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#DDD0C8] focus:ring-offset-1 focus:ring-offset-[#1E1A17] ${
-          checked ? "bg-[#DDD0C8]" : "bg-[#323232] border border-[rgba(221,208,200,0.25)]"
+        className={`relative inline-flex shrink-0 ${switchSizes} items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#40916c] focus:ring-offset-1 ${
+          checked ? "bg-[#40916c]" : "bg-[#d8e2dc]"
         }`}
       >
         <span
           className={`inline-block transform rounded-full shadow-xs transition duration-200 ${
-            checked ? `${thumbSizes} bg-[#1E1A17]` : `${thumbBase} bg-[#DDD0C8]`
+            checked ? `${thumbSizes} bg-[#ffffff]` : `${thumbBase} bg-[#ffffff]`
           }`}
         />
       </button>
 
       {label && (
-        <span className="text-xs font-medium text-[#F5EDE8]">{label}</span>
+        <span className="text-xs font-semibold text-[#1b4332]">{label}</span>
       )}
     </label>
   );

@@ -69,19 +69,19 @@ export const Modal: React.FC<ModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className={`relative w-full ${sizeStyles} glass-card-elevated p-6 shadow-2xl transition-all duration-300 animate-scale-in z-10 text-[#F5EDE8]`}
+        className={`relative w-full ${sizeStyles} clay-card-elevated p-6 shadow-2xl rounded-2xl transition-all duration-300 animate-scale-in z-10 text-[#1b4332] bg-[#ffffff]`}
       >
         {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b border-[rgba(221,208,200,0.15)]">
+        <div className="flex items-start justify-between pb-4 border-b border-[#e0ece4]">
           <div>
             <h3
               id="modal-title"
-              className="text-lg font-bold tracking-tight text-[#F5EDE8]"
+              className="text-lg font-bold tracking-tight text-[#1b4332]"
             >
               {title}
             </h3>
             {description && (
-              <p className="mt-1 text-xs text-[#C4B4A8] leading-relaxed">
+              <p className="mt-1 text-xs text-[#3f5e50] leading-relaxed">
                 {description}
               </p>
             )}
@@ -90,18 +90,18 @@ export const Modal: React.FC<ModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded-md p-1.5 text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.12)] transition-colors focus:outline-none focus:ring-2 focus:ring-[#DDD0C8] cursor-pointer"
+            className="rounded-xl p-1.5 text-[#52796f] hover:text-[#1b4332] hover:bg-[#f1faee] transition-colors focus:outline-none focus:ring-2 focus:ring-[#40916c] cursor-pointer"
           >
             <PiXLight size={20} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="py-4 text-[#F5EDE8]">{children}</div>
+        <div className="py-4 text-[#1b4332]">{children}</div>
 
         {/* Optional Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[rgba(221,208,200,0.15)]">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#e0ece4]">
             {footer}
           </div>
         )}

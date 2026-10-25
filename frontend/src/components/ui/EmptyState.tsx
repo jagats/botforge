@@ -25,16 +25,16 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <div
-      className={`flex flex-col items-center justify-center p-12 text-center rounded-md border border-[rgba(221,208,200,0.18)] bg-[rgba(221,208,200,0.06)] backdrop-blur-md ${className}`}
+      className={`flex flex-col items-center justify-center p-12 text-center rounded-2xl border border-[#d8f3dc] bg-[#ffffff] shadow-sm ${className}`}
     >
-      <div className="flex h-14 w-14 items-center justify-center rounded-md bg-[rgba(221,208,200,0.12)] text-[#C4B4A8] mb-4 shadow-2xs">
-        {icon || <PiTrayLight size={32} className="text-[#C4B4A8]" />}
+      <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#f1faee] text-[#40916c] mb-4 shadow-inner">
+        {icon || <PiTrayLight size={32} className="text-[#40916c]" />}
       </div>
 
-      <h3 className="text-base font-bold text-[#F5EDE8] tracking-tight">
+      <h3 className="text-base font-bold text-[#1b4332] tracking-tight">
         {title}
       </h3>
-      <p className="mt-1 text-xs text-[#C4B4A8] max-w-sm leading-relaxed">
+      <p className="mt-1 text-xs text-[#3f5e50] max-w-sm leading-relaxed">
         {description}
       </p>
 

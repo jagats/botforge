@@ -37,12 +37,8 @@ export default function DashboardOverviewPage() {
 
   return (
     <div className="space-y-8">
-      {/* Dark Glassmorphic Welcome Banner */}
-      <GlassCard className="relative overflow-hidden p-6 sm:p-8 border border-[rgba(255,248,245,0.20)] bg-linear-to-br from-[rgba(221,208,200,0.15)] via-[rgba(221,208,200,0.08)] to-[rgba(50,50,50,0.25)]">
-        {/* Subtle decorative glow orbs */}
-        <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-[radial-gradient(circle,rgba(221,208,200,0.15),transparent_70%)] blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-[radial-gradient(circle,rgba(196,180,168,0.12),transparent_70%)] blur-3xl pointer-events-none" />
-
+      {/* Welcome Banner */}
+      <GlassCard className="relative overflow-hidden p-6 sm:p-8 border border-[#d8f3dc] bg-[#ffffff] shadow-sm rounded-2xl">
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
@@ -56,13 +52,13 @@ export default function DashboardOverviewPage() {
               )}
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1b4332] tracking-tight">
               Welcome back, {brandName}
             </h1>
 
-            <p className="text-xs sm:text-sm text-[#C4B4A8] max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#52796f] max-w-2xl leading-relaxed">
               Your dedicated Qdrant vector memory is live and secured under isolated Tenant ID:{" "}
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-bg-page border border-[rgba(221,208,200,0.20)] font-mono text-xs font-semibold text-[#DDD0C8] shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#f8fbf9] border border-[#d8f3dc] font-mono text-xs font-semibold text-[#1b4332] shadow-2xs">
                 {tenantId || "..."}
                 {tenantId && <CopyButton text={tenantId} size="sm" />}
               </span>
@@ -100,22 +96,21 @@ export default function DashboardOverviewPage() {
         isLoading={isDocsLoading}
       />
 
-      {/* Quick Action Hub */}
+      {/* Quick Actions Hub */}
       <QuickActions onUploadClick={() => setIsUploadModalOpen(true)} />
 
-      {/* Recent Ingested Documents */}
+      {/* Recent Ingested Documents Table */}
       <RecentDocuments
         documents={documents}
         isLoading={isDocsLoading}
         onUploadClick={() => setIsUploadModalOpen(true)}
       />
 
-      {/* Document Ingestion Modal */}
+      {/* Document Upload Modal */}
       <UploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         onSuccess={() => {
-          setIsUploadModalOpen(false);
           refetch();
         }}
       />

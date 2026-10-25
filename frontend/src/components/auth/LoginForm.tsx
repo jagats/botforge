@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,10 +12,9 @@ import { User } from "@/types";
 import {
   PiEnvelopeLight,
   PiLockLight,
-  PiEyeLight,
-  PiEyeSlashLight,
   PiShieldCheckLight,
   PiWarningCircleLight,
+  PiUserLight,
 } from "react-icons/pi";
 
 export interface LoginFormProps {
@@ -28,6 +26,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const { login } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const formik = useFormik<LoginFormValues>({
     initialValues: {
@@ -61,7 +60,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   });
 
   return (
-    <div className="w-full max-w-md mx-auto p-6 sm:p-8 rounded-md glass-card-elevated shadow-2xl border border-[rgba(255,248,245,0.22)]">
+    <div className="w-full max-w-md mx-auto py-2">
       {/* Mobile-only logo display */}
       <div className="lg:hidden flex justify-center mb-6">
         <Logo size="md" />
@@ -69,18 +68,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold tracking-tight text-[#F5EDE8] mb-1.5">
-          Welcome back
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#1b4332] mb-1">
+          Sign In
         </h2>
-        <p className="text-xs text-[#C4B4A8]">
-          Sign in to access your AI knowledge base & bot configuration
+        <p className="text-xs sm:text-sm text-[#52796f]">
+          Enter your workspace credentials to access your assistant configuration.
         </p>
       </div>
 
       {/* Server Error Alert */}
       {serverError && (
-        <div className="p-3 mb-5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2.5 animate-shake">
-          <PiWarningCircleLight size={18} className="shrink-0 text-rose-400" />
+        <div className="p-3 mb-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2.5 animate-shake shadow-2xs">
+          <PiWarningCircleLight size={18} className="shrink-0 text-rose-500" />
           <span>{serverError}</span>
         </div>
       )}
@@ -93,7 +92,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           type="email"
           label="Work Email Address"
           placeholder="admin@brand.com"
-          leftIcon={<PiEnvelopeLight size={18} />}
+          leftIcon={<PiUserLight size={18} />}
           value={formik.values.email}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
@@ -113,9 +112,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              className="text-[#C4B4A8] hover:text-[#F5EDE8] transition-colors cursor-pointer"
+              className="text-xs font-semibold text-[#40916c] hover:text-[#2d6a4f] transition-colors cursor-pointer px-1 py-0.5 rounded-md"
             >
-              {showPassword ? <PiEyeSlashLight size={18} /> : <PiEyeLight size={18} />}
+              {showPassword ? "HIDE" : "SHOW"}
             </button>
           }
           value={formik.values.password}
@@ -125,6 +124,23 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           disabled={formik.isSubmitting}
         />
 
+        {/* Remember me and Help links */}
+        <div className="flex items-center justify-between text-xs pt-1">
+          <label className="flex items-center gap-2 cursor-pointer select-none text-[#3f5e50]">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="rounded border-[#d8f3dc] text-[#40916c] focus:ring-[#40916c] cursor-pointer"
+            />
+            <span>Remember me</span>
+          </label>
+
+          <span className="text-[#40916c] font-semibold hover:underline cursor-pointer">
+            Forgot Password?
+          </span>
+        </div>
+
         <div className="pt-2">
           <Button
             type="submit"
@@ -132,21 +148,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
             size="md"
             fullWidth
             isLoading={formik.isSubmitting}
+            className="h-11 shadow-md text-sm"
           >
-            Sign In to Workspace →
+            Sign In to Workspace
           </Button>
         </div>
       </form>
 
       {/* Security footer */}
-      <div className="mt-6 pt-5 border-t border-[rgba(221,208,200,0.15)] flex items-center justify-center gap-1.5 text-[11px] text-[#7A6E68]">
-        <PiShieldCheckLight size={16} className="text-[#DDD0C8]" />
-        <span>Secured with JWT Enterprise Authentication</span>
+      <div className="mt-6 pt-5 border-t border-[#e0ece4] flex items-center justify-center gap-1.5 text-xs text-[#6b8f7e]">
+        <PiShieldCheckLight size={16} className="text-[#40916c]" />
+        <span>Secured with JWT Enterprise Multi-Tenant Protection</span>
       </div>
 
-      <div className="text-center mt-4 text-[11px] text-[#7A6E68]">
+      <div className="text-center mt-3 text-xs text-[#6b8f7e]">
         Need brand access or onboarding?{" "}
-        <span className="text-[#DDD0C8] font-medium">Contact your BotForge Admin</span>
+        <span className="text-[#40916c] font-semibold">Contact your BotForge Admin</span>
       </div>
     </div>
   );

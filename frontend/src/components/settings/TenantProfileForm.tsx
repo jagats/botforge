@@ -42,13 +42,13 @@ export const TenantProfileForm: React.FC = () => {
 
   return (
     <GlassCard elevated padding="lg" className="space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-[rgba(221,208,200,0.15)]">
+      <div className="flex items-center justify-between pb-4 border-b border-[#e0ece4]">
         <div>
-          <h2 className="text-base font-bold text-[#F5EDE8] tracking-tight flex items-center gap-2">
-            <PiBuildingsLight size={18} className="text-[#DDD0C8]" />
+          <h2 className="text-base font-bold text-[#1b4332] tracking-tight flex items-center gap-2">
+            <PiBuildingsLight size={18} className="text-[#40916c]" />
             <span>Organization Profile</span>
           </h2>
-          <p className="text-xs text-[#C4B4A8] mt-0.5">
+          <p className="text-xs text-[#52796f] mt-0.5">
             Manage company brand identity and multi-tenant partitioning settings.
           </p>
         </div>
@@ -68,8 +68,8 @@ export const TenantProfileForm: React.FC = () => {
       </div>
 
       {error && (
-        <div className="p-3.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2 animate-fade-in">
-          <PiWarningCircleLight size={16} className="shrink-0 text-rose-400" />
+        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 animate-fade-in">
+          <PiWarningCircleLight size={16} className="shrink-0 text-rose-500" />
           <span>{error}</span>
         </div>
       )}
@@ -77,11 +77,11 @@ export const TenantProfileForm: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Company Name */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#7A6E68]">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#52796f]">
             Company Name
           </label>
           {!isEditing ? (
-            <p className="text-sm font-bold text-[#F5EDE8] pt-1">
+            <p className="text-sm font-bold text-[#1b4332] pt-1">
               {tenant?.name || "—"}
             </p>
           ) : (
@@ -126,11 +126,11 @@ export const TenantProfileForm: React.FC = () => {
 
         {/* Workspace Slug */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#7A6E68]">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#52796f]">
             Workspace Slug
           </label>
           <div className="pt-1">
-            <span className="px-2.5 py-1 rounded-md bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.20)] font-mono text-xs text-[#DDD0C8]">
+            <span className="px-2.5 py-1 rounded-xl bg-[#f8fbf9] border border-[#d8f3dc] font-mono text-xs text-[#1b4332] font-semibold">
               {tenant?.slug || "—"}
             </span>
           </div>
@@ -138,7 +138,7 @@ export const TenantProfileForm: React.FC = () => {
 
         {/* Subscription Plan */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#7A6E68]">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#52796f]">
             Subscription Tier
           </label>
           <div className="pt-1">
@@ -150,12 +150,12 @@ export const TenantProfileForm: React.FC = () => {
 
         {/* Tenant Partition ID */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#7A6E68]">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#52796f]">
             Partition Tenant ID
           </label>
           <div className="flex items-center gap-2 pt-1">
             <span
-              className="font-mono text-xs text-[#DDD0C8] truncate max-w-[140px]"
+              className="font-mono text-xs text-[#1b4332] font-semibold truncate max-w-[140px]"
               title={tenant?.id}
             >
               {tenant?.id || "—"}

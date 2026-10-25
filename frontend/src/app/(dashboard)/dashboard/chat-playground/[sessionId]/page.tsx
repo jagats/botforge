@@ -41,7 +41,6 @@ export default function SessionReplayPage({ params }: PageProps) {
         action={{
           label: "Back to Playground",
           onClick: () => {},
-          icon: <span>←</span>,
         }}
       />
     );
@@ -67,7 +66,7 @@ export default function SessionReplayPage({ params }: PageProps) {
         action={
           <Link href="/dashboard/chat-playground">
             <Button variant="secondary" size="sm">
-              ← Back to Playground
+              Back to Playground
             </Button>
           </Link>
         }

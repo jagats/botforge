@@ -34,9 +34,9 @@ export const Avatar: React.FC<AvatarProps> = ({
   };
 
   const roleStyles = {
-    user: "bg-[rgba(221,208,200,0.15)] text-[#F5EDE8] border-[rgba(221,208,200,0.30)]",
-    bot: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-    admin: "bg-[#323232] text-[#DDD0C8] border-[rgba(221,208,200,0.30)]",
+    user: "bg-[#d8f3dc] text-[#1b4332] border-[#b7e4c7]",
+    bot: "bg-[#40916c] text-[#ffffff] border-[#2d6a4f]",
+    admin: "bg-[#1b4332] text-[#ffffff] border-[#40916c]",
   }[role];
 
   if (src) {
@@ -44,7 +44,7 @@ export const Avatar: React.FC<AvatarProps> = ({
       <img
         src={src}
         alt={name || "Avatar"}
-        className={`inline-block rounded-full object-cover border border-[rgba(221,208,200,0.25)] shrink-0 ${sizeStyles} ${className}`}
+        className={`inline-block rounded-full object-cover border border-[#b7e4c7] shrink-0 ${sizeStyles} ${className}`}
       />
     );
   }

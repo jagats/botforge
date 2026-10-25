@@ -10,19 +10,19 @@ export const Navbar: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
 
   return (
-    <nav className="w-full glass-topbar sticky top-0 z-50">
+    <nav className="w-full bg-[#ffffff] border-b border-[#e0ece4] shadow-xs sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <Logo size="md" />
 
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
-              <span className="text-xs text-text-secondary hidden sm:inline">
-                Signed in as <strong className="text-text-primary">{user?.email}</strong>
+              <span className="text-xs text-[#52796f] hidden sm:inline">
+                Signed in as <strong className="text-[#1b4332]">{user?.email}</strong>
               </span>
               <Link href={user?.role === "superadmin" ? "/admin/brands" : "/dashboard"}>
                 <Button variant="accent" size="sm">
-                  {user?.role === "superadmin" ? "Admin Portal →" : "Dashboard →"}
+                  {user?.role === "superadmin" ? "Admin Portal" : "Dashboard"}
                 </Button>
               </Link>
             </div>

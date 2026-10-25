@@ -102,12 +102,12 @@ export const BrandTable: React.FC<BrandTableProps> = ({
     return (
       <div className="space-y-4">
         <div className="flex gap-3">
-          <Skeleton className="h-10 w-72 rounded-md" />
-          <Skeleton className="h-10 w-48 rounded-md" />
+          <Skeleton className="h-10 w-72 rounded-xl" />
+          <Skeleton className="h-10 w-48 rounded-xl" />
         </div>
-        <div className="rounded-md glass-card p-4 space-y-3">
+        <div className="rounded-2xl clay-card p-4 space-y-3 bg-[#ffffff]">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full rounded-md" />
+            <Skeleton key={i} className="h-12 w-full rounded-xl" />
           ))}
         </div>
       </div>
@@ -129,7 +129,7 @@ export const BrandTable: React.FC<BrandTableProps> = ({
           />
         </div>
 
-        <div className="flex items-center gap-1.5 self-start sm:self-auto bg-[rgba(221,208,200,0.08)] p-1 rounded-md border border-[rgba(221,208,200,0.18)]">
+        <div className="flex items-center gap-1.5 self-start sm:self-auto bg-[#ffffff] p-1 rounded-xl border border-[#d8f3dc] shadow-sm">
           {(
             [
               { label: "All Brands", value: "all" },
@@ -141,10 +141,10 @@ export const BrandTable: React.FC<BrandTableProps> = ({
               key={tab.value}
               type="button"
               onClick={() => handleStatusFilterChange(tab.value)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer ${
                 statusFilter === tab.value
-                  ? "bg-[#323232] text-[#F5EDE8] shadow-sm border border-[rgba(221,208,200,0.25)] font-semibold"
-                  : "text-[#C4B4A8] hover:text-[#F5EDE8]"
+                  ? "bg-[#40916c] text-[#ffffff] shadow-sm"
+                  : "text-[#52796f] hover:text-[#1b4332] hover:bg-[#f1faee]"
               }`}
             >
               {tab.label}
@@ -155,7 +155,7 @@ export const BrandTable: React.FC<BrandTableProps> = ({
 
       {/* Brands Table or Empty State */}
       {filteredBrands.length === 0 ? (
-        <div className="rounded-md glass-card p-8">
+        <div className="rounded-2xl clay-card p-8 bg-[#ffffff]">
           <EmptyState
             title="No client brands found"
             description={
@@ -174,11 +174,11 @@ export const BrandTable: React.FC<BrandTableProps> = ({
           />
         </div>
       ) : (
-        <div className="rounded-md glass-card shadow-sm overflow-hidden">
+        <div className="rounded-2xl clay-card shadow-sm overflow-hidden bg-[#ffffff] border border-[#d8f3dc]">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
-                <tr className="border-b border-[rgba(221,208,200,0.15)] bg-[rgba(221,208,200,0.06)] text-[#C4B4A8] font-semibold text-xs tracking-wider uppercase">
+                <tr className="border-b border-[#e0ece4] bg-[#f8fbf9] text-[#52796f] font-semibold text-xs tracking-wider uppercase">
                   <th className="py-3.5 px-4 sm:px-6">Brand / Client</th>
                   <th className="py-3.5 px-4 sm:px-6">Owner Email</th>
                   <th className="py-3.5 px-4">Plan</th>
@@ -187,23 +187,23 @@ export const BrandTable: React.FC<BrandTableProps> = ({
                   <th className="py-3.5 px-4 sm:px-6 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[rgba(221,208,200,0.10)] text-[#F5EDE8]">
+              <tbody className="divide-y divide-[#f1faee] text-[#1b4332]">
                 {paginatedBrands.map((brand) => (
                   <tr
                     key={brand.tenant_id}
-                    className="hover:bg-[rgba(221,208,200,0.06)] transition-colors group"
+                    className="hover:bg-[#f8fbf9] transition-colors group"
                   >
                     {/* Brand Info */}
                     <td className="py-3.5 px-4 sm:px-6">
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-md bg-[#323232] text-[#DDD0C8] border border-[rgba(221,208,200,0.25)] font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+                        <div className="h-9 w-9 rounded-xl bg-[#d8f3dc] text-[#1b4332] border border-[#b7e4c7] font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
                           {brand.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-bold text-[#F5EDE8]">
+                          <div className="font-bold text-[#1b4332]">
                             {brand.name}
                           </div>
-                          <div className="text-xs text-[#7A6E68] font-mono">
+                          <div className="text-xs text-[#6b8f7e] font-mono">
                             slug: {brand.slug}
                           </div>
                         </div>
@@ -211,7 +211,7 @@ export const BrandTable: React.FC<BrandTableProps> = ({
                     </td>
 
                     {/* Owner Email */}
-                    <td className="py-3.5 px-4 sm:px-6 text-xs text-[#C4B4A8]">
+                    <td className="py-3.5 px-4 sm:px-6 text-xs text-[#3f5e50]">
                       {brand.owner_email}
                     </td>
 
@@ -234,7 +234,7 @@ export const BrandTable: React.FC<BrandTableProps> = ({
                     </td>
 
                     {/* Created Date */}
-                    <td className="py-3.5 px-4 text-xs text-[#7A6E68] hidden md:table-cell">
+                    <td className="py-3.5 px-4 text-xs text-[#6b8f7e] hidden md:table-cell">
                       {formatDate(brand.created_at)}
                     </td>
 
@@ -246,10 +246,10 @@ export const BrandTable: React.FC<BrandTableProps> = ({
                           size="sm"
                           onClick={() => handleViewDashboard(brand)}
                           isLoading={impersonatingTenantId === brand.tenant_id}
-                          className="h-8 px-2.5 text-xs flex items-center gap-1.5 bg-[rgba(221,208,200,0.14)] hover:bg-[rgba(221,208,200,0.24)] text-[#F5EDE8] border border-[rgba(221,208,200,0.28)]"
+                          className="h-8 px-2.5 text-xs flex items-center gap-1.5"
                           title={`View & manage ${brand.name} dashboard`}
                         >
-                          <PiArrowSquareOutLight size={14} className="text-[#DDD0C8]" />
+                          <PiArrowSquareOutLight size={14} className="text-[#40916c]" />
                           <span>Dashboard</span>
                         </Button>
                         <Link href={`/admin/brands/${brand.tenant_id}`}>
@@ -265,7 +265,7 @@ export const BrandTable: React.FC<BrandTableProps> = ({
                           variant="ghost"
                           size="sm"
                           onClick={() => onDeleteBrand(brand)}
-                          className="h-8 px-2 text-rose-400 hover:text-rose-300 hover:bg-rose-500/20"
+                          className="h-8 px-2 text-[#52796f] hover:text-rose-600 hover:bg-rose-50"
                           title="Purge brand"
                         >
                           <PiTrashLight size={16} />
@@ -280,18 +280,18 @@ export const BrandTable: React.FC<BrandTableProps> = ({
 
           {/* Pagination Footer */}
           {totalPages > 1 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 py-3.5 border-t border-[rgba(221,208,200,0.15)] bg-[rgba(221,208,200,0.04)] text-xs text-[#7A6E68]">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 py-3.5 border-t border-[#e0ece4] bg-[#f8fbf9] text-xs text-[#6b8f7e]">
               <div>
                 Showing{" "}
-                <span className="font-semibold text-[#F5EDE8]">
+                <span className="font-semibold text-[#1b4332]">
                   {(currentPage - 1) * pageSize + 1}
                 </span>{" "}
                 to{" "}
-                <span className="font-semibold text-[#F5EDE8]">
+                <span className="font-semibold text-[#1b4332]">
                   {Math.min(currentPage * pageSize, filteredBrands.length)}
                 </span>{" "}
                 of{" "}
-                <span className="font-semibold text-[#F5EDE8]">
+                <span className="font-semibold text-[#1b4332]">
                   {filteredBrands.length}
                 </span>{" "}
                 brands
@@ -320,10 +320,10 @@ export const BrandTable: React.FC<BrandTableProps> = ({
                         key={pageNum}
                         type="button"
                         onClick={() => setCurrentPage(pageNum)}
-                        className={`h-8 w-8 rounded-md text-xs font-semibold transition-colors cursor-pointer ${
+                        className={`h-8 w-8 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                           currentPage === pageNum
-                            ? "bg-[#323232] text-[#F5EDE8] border border-[rgba(221,208,200,0.30)] shadow-xs"
-                            : "text-[#C4B4A8] hover:bg-[rgba(221,208,200,0.10)]"
+                            ? "bg-[#40916c] text-[#ffffff] shadow-xs"
+                            : "text-[#52796f] hover:bg-[#f1faee] hover:text-[#1b4332]"
                         }`}
                       >
                         {pageNum}
@@ -335,7 +335,7 @@ export const BrandTable: React.FC<BrandTableProps> = ({
                     pageNum === currentPage + 2
                   ) {
                     return (
-                      <span key={pageNum} className="text-[#7A6E68] px-1">
+                      <span key={pageNum} className="text-[#6b8f7e] px-1">
                         ...
                       </span>
                     );

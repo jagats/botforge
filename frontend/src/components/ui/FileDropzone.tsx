@@ -78,14 +78,14 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => !disabled && !selectedFile && inputRef.current?.click()}
-        className={`relative flex flex-col items-center justify-center p-8 rounded-md border-2 border-dashed transition-all duration-200 ${
+        className={`relative flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed transition-all duration-200 ${
           disabled
-            ? "border-[rgba(221,208,200,0.15)] bg-[rgba(30,26,23,0.5)] opacity-60 cursor-not-allowed"
+            ? "border-[#d8e2dc] bg-[#f1faee]/50 opacity-60 cursor-not-allowed"
             : selectedFile
-            ? "border-[rgba(221,208,200,0.40)] bg-[rgba(221,208,200,0.10)]"
+            ? "border-[#40916c] bg-[#ffffff] shadow-sm"
             : isDragOver
-            ? "border-[#DDD0C8] bg-[rgba(221,208,200,0.15)] scale-[1.01]"
-            : "border-[rgba(221,208,200,0.25)] bg-[rgba(221,208,200,0.06)] hover:border-[#DDD0C8] hover:bg-[rgba(221,208,200,0.10)] cursor-pointer"
+            ? "border-[#40916c] bg-[#d8f3dc]/30 scale-[1.01]"
+            : "border-[#d8f3dc] bg-[#ffffff] hover:border-[#40916c] hover:bg-[#f1faee]/40 cursor-pointer shadow-sm"
         }`}
       >
         <input
@@ -98,16 +98,16 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
         />
 
         {selectedFile ? (
-          <div className="flex items-center justify-between w-full max-w-sm p-3 rounded-md bg-[rgba(221,208,200,0.12)] border border-[rgba(221,208,200,0.25)] shadow-xs">
+          <div className="flex items-center justify-between w-full max-w-sm p-3.5 rounded-xl bg-[#f8fbf9] border border-[#d8f3dc] shadow-xs">
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#323232] text-[#DDD0C8] border border-[rgba(221,208,200,0.20)]">
-                <PiFilePdfLight size={20} />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#d8f3dc] text-[#2d6a4f] border border-[#b7e4c7]">
+                <PiFilePdfLight size={22} />
               </div>
               <div className="truncate">
-                <p className="text-xs font-semibold text-[#F5EDE8] truncate">
+                <p className="text-xs font-bold text-[#1b4332] truncate">
                   {selectedFile.name}
                 </p>
-                <p className="text-[11px] text-[#7A6E68]">
+                <p className="text-[11px] text-[#6b8f7e]">
                   {formatFileSize(selectedFile.size)}
                 </p>
               </div>
@@ -120,7 +120,7 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
                   e.stopPropagation();
                   onClear();
                 }}
-                className="rounded-md p-1.5 text-[#C4B4A8] hover:text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
+                className="rounded-lg p-1.5 text-[#52796f] hover:text-rose-500 hover:bg-rose-50 transition-colors cursor-pointer"
               >
                 <PiXLight size={16} />
               </button>
@@ -128,14 +128,14 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
           </div>
         ) : (
           <div className="text-center space-y-2">
-            <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-[rgba(221,208,200,0.12)] text-[#DDD0C8] shadow-xs">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#f1faee] text-[#40916c] shadow-inner">
               <PiUploadSimpleLight size={24} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-[#F5EDE8]">
+              <p className="text-sm font-semibold text-[#1b4332]">
                 Click to upload or drag and drop
               </p>
-              <p className="text-xs text-[#7A6E68] mt-0.5">
+              <p className="text-xs text-[#6b8f7e] mt-0.5">
                 PDF documents up to {Math.round(maxSizeBytes / (1024 * 1024))}MB
               </p>
             </div>
@@ -144,7 +144,7 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
       </div>
 
       {(error || sizeError) && (
-        <p className="text-xs font-medium text-rose-400 animate-fade-in flex items-center gap-1">
+        <p className="text-xs font-medium text-rose-500 animate-fade-in flex items-center gap-1">
           <PiWarningCircleLight size={14} className="shrink-0" />
           <span>{error || sizeError}</span>
         </p>

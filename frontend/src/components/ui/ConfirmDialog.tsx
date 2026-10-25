@@ -52,11 +52,11 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     >
       <div className="flex items-start gap-3">
         {variant === "danger" && (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-rose-500/20 text-rose-400 border border-rose-500/30">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-600 border border-rose-200">
             <PiWarningCircleLight size={22} />
           </div>
         )}
-        <p className="text-sm text-[#C4B4A8] leading-relaxed pt-1">{message}</p>
+        <p className="text-sm text-[#3f5e50] leading-relaxed pt-1">{message}</p>
       </div>
     </Modal>
   );

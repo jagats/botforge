@@ -67,7 +67,7 @@ export default function DocumentDetailPage({ params }: PageProps) {
             size="sm"
             onClick={() => router.push("/dashboard/documents")}
           >
-            ← Back to Documents
+            Back to Documents
           </Button>
         }
       />

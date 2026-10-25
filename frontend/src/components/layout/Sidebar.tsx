@@ -57,29 +57,29 @@ export const Sidebar: React.FC = () => {
   ];
 
   const sidebarContent = (
-    <div className="flex flex-col h-full justify-between">
+    <div className="flex flex-col h-full justify-between select-none">
       <div>
         {/* Brand Header */}
-        <div className="h-16 px-4 flex items-center justify-between border-b border-[rgba(221,208,200,0.15)]">
+        <div className="h-16 px-4 flex items-center justify-between border-b border-[#e0ece4]">
           <Logo collapsed={isCollapsed} href="/dashboard" />
 
           {/* Collapse toggle (desktop only) */}
           <button
             onClick={toggleCollapse}
             aria-label="Toggle sidebar collapse"
-            className="hidden md:flex p-1.5 rounded-md text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.10)] transition-colors cursor-pointer"
+            className="hidden md:flex p-1.5 rounded-lg text-[#52796f] hover:text-[#1b4332] hover:bg-[#f1faee] transition-colors cursor-pointer"
           >
             <PiCaretLeftLight
               size={18}
-              className={`transform transition-transform ${isCollapsed ? "rotate-180" : ""}`}
+              className={`transform transition-transform duration-200 ${isCollapsed ? "rotate-180" : ""}`}
             />
           </button>
         </div>
 
         {/* Navigation Links */}
-        <nav className="p-3 space-y-1">
+        <nav className="p-3 space-y-1.5">
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
 
             return (
               <Link
@@ -87,10 +87,10 @@ export const Sidebar: React.FC = () => {
                 href={item.href}
                 onClick={closeMobile}
                 title={isCollapsed ? item.label : undefined}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-md text-xs font-medium transition-all duration-150 ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
                   isActive
-                    ? "bg-[rgba(221,208,200,0.18)] text-[#F5EDE8] shadow-xs border border-[rgba(221,208,200,0.30)] font-semibold"
-                    : "text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.08)]"
+                    ? "bg-[#40916c] text-[#ffffff] shadow-sm"
+                    : "text-[#3f5e50] hover:text-[#1b4332] hover:bg-[#f1faee]"
                 } ${isCollapsed ? "justify-center px-2" : ""}`}
               >
                 <span className="shrink-0">{item.icon}</span>
@@ -102,9 +102,9 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* User Footer */}
-      <div className="p-3 border-t border-[rgba(221,208,200,0.15)]">
+      <div className="p-3 border-t border-[#e0ece4]">
         <div
-          className={`flex items-center gap-3 p-2 rounded-md bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.18)] shadow-2xs ${
+          className={`flex items-center gap-3 p-2 rounded-xl bg-[#f8fbf9] border border-[#d8f3dc] shadow-2xs ${
             isCollapsed ? "justify-center p-1.5" : ""
           }`}
         >
@@ -116,10 +116,10 @@ export const Sidebar: React.FC = () => {
 
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-[#F5EDE8] truncate">
+              <p className="text-xs font-bold text-[#1b4332] truncate">
                 {user?.company_name || "Client Brand"}
               </p>
-              <p className="text-[11px] text-[#7A6E68] truncate">{user?.email}</p>
+              <p className="text-[11px] text-[#6b8f7e] truncate">{user?.email}</p>
             </div>
           )}
 
@@ -131,7 +131,7 @@ export const Sidebar: React.FC = () => {
               }}
               title="Sign out"
               aria-label="Sign out"
-              className="p-1.5 rounded-md text-[#C4B4A8] hover:text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-[#52796f] hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
             >
               <PiSignOutLight size={18} />
             </button>
@@ -143,9 +143,9 @@ export const Sidebar: React.FC = () => {
 
   return (
     <>
-      {/* Desktop Sidebar */}
+      {/* Desktop Fixed Non-Scrollable Sidebar */}
       <aside
-        className={`hidden md:flex flex-col shrink-0 min-h-screen sticky top-0 z-30 glass-sidebar transition-all duration-300 ${
+        className={`hidden md:flex flex-col shrink-0 fixed left-0 top-0 h-screen z-30 clay-sidebar overflow-hidden transition-all duration-300 ${
           isCollapsed ? "w-20" : "w-64"
         }`}
       >
@@ -162,7 +162,7 @@ export const Sidebar: React.FC = () => {
 
       {/* Mobile Drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 glass-card-elevated md:hidden transition-transform duration-300 shadow-2xl ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 clay-card-elevated md:hidden transition-transform duration-300 shadow-2xl bg-[#ffffff] overflow-hidden ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

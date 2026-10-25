@@ -52,7 +52,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       {/* Sample Quick Prompts */}
       {samplePrompts && samplePrompts.length > 0 && (
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          <span className="text-[11px] font-semibold text-[#7A6E68] shrink-0">
+          <span className="text-[11px] font-semibold text-[#6b8f7e] shrink-0">
             Try:
           </span>
           {samplePrompts.map((prompt, idx) => (
@@ -61,7 +61,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               type="button"
               onClick={() => onSelectPrompt?.(prompt)}
               disabled={isLoading || disabled}
-              className="px-2.5 py-1 rounded-md bg-[rgba(221,208,200,0.10)] hover:bg-[rgba(221,208,200,0.20)] text-[#DDD0C8] hover:text-[#F5EDE8] text-xs font-medium whitespace-nowrap transition-colors cursor-pointer border border-[rgba(221,208,200,0.18)]"
+              className="px-2.5 py-1 rounded-xl bg-[#f8fbf9] hover:bg-[#d8f3dc] text-[#1b4332] text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer border border-[#d8f3dc]"
             >
               {prompt}
             </button>
@@ -70,7 +70,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       )}
 
       {/* Input Container */}
-      <div className="relative rounded-md border border-[rgba(221,208,200,0.25)] bg-[rgba(221,208,200,0.08)] shadow-xs focus-within:border-[#DDD0C8] focus-within:ring-2 focus-within:ring-[#DDD0C8]/20 transition-all">
+      <div className="relative rounded-2xl border border-[#d8f3dc] bg-[#ffffff] shadow-sm focus-within:border-[#40916c] focus-within:ring-2 focus-within:ring-[#40916c]/20 transition-all">
         <textarea
           ref={textareaRef}
           rows={1}
@@ -79,12 +79,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled || isLoading}
-          className="w-full resize-none bg-transparent px-4 py-3 text-sm text-[#F5EDE8] placeholder:text-[rgba(196,180,168,0.50)] focus:outline-none max-h-36 disabled:opacity-60"
+          className="w-full resize-none bg-transparent px-4 py-3 text-sm text-[#1b4332] placeholder:text-[#7a9a8b] focus:outline-none max-h-36 disabled:opacity-60"
         />
 
         <div className="flex items-center justify-between px-3 pb-2.5">
-          <span className="text-[11px] text-[#7A6E68] hidden sm:inline">
-            Press <kbd className="px-1.5 py-0.5 rounded-sm bg-[#323232] font-mono text-[10px] text-[#DDD0C8] border border-[rgba(221,208,200,0.20)]">Enter</kbd> to send, <kbd className="px-1.5 py-0.5 rounded-sm bg-[#323232] font-mono text-[10px] text-[#DDD0C8] border border-[rgba(221,208,200,0.20)]">Shift + Enter</kbd> for newline
+          <span className="text-[11px] text-[#6b8f7e] hidden sm:inline">
+            Press <kbd className="px-1.5 py-0.5 rounded-md bg-[#f1faee] font-mono text-[10px] text-[#40916c] border border-[#d8f3dc]">Enter</kbd> to send, <kbd className="px-1.5 py-0.5 rounded-md bg-[#f1faee] font-mono text-[10px] text-[#40916c] border border-[#d8f3dc]">Shift + Enter</kbd> for newline
           </span>
 
           <div className="ml-auto">

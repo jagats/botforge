@@ -23,11 +23,11 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     lg: "p-8",
   }[padding];
 
-  const glassStyle = elevated ? "glass-card-elevated" : "glass-card";
+  const cardStyle = elevated ? "clay-card-elevated" : "clay-card";
 
   return (
     <div
-      className={`${glassStyle} transition-all duration-200 ${paddingStyles} ${className}`}
+      className={`${cardStyle} transition-all duration-200 ${paddingStyles} ${className}`}
       {...props}
     >
       {children}

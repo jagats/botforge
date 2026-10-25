@@ -18,37 +18,37 @@ export const Badge: React.FC<BadgeProps> = ({
   children,
 }) => {
   const sizeStyles = {
-    sm: "px-3 py-1 text-xs gap-1.5",
-    md: "px-4 py-2 text-xs gap-2",
+    sm: "px-2.5 py-0.5 text-xs gap-1.5",
+    md: "px-3.5 py-1 text-xs gap-2",
   }[size];
 
   const variantStyles = {
     success:
-      "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 shadow-xs",
+      "bg-[#d8f3dc] text-[#2d6a4f] border-[#b7e4c7] shadow-2xs font-semibold",
     warning:
-      "bg-amber-400/15 text-amber-300 border-amber-400/30 shadow-xs",
+      "bg-[#fef3c7] text-[#b45309] border-[#fde68a] shadow-2xs font-semibold",
     error:
-      "bg-rose-500/15 text-rose-400 border-rose-500/30 shadow-xs",
+      "bg-[#fee2e2] text-[#b91c1c] border-[#fca5a5] shadow-2xs font-semibold",
     info:
-      "bg-sky-400/15 text-sky-300 border-sky-400/30 shadow-xs",
+      "bg-[#e0f2fe] text-[#0369a1] border-[#bae6fd] shadow-2xs font-semibold",
     neutral:
-      "bg-[rgba(221,208,200,0.12)] text-[#C4B4A8] border-[rgba(221,208,200,0.25)] shadow-xs",
+      "bg-[#f1faee] text-[#3f5e50] border-[#d8e2dc] shadow-2xs font-semibold",
     purple:
-      "bg-[rgba(221,208,200,0.18)] text-[#DDD0C8] border-[rgba(221,208,200,0.35)] shadow-xs",
+      "bg-[#d8f3dc] text-[#1b4332] border-[#95d5b2] shadow-2xs font-bold",
   }[variant];
 
   const dotColors = {
-    success: "bg-emerald-400",
-    warning: "bg-amber-400",
-    error: "bg-rose-400",
-    info: "bg-sky-400",
-    neutral: "bg-[#C4B4A8]",
-    purple: "bg-[#DDD0C8]",
+    success: "bg-[#40916c]",
+    warning: "bg-[#f59e0b]",
+    error: "bg-[#ef4444]",
+    info: "bg-[#0284c7]",
+    neutral: "bg-[#52796f]",
+    purple: "bg-[#2d6a4f]",
   }[variant];
 
   return (
     <span
-      className={`inline-flex items-center font-medium rounded-[4px] border ${sizeStyles} ${variantStyles} ${className}`}
+      className={`inline-flex items-center rounded-lg border ${sizeStyles} ${variantStyles} ${className}`}
     >
       {dot && (
         <span

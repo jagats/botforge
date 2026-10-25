@@ -14,7 +14,8 @@ interface SidebarContextType {
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  // By default, the client sidebar is closed / collapsed
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
   const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
 
   // Close mobile drawer on window resize above md breakpoint (768px)

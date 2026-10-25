@@ -15,9 +15,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <SuperadminGuard>
-      <div className="min-h-screen bg-mesh text-[#F5EDE8] flex flex-col font-sans antialiased">
+      <div className="min-h-screen bg-mesh text-[#1b4332] flex flex-col font-sans antialiased">
         {/* Top Admin Header */}
-        <header className="sticky top-0 z-50 w-full glass-topbar border-b border-[rgba(221,208,200,0.15)]">
+        <header className="sticky top-0 z-50 w-full bg-[#ffffff] border-b border-[#e0ece4] shadow-xs">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-3">
@@ -27,13 +27,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </Badge>
               </div>
 
-              <nav className="hidden md:flex items-center gap-1.5 pl-4 border-l border-[rgba(221,208,200,0.15)]">
+              <nav className="hidden md:flex items-center gap-1.5 pl-4 border-l border-[#d8f3dc]">
                 <Link
                   href="/admin/brands"
-                  className={`px-3.5 py-1.5 rounded-[4px] text-xs font-medium transition-colors ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                     pathname.startsWith("/admin/brands")
-                      ? "bg-[rgba(221,208,200,0.18)] text-[#F5EDE8] border border-[rgba(221,208,200,0.30)] font-semibold"
-                      : "text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.08)]"
+                      ? "bg-[#40916c] text-[#ffffff] shadow-xs"
+                      : "text-[#3f5e50] hover:text-[#1b4332] hover:bg-[#f1faee]"
                   }`}
                 >
                   Client Brands
@@ -43,8 +43,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             <div className="flex items-center gap-3">
               {user && (
-                <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-[4px] bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.18)] text-xs shadow-2xs">
-                  <span className="text-[#DDD0C8] font-medium">{user.email}</span>
+                <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#f8fbf9] border border-[#d8f3dc] text-xs shadow-2xs">
+                  <span className="text-[#1b4332] font-semibold">{user.email}</span>
                   <Badge variant="purple" size="sm">
                     Superadmin
                   </Badge>
@@ -56,7 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   await logout();
                   router.push("/login");
                 }}
-                className="px-3 py-1.5 rounded-md text-xs font-medium text-[#C4B4A8] hover:text-rose-400 hover:bg-rose-500/20 border border-transparent transition-all cursor-pointer"
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#52796f] hover:text-rose-600 hover:bg-rose-50 border border-transparent transition-all cursor-pointer"
               >
                 Sign Out
               </button>

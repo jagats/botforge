@@ -16,18 +16,18 @@ export const WidgetPreview: React.FC = () => {
     : "";
 
   return (
-    <GlassCard elevated padding="none" className="overflow-hidden shadow-lg border border-[rgba(255,248,245,0.22)]">
+    <GlassCard elevated padding="none" className="overflow-hidden shadow-lg border border-[#d8f3dc]">
       {/* Mock Browser Header / Chrome */}
-      <div className="flex items-center justify-between px-4 py-3 bg-[#232020] border-b border-[rgba(221,208,200,0.15)] backdrop-blur-md">
+      <div className="flex items-center justify-between px-4 py-3 bg-[#ffffff] border-b border-[#e0ece4]">
         <div className="flex items-center gap-2">
-          <span className="h-3 w-3 rounded-full bg-rose-400/80 inline-block" />
-          <span className="h-3 w-3 rounded-full bg-amber-400/80 inline-block" />
-          <span className="h-3 w-3 rounded-full bg-emerald-400/80 inline-block" />
+          <span className="h-3 w-3 rounded-full bg-rose-400 inline-block" />
+          <span className="h-3 w-3 rounded-full bg-amber-400 inline-block" />
+          <span className="h-3 w-3 rounded-full bg-emerald-400 inline-block" />
         </div>
 
         {/* Mock Address Bar */}
-        <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-[#1E1A17] border border-[rgba(221,208,200,0.20)] text-xs font-mono text-[#DDD0C8] w-full max-w-sm sm:max-w-md shadow-2xs">
-          <PiLockLight size={14} className="text-[#4ADE80] shrink-0" />
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#f8fbf9] border border-[#d8f3dc] text-xs font-mono text-[#1b4332] w-full max-w-sm sm:max-w-md shadow-2xs">
+          <PiLockLight size={14} className="text-[#40916c] shrink-0" />
           <span className="truncate">https://yourclientwebsite.com/support</span>
         </div>
 
@@ -38,7 +38,7 @@ export const WidgetPreview: React.FC = () => {
             setIsIframeLoading(true);
             setIframeKey((prev) => prev + 1);
           }}
-          className="p-1.5 rounded-md text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.10)] transition-colors cursor-pointer"
+          className="p-1.5 rounded-lg text-[#52796f] hover:text-[#1b4332] hover:bg-[#f1faee] transition-colors cursor-pointer"
           title="Reload preview"
         >
           <PiArrowsClockwiseLight size={16} />
@@ -46,12 +46,12 @@ export const WidgetPreview: React.FC = () => {
       </div>
 
       {/* Simulated Website Viewport */}
-      <div className="relative w-full h-[540px] bg-[#1E1A17]">
+      <div className="relative w-full h-[540px] bg-[#f1faee]">
         {isIframeLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#1E1A17]/80 backdrop-blur-xs z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-[#ffffff]/80 backdrop-blur-xs z-10">
             <div className="flex flex-col items-center gap-2">
               <Spinner size="md" />
-              <span className="text-xs font-semibold text-[#DDD0C8]">Loading live widget preview...</span>
+              <span className="text-xs font-semibold text-[#1b4332]">Loading live widget preview...</span>
             </div>
           </div>
         )}
@@ -65,7 +65,7 @@ export const WidgetPreview: React.FC = () => {
             onLoad={() => setIsIframeLoading(false)}
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-[#7A6E68] text-xs">
+          <div className="flex items-center justify-center h-full text-[#6b8f7e] text-xs font-medium">
             No public API key available for preview
           </div>
         )}
