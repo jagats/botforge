@@ -249,7 +249,7 @@ export const BrandTable: React.FC<BrandTableProps> = ({
                           className="h-8 px-2.5 text-xs flex items-center gap-1.5"
                           title={`View & manage ${brand.name} dashboard`}
                         >
-                          <PiArrowSquareOutLight size={14} className="text-[#40916c]" />
+                          {/* <PiArrowSquareOutLight size={14} className="text-[#40916c]" /> */}
                           <span>Dashboard</span>
                         </Button>
                         <Link href={`/admin/brands/${brand.tenant_id}`}>
