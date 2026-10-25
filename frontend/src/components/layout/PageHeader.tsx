@@ -23,7 +23,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   className = "",
 }) => {
   return (
-    <div className={`space-y-3 pb-6 border-b border-[rgba(221,208,200,0.15)] ${className}`}>
+    <div className={`space-y-3 pb-6 border-b border-[#e0ece4] ${className}`}>
       {breadcrumbs && breadcrumbs.length > 0 && (
         <BreadcrumbNav items={breadcrumbs} className="mb-2" />
       )}
@@ -31,13 +31,13 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl font-bold tracking-tight text-[#F5EDE8]">
+            <h1 className="text-2xl font-extrabold tracking-tight text-[#1b4332]">
               {title}
             </h1>
             {badge}
           </div>
           {description && (
-            <p className="mt-1 text-xs sm:text-sm text-[#C4B4A8] max-w-2xl leading-relaxed">
+            <p className="mt-1 text-xs sm:text-sm text-[#52796f] max-w-2xl leading-relaxed">
               {description}
             </p>
           )}

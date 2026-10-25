@@ -31,14 +31,14 @@ export const RecentDocuments: React.FC<RecentDocumentsProps> = ({
   const getDocTypeIcon = (type: string) => {
     switch (type.toLowerCase()) {
       case "pdf":
-        return <PiFilePdfLight size={18} className="text-[#DDD0C8]" />;
+        return <PiFilePdfLight size={18} className="text-[#2d6a4f]" />;
       case "url":
-        return <PiLinkLight size={18} className="text-[#DDD0C8]" />;
+        return <PiLinkLight size={18} className="text-[#2d6a4f]" />;
       case "faq":
       case "faq_text":
-        return <PiChatTextLight size={18} className="text-[#DDD0C8]" />;
+        return <PiChatTextLight size={18} className="text-[#2d6a4f]" />;
       default:
-        return <PiFileTextLight size={18} className="text-[#DDD0C8]" />;
+        return <PiFileTextLight size={18} className="text-[#2d6a4f]" />;
     }
   };
 
@@ -46,16 +46,16 @@ export const RecentDocuments: React.FC<RecentDocumentsProps> = ({
     <GlassCard className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-base font-bold text-[#F5EDE8]">
+          <h3 className="text-base font-bold text-[#1b4332]">
             Recent Knowledge Documents
           </h3>
-          <p className="text-xs text-[#C4B4A8]">
+          <p className="text-xs text-[#52796f]">
             Latest files, webpages, and QA pairs ingested into your Qdrant index.
           </p>
         </div>
         <Link href="/dashboard/documents">
-          <Button variant="ghost" size="sm" className="text-[#DDD0C8] hover:text-[#F5EDE8]">
-            View All Documents →
+          <Button variant="ghost" size="sm" className="text-[#40916c] hover:text-[#2d6a4f] font-semibold">
+            View All Documents
           </Button>
         </Link>
       </div>
@@ -77,7 +77,7 @@ export const RecentDocuments: React.FC<RecentDocumentsProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
-              <tr className="border-b border-[rgba(221,208,200,0.15)] text-xs font-semibold text-[#C4B4A8] uppercase tracking-wider">
+              <tr className="border-b border-[#e0ece4] text-xs font-semibold text-[#52796f] uppercase tracking-wider">
                 <th className="pb-3 px-2">Document</th>
                 <th className="pb-3 px-2">Status</th>
                 <th className="pb-3 px-2">Chunks</th>
@@ -85,25 +85,25 @@ export const RecentDocuments: React.FC<RecentDocumentsProps> = ({
                 <th className="pb-3 px-2 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[rgba(221,208,200,0.10)] text-[#F5EDE8]">
+            <tbody className="divide-y divide-[#f1faee] text-[#1b4332]">
               {recent.map((doc) => (
                 <tr
                   key={doc.id}
-                  className="hover:bg-[rgba(221,208,200,0.06)] transition-colors group"
+                  className="hover:bg-[#f8fbf9] transition-colors group"
                 >
                   <td className="py-3 px-2">
                     <div className="flex items-center gap-2.5">
-                      <span className="p-1 rounded-md bg-[#323232] border border-[rgba(221,208,200,0.20)]">
+                      <span className="p-1 rounded-lg bg-[#d8f3dc] border border-[#b7e4c7]">
                         {getDocTypeIcon(doc.source_type || "pdf")}
                       </span>
                       <div>
                         <Link
                           href={`/dashboard/documents/${doc.id}`}
-                          className="font-semibold text-[#F5EDE8] group-hover:text-[#DDD0C8] transition-colors line-clamp-1 max-w-[200px] sm:max-w-xs"
+                          className="font-bold text-[#1b4332] group-hover:text-[#40916c] transition-colors line-clamp-1 max-w-[200px] sm:max-w-xs"
                         >
                           {doc.title || "Untitled Document"}
                         </Link>
-                        <span className="text-[11px] text-[#7A6E68] uppercase tracking-wider font-mono">
+                        <span className="text-[11px] text-[#6b8f7e] uppercase tracking-wider font-mono">
                           {doc.source_type === "faq_text" ? "FAQ" : (doc.source_type || "PDF").toUpperCase()}
                         </span>
                       </div>
@@ -114,11 +114,11 @@ export const RecentDocuments: React.FC<RecentDocumentsProps> = ({
                     <DocumentStatusBadge status={doc.status} />
                   </td>
 
-                  <td className="py-3 px-2 text-xs font-mono text-[#DDD0C8]">
+                  <td className="py-3 px-2 text-xs font-mono font-semibold text-[#40916c]">
                     {doc.chunk_count ? `${doc.chunk_count} chunks` : "—"}
                   </td>
 
-                  <td className="py-3 px-2 text-xs text-[#7A6E68] hidden sm:table-cell">
+                  <td className="py-3 px-2 text-xs text-[#6b8f7e] hidden sm:table-cell">
                     {formatDate(doc.created_at)}
                   </td>
 
@@ -127,7 +127,7 @@ export const RecentDocuments: React.FC<RecentDocumentsProps> = ({
                       <Button
                         variant="secondary"
                         size="sm"
-                        className="h-7 px-2 text-xs"
+                        className="h-8 px-2.5 text-xs"
                       >
                         Details
                       </Button>

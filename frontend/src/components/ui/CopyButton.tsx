@@ -30,24 +30,24 @@ export const CopyButton: React.FC<CopyButtonProps> = ({
   };
 
   const sizeStyles = {
-    sm: "px-3 py-1.5 text-xs gap-1.5",
-    md: "px-4 py-2 text-sm gap-2",
+    sm: "px-3 py-1.5 text-xs gap-1.5 rounded-lg",
+    md: "px-4 py-2 text-sm gap-2 rounded-xl",
   }[size];
 
   return (
     <button
       type="button"
       onClick={handleCopy}
-      className={`inline-flex items-center font-medium rounded-[4px] border border-[rgba(221,208,200,0.22)] bg-[rgba(221,208,200,0.10)] text-[#DDD0C8] hover:text-[#F5EDE8] hover:border-[rgba(221,208,200,0.40)] shadow-2xs transition-all active:scale-95 cursor-pointer backdrop-blur-xs ${sizeStyles} ${className}`}
+      className={`inline-flex items-center font-semibold border border-[#d8f3dc] bg-[#ffffff] text-[#3f5e50] hover:text-[#1b4332] hover:bg-[#f1faee] shadow-2xs transition-all active:scale-95 cursor-pointer ${sizeStyles} ${className}`}
     >
       {copied ? (
         <>
-          <PiCheckLight size={14} className="text-[#4ADE80] shrink-0" />
-          <span className="text-[#4ADE80] font-semibold">{label ? "Copied!" : "Copied"}</span>
+          <PiCheckLight size={14} className="text-[#40916c] shrink-0" />
+          <span className="text-[#40916c] font-semibold">{label ? "Copied!" : "Copied"}</span>
         </>
       ) : (
         <>
-          <PiCopyLight size={14} className="text-[#C4B4A8] shrink-0" />
+          <PiCopyLight size={14} className="text-[#52796f] shrink-0" />
           <span>{label || "Copy"}</span>
         </>
       )}

@@ -28,31 +28,31 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    // Base styles - capped at rounded-md (8px)
+    // Claymorphism base styles
     const baseStyles =
-      "inline-flex items-center justify-center font-medium rounded-md transition-all duration-200 cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-[#1E1A17] disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed";
+      "inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#40916c] disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed";
 
     // Size variants
     const sizeStyles = {
-      sm: "text-sm px-3 py-2 gap-1.5",
-      md: "text-md px-6 py-2 gap-2",
-      lg: "text-lg px-10 py-3 gap-2.5",
+      sm: "text-xs px-3.5 py-1.5 gap-1.5 rounded-lg",
+      md: "text-sm px-5 py-2.5 gap-2 rounded-xl",
+      lg: "text-base px-7 py-3.5 gap-2.5 rounded-2xl",
     }[size];
 
-    // Style variants (Dark Charcoal & Beige Design Refresh)
+    // Style variants (Claymorphism with Mint & Forest Palette)
     const variantStyles = {
       primary:
-        "bg-[#323232] hover:bg-[#1a1a1a] active:scale-[0.98] text-[#F5EDE8] border border-[rgba(221,208,200,0.20)] shadow-xs hover:shadow-[#323232]/50 focus:ring-[#DDD0C8]",
+        "clay-btn-primary active:scale-[0.98]",
       accent:
-        "bg-[#DDD0C8] hover:bg-[#C4B4A8] active:scale-[0.98] text-[#323232] font-semibold shadow-xs hover:shadow-[#DDD0C8]/25 focus:ring-[#323232]",
+        "clay-btn-primary active:scale-[0.98]",
       secondary:
-        "bg-[rgba(221,208,200,0.12)] hover:bg-[rgba(221,208,200,0.22)] active:scale-[0.98] text-[#DDD0C8] border border-[rgba(221,208,200,0.25)] shadow-xs focus:ring-[#DDD0C8] backdrop-blur-md",
+        "clay-btn-secondary active:scale-[0.98]",
       ghost:
-        "bg-transparent hover:bg-[rgba(221,208,200,0.10)] text-[#C4B4A8] hover:text-[#F5EDE8] focus:ring-[#DDD0C8]",
+        "bg-transparent hover:bg-[#d8f3dc]/50 text-[#3f5e50] hover:text-[#1b4332] focus:ring-[#40916c]",
       danger:
-        "bg-rose-500/20 hover:bg-rose-500/30 active:scale-[0.98] text-rose-300 border border-rose-500/30 shadow-xs focus:ring-rose-400",
+        "bg-[#fee2e2] hover:bg-[#fecaca] text-[#b91c1c] border border-[#fca5a5] shadow-xs active:scale-[0.98] focus:ring-[#e63946]",
       purple:
-        "bg-[#423a35] hover:bg-[#342e2a] active:scale-[0.98] text-[#DDD0C8] border border-[rgba(221,208,200,0.30)] shadow-xs focus:ring-[#DDD0C8]",
+        "bg-[#d8f3dc] hover:bg-[#b7e4c7] text-[#1b4332] border border-[#95d5b2] shadow-xs active:scale-[0.98] focus:ring-[#40916c]",
     }[variant];
 
     const widthStyle = fullWidth ? "w-full" : "";

@@ -6,7 +6,7 @@ export default function DocumentsLoading() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header skeleton */}
-      <div className="space-y-2 pb-6 border-b border-[rgba(221,208,200,0.15)]">
+      <div className="space-y-2 pb-6 border-b border-[#e0ece4]">
         <Skeleton height={28} width={260} />
         <Skeleton height={16} width={450} />
       </div>
@@ -14,7 +14,7 @@ export default function DocumentsLoading() {
       {/* Table container skeleton */}
       <GlassCard padding="none" className="overflow-hidden">
         <div className="p-6 space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-[rgba(221,208,200,0.10)]">
+          <div className="flex items-center justify-between pb-2 border-b border-[#e0ece4]">
             <Skeleton height={20} width={150} />
             <Skeleton height={32} width={110} className="rounded-md" />
           </div>

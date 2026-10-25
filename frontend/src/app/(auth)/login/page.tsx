@@ -9,9 +9,8 @@ import { Badge } from "@/components/ui/Badge";
 import {
   PiSparkleLight,
   PiShieldCheckLight,
-  PiLightningLight,
   PiCheckCircleLight,
-  PiBookOpenLight,
+  PiLightningLight,
 } from "react-icons/pi";
 
 export default function LoginPage() {
@@ -29,111 +28,92 @@ export default function LoginPage() {
   }, [isAuthenticated, isLoading, user, router]);
 
   return (
-    <div className="w-full min-h-screen flex flex-col lg:flex-row">
-      {/* Left Panel - Branding & Product Preview (Desktop) */}
-      <div className="hidden lg:flex lg:w-3/5 xl:w-7/12 flex-col justify-between p-12 lg:p-16 border-r border-[rgba(221,208,200,0.15)] bg-gradient-to-br from-[#1E1A17] via-[#28221E] to-[#1E1A17] relative overflow-hidden">
-        {/* Subtle decorative glow orbs within left panel */}
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-[radial-gradient(circle,rgba(221,208,200,0.15),transparent_70%)] pointer-events-none rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-[radial-gradient(circle,rgba(196,180,168,0.12),transparent_70%)] pointer-events-none rounded-full blur-3xl" />
+    <div className="w-full max-w-5xl clay-card-elevated bg-[#ffffff] rounded-3xl overflow-hidden shadow-2xl border border-[#d8f3dc] grid grid-cols-1 lg:grid-cols-12 my-auto">
+      {/* Left Panel - Stylized Reference Layout with 3D Organic Spheres (Desktop) */}
+      <div className="hidden lg:flex lg:col-span-5 xl:col-span-5 flex-col justify-between p-8 xl:p-10 bg-gradient-to-br from-[#1b4332] via-[#2d6a4f] to-[#40916c] text-[#ffffff] relative overflow-hidden select-none">
+        {/* Claymorphic 3D spheres / orbs following the reference design */}
+        <div className="absolute -top-12 -left-12 w-48 h-48 rounded-full bg-gradient-to-br from-[#52b788]/40 to-transparent blur-sm pointer-events-none" />
+        <div className="absolute -bottom-16 -left-10 w-64 h-64 rounded-full bg-gradient-to-tr from-[#132a13] to-[#2d6a4f] shadow-2xl pointer-events-none opacity-90 border border-[#52b788]/20" />
+        <div className="absolute bottom-12 right-2 w-36 h-36 rounded-full bg-gradient-to-br from-[#52b788] via-[#40916c] to-[#1b4332] shadow-2xl pointer-events-none border border-[#74c69d]/40" />
+        <div className="absolute top-1/3 -right-10 w-24 h-24 rounded-full bg-gradient-to-br from-[#74c69d] to-[#2d6a4f] opacity-80 blur-[2px] pointer-events-none" />
 
         {/* Top Header */}
         <div className="relative z-10 flex items-center justify-between">
-          <Logo size="md" />
-          <Badge variant="purple" size="sm" dot>
-            Enterprise v2.0
-          </Badge>
-        </div>
-
-        {/* Hero Narrative */}
-        <div className="relative z-10 my-auto py-8 max-w-xl space-y-6">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-[4px] bg-[rgba(221,208,200,0.12)] border border-[rgba(221,208,200,0.25)] text-xs text-[#DDD0C8] font-medium">
-            <PiSparkleLight size={15} />
-            <span>Multi-Tenant AI Bot-as-a-Service Platform</span>
+          <div className="flex items-center gap-2">
+            <div className="h-9 w-9 rounded-xl bg-[#ffffff]/15 backdrop-blur-md flex items-center justify-center border border-white/25 shadow-xs">
+              <span className="text-[#ffffff] font-extrabold text-sm">BF</span>
+            </div>
+            <span className="text-xl font-bold tracking-tight text-[#ffffff]">
+              BotForge
+            </span>
           </div>
 
-          <h1 className="text-4xl xl:text-5xl font-extrabold tracking-tight text-[#F5EDE8] leading-[1.15]">
-            Grounded AI Intelligence,{" "}
-            <span className="text-[#DDD0C8]">Tailored for Your Brand.</span>
-          </h1>
+          <span className="px-2.5 py-1 rounded-lg bg-[#ffffff]/15 border border-[#ffffff]/20 text-[11px] font-semibold text-[#ffffff] backdrop-blur-md">
+            Enterprise v2.0
+          </span>
+        </div>
 
-          <p className="text-sm xl:text-base text-[#C4B4A8] leading-relaxed">
+        {/* Hero Narrative - Strictly fit within one fold */}
+        <div className="relative z-10 my-auto py-6 space-y-4">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#ffffff]/15 border border-[#ffffff]/20 text-xs text-[#d8f3dc] font-medium backdrop-blur-sm">
+            <PiSparkleLight size={14} className="text-[#95d5b2]" />
+            <span>AI Bot-as-a-Service Platform</span>
+          </div>
+
+          <div className="space-y-1">
+            <p className="text-xs font-extrabold tracking-widest uppercase text-[#95d5b2]">
+              WELCOME
+            </p>
+            <h1 className="text-3xl xl:text-4xl font-extrabold tracking-tight text-[#ffffff] leading-tight">
+              Grounded AI for Your Brand
+            </h1>
+          </div>
+
+          <p className="text-xs xl:text-sm text-[#d8f3dc]/90 leading-relaxed max-w-sm">
             Ingest PDFs, websites, and FAQs into domain-specific vector storage.
-            Deploy real-time chatbots with precise source citations in under 5 minutes.
+            Deploy real-time chatbots with strict source citations in under 5 minutes.
           </p>
 
           {/* Feature Badges */}
-          <div className="flex flex-wrap gap-2 pt-2">
+          <div className="flex flex-col gap-2 pt-2">
             {[
               "Qdrant Vector Retrieval",
               "LangChain RAG Pipeline",
-              "Strict Tenant Isolation",
+              "Strict Tenant Data Isolation",
               "1-Line Embed Widget",
             ].map((feature) => (
-              <span
+              <div
                 key={feature}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[4px] text-xs bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.18)] text-[#DDD0C8]"
+                className="inline-flex items-center gap-2 text-xs text-[#ffffff] font-medium"
               >
-                <PiCheckCircleLight size={14} className="text-[#4ADE80]" />
-                {feature}
-              </span>
-            ))}
-          </div>
-
-          {/* Frosted Chat Mockup */}
-          <div className="pt-4">
-            <div className="rounded-md glass-card p-5 border border-[rgba(255,248,245,0.20)] shadow-2xl space-y-3.5 max-w-lg">
-              <div className="flex items-center justify-between pb-2 border-b border-[rgba(221,208,200,0.12)]">
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-[#4ADE80] animate-pulse" />
-                  <span className="text-xs font-semibold text-[#F5EDE8]">
-                    BotForge Agent Preview
-                  </span>
-                </div>
-                <span className="text-[10px] font-mono text-[#7A6E68]">
-                  rag-session#9241
+                <span className="p-0.5 rounded-full bg-[#52b788] text-[#1b4332]">
+                  <PiCheckCircleLight size={13} className="text-[#132a13]" />
                 </span>
+                <span>{feature}</span>
               </div>
-
-              {/* User message */}
-              <div className="flex justify-end">
-                <div className="rounded-md bg-[#323232] border border-[rgba(221,208,200,0.20)] px-3.5 py-2 text-xs text-[#F5EDE8] max-w-xs shadow-xs">
-                  How do I configure the embedded widget for our help desk?
-                </div>
-              </div>
-
-              {/* Bot response */}
-              <div className="flex flex-col items-start gap-1.5">
-                <div className="rounded-md bg-[rgba(221,208,200,0.15)] border border-[rgba(255,248,245,0.25)] px-3.5 py-2.5 text-xs text-[#F5EDE8] max-w-md shadow-xs leading-relaxed">
-                  Navigate to <strong>Widget Embed</strong>, customize your brand accent color, and paste the single script tag before your closing &lt;/body&gt; tag.
-                </div>
-                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[rgba(221,208,200,0.10)] text-[10px] text-[#DDD0C8] border border-[rgba(221,208,200,0.15)]">
-                  <PiBookOpenLight size={12} />
-                  <span>Source: docs/widget-integration-guide.pdf</span>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Bottom Platform Proof */}
-        <div className="relative z-10 pt-6 border-t border-[rgba(221,208,200,0.12)] grid grid-cols-3 gap-4 text-center">
+        {/* Bottom Platform Proof - Compact strip */}
+        <div className="relative z-10 pt-4 border-t border-[#ffffff]/20 grid grid-cols-3 gap-2 text-center text-[#ffffff]">
           <div>
-            <p className="text-lg font-bold text-[#F5EDE8]">99.9%</p>
-            <p className="text-[11px] text-[#7A6E68]">Uptime SLA</p>
+            <p className="text-base font-bold text-[#ffffff]">99.9%</p>
+            <p className="text-[10px] text-[#d8f3dc]">Uptime SLA</p>
           </div>
           <div>
-            <p className="text-lg font-bold text-[#F5EDE8]">&lt;450ms</p>
-            <p className="text-[11px] text-[#7A6E68]">Avg RAG Latency</p>
+            <p className="text-base font-bold text-[#ffffff]">&lt;450ms</p>
+            <p className="text-[10px] text-[#d8f3dc]">Avg RAG</p>
           </div>
           <div>
-            <p className="text-lg font-bold text-[#F5EDE8]">100%</p>
-            <p className="text-[11px] text-[#7A6E68]">Data Isolation</p>
+            <p className="text-base font-bold text-[#ffffff]">100%</p>
+            <p className="text-[10px] text-[#d8f3dc]">Isolated</p>
           </div>
         </div>
       </div>
 
       {/* Right Panel - Login Form */}
-      <div className="w-full lg:w-2/5 xl:w-5/12 flex items-center justify-center p-6 sm:p-12 lg:p-16 my-auto">
+      <div className="lg:col-span-7 xl:col-span-7 p-6 sm:p-10 lg:p-12 flex items-center justify-center bg-[#ffffff]">
         <LoginForm />
       </div>
     </div>

@@ -16,7 +16,7 @@ export default function NewBrandPage() {
       <div className="flex items-center gap-3">
         <Link href="/admin/brands">
           <Button variant="secondary" size="sm" className="h-8 px-2.5">
-            ← Back to Brands
+            Back to Brands
           </Button>
         </Link>
       </div>

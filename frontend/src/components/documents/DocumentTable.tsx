@@ -59,7 +59,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
           <Skeleton height={24} width="30%" />
           <div className="space-y-3 pt-2">
             {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} height={48} className="rounded-md" />
+              <Skeleton key={i} height={48} className="rounded-xl" />
             ))}
           </div>
         </div>
@@ -86,7 +86,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="border-b border-[rgba(221,208,200,0.15)] bg-[rgba(221,208,200,0.06)] text-[#C4B4A8] font-semibold uppercase tracking-wider">
+              <tr className="border-b border-[#e0ece4] bg-[#f8fbf9] text-[#52796f] font-semibold uppercase tracking-wider">
                 <th className="px-6 py-3.5">Document Title</th>
                 <th className="px-4 py-3.5">Type</th>
                 <th className="px-4 py-3.5">Status</th>
@@ -95,17 +95,17 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                 <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[rgba(221,208,200,0.10)]">
+            <tbody className="divide-y divide-[#f1faee]">
               {documents.map((doc) => (
                 <tr
                   key={doc.id}
-                  className="hover:bg-[rgba(221,208,200,0.06)] transition-colors group"
+                  className="hover:bg-[#f8fbf9] transition-colors group"
                 >
                   <td className="px-6 py-4">
                     <div className="flex flex-col min-w-0">
                       <Link
                         href={`/dashboard/documents/${doc.id}`}
-                        className="font-bold text-[#F5EDE8] hover:text-[#DDD0C8] transition-colors truncate max-w-sm sm:max-w-md"
+                        className="font-bold text-[#1b4332] hover:text-[#40916c] transition-colors truncate max-w-sm sm:max-w-md"
                       >
                         {doc.title || "Untitled Document"}
                       </Link>
@@ -114,13 +114,13 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                           href={doc.original_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[11px] text-[#7A6E68] hover:text-[#DDD0C8] truncate max-w-xs mt-0.5"
+                          className="text-[11px] text-[#6b8f7e] hover:text-[#40916c] truncate max-w-xs mt-0.5"
                         >
                           {doc.original_url}
                         </a>
                       )}
                       {doc.error_message && (
-                        <span className="text-[11px] text-rose-400 font-medium truncate mt-0.5">
+                        <span className="text-[11px] text-rose-600 font-medium truncate mt-0.5">
                           Error: {doc.error_message}
                         </span>
                       )}
@@ -135,11 +135,11 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                     <DocumentStatusBadge status={doc.status} />
                   </td>
 
-                  <td className="px-4 py-4 text-center whitespace-nowrap font-mono font-medium text-[#DDD0C8]">
+                  <td className="px-4 py-4 text-center whitespace-nowrap font-mono font-bold text-[#40916c]">
                     {doc.chunk_count || 0}
                   </td>
 
-                  <td className="px-4 py-4 whitespace-nowrap text-[#7A6E68]">
+                  <td className="px-4 py-4 whitespace-nowrap text-[#6b8f7e]">
                     {formatDate(doc.created_at)}
                   </td>
 
@@ -147,7 +147,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                     <div className="flex items-center justify-end gap-2">
                       <Link
                         href={`/dashboard/documents/${doc.id}`}
-                        className="p-1.5 rounded-md text-[#C4B4A8] hover:text-[#F5EDE8] hover:bg-[rgba(221,208,200,0.12)] transition-colors"
+                        className="p-1.5 rounded-lg text-[#52796f] hover:text-[#1b4332] hover:bg-[#f1faee] transition-colors"
                         title="View details"
                       >
                         <PiEyeLight size={18} />
@@ -156,7 +156,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
                       <button
                         type="button"
                         onClick={() => setDocToDelete(doc)}
-                        className="p-1.5 rounded-md text-[#C4B4A8] hover:text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg text-[#52796f] hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                         title="Delete document"
                       >
                         <PiTrashLight size={18} />

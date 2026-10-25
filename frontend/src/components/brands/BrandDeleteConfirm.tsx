@@ -78,9 +78,9 @@ export const BrandDeleteConfirm: React.FC<BrandDeleteConfirmProps> = ({
       }
     >
       <div className="space-y-4">
-        <div className="p-3.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs space-y-1.5">
-          <p className="font-bold flex items-center gap-1.5 text-rose-200">
-            <PiWarningCircleLight size={16} className="text-rose-400 shrink-0" />
+        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs space-y-1.5">
+          <p className="font-bold flex items-center gap-1.5 text-rose-900">
+            <PiWarningCircleLight size={16} className="text-rose-600 shrink-0" />
             <span>Critical Action — Irreversible Data Loss</span>
           </p>
           <p className="leading-relaxed">
@@ -89,9 +89,9 @@ export const BrandDeleteConfirm: React.FC<BrandDeleteConfirmProps> = ({
         </div>
 
         <div className="space-y-1.5">
-          <p className="text-xs text-[#C4B4A8]">
+          <p className="text-xs text-[#3f5e50]">
             To confirm deletion, please type the brand slug:{" "}
-            <code className="px-1.5 py-0.5 rounded-sm bg-[#1E1A17] font-mono font-bold text-rose-400 border border-rose-500/30">
+            <code className="px-1.5 py-0.5 rounded-md bg-rose-100 font-mono font-bold text-rose-700 border border-rose-200">
               {brand.slug}
             </code>
           </p>

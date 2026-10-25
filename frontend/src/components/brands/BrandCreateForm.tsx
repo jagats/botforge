@@ -55,8 +55,8 @@ export const BrandCreateForm: React.FC<BrandCreateFormProps> = ({
   return (
     <form onSubmit={formik.handleSubmit} noValidate className="space-y-4">
       {serverError && (
-        <div className="p-3.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-          <PiWarningCircleLight size={16} className="shrink-0 text-rose-400" />
+        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+          <PiWarningCircleLight size={16} className="shrink-0 text-rose-500" />
           <span>{serverError}</span>
         </div>
       )}
@@ -116,7 +116,7 @@ export const BrandCreateForm: React.FC<BrandCreateFormProps> = ({
         disabled={isCreating}
       />
 
-      <div className="flex items-center justify-end gap-3 pt-3 border-t border-[rgba(221,208,200,0.15)]">
+      <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#e0ece4]">
         {onCancel && (
           <Button
             type="button"

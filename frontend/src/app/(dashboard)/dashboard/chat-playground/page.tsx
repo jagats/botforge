@@ -109,13 +109,13 @@ export default function ChatPlaygroundPage() {
         ]}
         action={
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md bg-[rgba(221,208,200,0.08)] border border-[rgba(221,208,200,0.20)] text-xs">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#f8fbf9] border border-[#d8f3dc] text-xs shadow-2xs">
               <span
                 className={`h-2 w-2 rounded-full ${
-                  readyDocs.length > 0 ? "bg-[#4ADE80] animate-pulse" : "bg-[#FCD34D]"
+                  readyDocs.length > 0 ? "bg-[#40916c] animate-pulse" : "bg-[#f59e0b]"
                 }`}
               />
-              <span className="font-medium text-[#DDD0C8]">
+              <span className="font-semibold text-[#1b4332]">
                 {readyDocs.length} {readyDocs.length === 1 ? "doc" : "docs"} indexed ({totalChunks} chunks)
               </span>
             </div>
@@ -134,16 +134,16 @@ export default function ChatPlaygroundPage() {
 
       {/* Warning when 0 docs are ready */}
       {!isLoadingDocs && readyDocs.length === 0 && (
-        <div className="p-3.5 rounded-md bg-amber-400/10 border border-amber-400/25 flex items-center justify-between text-xs text-amber-300 animate-fade-in shadow-2xs">
+        <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between text-xs text-amber-800 animate-fade-in shadow-2xs">
           <div className="flex items-center gap-2">
-            <PiInfoLight size={18} className="text-amber-300 shrink-0" />
+            <PiInfoLight size={18} className="text-amber-600 shrink-0" />
             <span>
               You do not have any ready knowledge base documents yet. The bot will respond with polite fallback answers until documents are ingested.
             </span>
           </div>
           <Link href="/dashboard/documents">
             <Button variant="accent" size="sm">
-              Upload Documents →
+              Upload Documents
             </Button>
           </Link>
         </div>
@@ -157,7 +157,7 @@ export default function ChatPlaygroundPage() {
           className="flex-1"
         />
 
-        <div className="p-4 border-t border-[rgba(221,208,200,0.15)] bg-[#1E1A17]/85 backdrop-blur-md">
+        <div className="p-4 border-t border-[#e0ece4] bg-[#ffffff]">
           <ChatInput
             value={inputMessage}
             onChange={setInputMessage}

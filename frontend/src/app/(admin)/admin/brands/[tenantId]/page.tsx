@@ -46,7 +46,7 @@ export default function AdminBrandDetailPage({ params }: BrandDetailPageProps) {
             `The requested brand with ID "${tenantId}" could not be located.`
           }
           action={{
-            label: "← Return to Brands",
+            label: "Return to Brands",
             onClick: () => {
               window.location.href = "/admin/brands";
             },
