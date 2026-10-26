@@ -2,6 +2,7 @@
 
 import React from "react";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 
 export interface StatsCardProps {
   title: string;
@@ -33,6 +34,28 @@ export const StatsCard: React.FC<StatsCardProps> = ({
     cyan: "bg-sky-100 text-sky-700 border-sky-200",
   }[color];
 
+  // Helper to render animated counter if value is numeric or percentage
+  const renderValue = () => {
+    if (typeof value === "number") {
+      return <AnimatedCounter value={value} />;
+    }
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      const percentMatch = trimmed.match(/^([\d,.]+)(%)$/);
+      if (percentMatch) {
+        const num = parseFloat(percentMatch[1].replace(/,/g, ""));
+        if (!isNaN(num)) {
+          return <AnimatedCounter value={num} suffix="%" />;
+        }
+      }
+      const numOnly = Number(trimmed.replace(/,/g, ""));
+      if (!isNaN(numOnly) && trimmed !== "") {
+        return <AnimatedCounter value={numOnly} />;
+      }
+    }
+    return value;
+  };
+
   return (
     <GlassCard
       className={`p-5 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${className}`}
@@ -44,7 +67,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
           </p>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl sm:text-3xl font-extrabold text-[#1b4332] tracking-tight">
-              {value}
+              {renderValue()}
             </span>
             {trend && (
               <span
