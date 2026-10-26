@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { Document } from "@/types";
 import { DocumentStatusBadge } from "./DocumentStatusBadge";
@@ -9,8 +9,10 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { Select } from "@/components/ui/Select";
+import { Input } from "@/components/ui/Input";
 import { formatDate } from "@/lib/utils";
-import { PiEyeLight, PiTrashLight } from "react-icons/pi";
+import { PiEyeLight, PiTrashLight, PiMagnifyingGlassLight } from "react-icons/pi";
 
 export interface DocumentTableProps {
   documents: Document[];
@@ -28,6 +30,23 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
   onOpenUpload,
 }) => {
   const [docToDelete, setDocToDelete] = useState<Document | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const filteredDocuments = useMemo(() => {
+    return documents.filter((doc) => {
+      const matchesSearch =
+        !searchQuery.trim() ||
+        (doc.title && doc.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (doc.original_url && doc.original_url.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      const matchesType = typeFilter === "all" || doc.source_type === typeFilter;
+      const matchesStatus = statusFilter === "all" || doc.status === statusFilter;
+
+      return matchesSearch && matchesType && matchesStatus;
+    });
+  }, [documents, searchQuery, typeFilter, statusFilter]);
 
   const getSourceTypeBadge = (sourceType: Document["source_type"]) => {
     switch (sourceType) {
@@ -81,22 +100,76 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
   }
 
   return (
-    <>
-      <GlassCard padding="none" className="overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="border-b border-[#e0ece4] bg-[#f8fbf9] text-[#52796f] font-semibold uppercase tracking-wider">
-                <th className="px-6 py-3.5">Document Title</th>
-                <th className="px-4 py-3.5">Type</th>
-                <th className="px-4 py-3.5">Status</th>
-                <th className="px-4 py-3.5 text-center">Chunks</th>
-                <th className="px-4 py-3.5">Date Ingested</th>
-                <th className="px-6 py-3.5 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#f1faee]">
-              {documents.map((doc) => (
+    <div className="space-y-4">
+      {/* Controls Bar: Search & Custom Dropdown Filters */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="w-full sm:w-72">
+          <Input
+            id="doc-search"
+            type="text"
+            placeholder="Search by title or URL..."
+            leftIcon={<PiMagnifyingGlassLight size={16} />}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+          <div className="w-full sm:w-44">
+            <Select
+              id="doc-type-filter"
+              size="md"
+              value={typeFilter}
+              onValueChange={(val: string | number) => setTypeFilter(String(val))}
+              options={[
+                { label: "All Document Types", value: "all" },
+                { label: "PDF Documents", value: "pdf" },
+                { label: "Web URLs", value: "url" },
+                { label: "Custom FAQs", value: "faq_text" },
+              ]}
+            />
+          </div>
+
+          <div className="w-full sm:w-40">
+            <Select
+              id="doc-status-filter"
+              size="md"
+              value={statusFilter}
+              onValueChange={(val: string | number) => setStatusFilter(String(val))}
+              options={[
+                { label: "All Statuses", value: "all" },
+                { label: "Ready / Indexed", value: "ready" },
+                { label: "Processing", value: "processing" },
+                { label: "Failed", value: "failed" },
+              ]}
+            />
+          </div>
+        </div>
+      </div>
+
+      {filteredDocuments.length === 0 ? (
+        <div className="rounded-2xl clay-card p-8 bg-[#ffffff]">
+          <EmptyState
+            title="No matching documents"
+            description="Try clearing your search query or adjusting your type/status filters."
+          />
+        </div>
+      ) : (
+        <GlassCard padding="none" className="overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-[#e0ece4] bg-[#f8fbf9] text-[#52796f] font-semibold uppercase tracking-wider">
+                  <th className="px-6 py-3.5">Document Title</th>
+                  <th className="px-4 py-3.5">Type</th>
+                  <th className="px-4 py-3.5">Status</th>
+                  <th className="px-4 py-3.5 text-center">Chunks</th>
+                  <th className="px-4 py-3.5">Date Ingested</th>
+                  <th className="px-6 py-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#f1faee]">
+                {filteredDocuments.map((doc) => (
                 <tr
                   key={doc.id}
                   className="hover:bg-[#f8fbf9] transition-colors group"
@@ -169,6 +242,7 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
           </table>
         </div>
       </GlassCard>
+      )}
 
       {/* Confirmation Dialog */}
       <ConfirmDialog
@@ -181,6 +255,6 @@ export const DocumentTable: React.FC<DocumentTableProps> = ({
         variant="danger"
         isLoading={isDeleting}
       />
-    </>
+    </div>
   );
 };
