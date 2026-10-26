@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
+import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { BrandTable } from "@/components/brands/BrandTable";
 import { BrandCreateForm } from "@/components/brands/BrandCreateForm";
 import { BrandDeleteConfirm } from "@/components/brands/BrandDeleteConfirm";
@@ -50,40 +51,56 @@ export default function AdminBrandsPage() {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <GlassCard className="p-4 hover:shadow-md transition-all">
-          <p className="text-xs font-semibold text-[#C4B4A8] uppercase tracking-wider">
+        <GlassCard className="p-4 sm:p-5 hover:shadow-md transition-all">
+          <p className="text-xs font-semibold text-[#52796f] uppercase tracking-wider">
             Total Brands
           </p>
-          <p className="text-2xl font-extrabold text-[#F5EDE8] mt-1">
-            {isLoading ? "..." : totalCount}
-          </p>
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#1b4332] mt-1.5 flex items-baseline">
+            {isLoading ? (
+              <span className="text-xl text-[#7a9a8b] animate-pulse">...</span>
+            ) : (
+              <AnimatedCounter value={totalCount} duration={1200} delay={0} />
+            )}
+          </div>
         </GlassCard>
 
-        <GlassCard className="p-4 hover:shadow-md transition-all">
-          <p className="text-xs font-semibold text-[#4ADE80] uppercase tracking-wider">
+        <GlassCard className="p-4 sm:p-5 hover:shadow-md transition-all">
+          <p className="text-xs font-semibold text-[#2d6a4f] uppercase tracking-wider">
             Active Brands
           </p>
-          <p className="text-2xl font-extrabold text-[#4ADE80] mt-1">
-            {isLoading ? "..." : activeCount}
-          </p>
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#40916c] mt-1.5 flex items-baseline">
+            {isLoading ? (
+              <span className="text-xl text-[#7a9a8b] animate-pulse">...</span>
+            ) : (
+              <AnimatedCounter value={activeCount} duration={1200} delay={100} />
+            )}
+          </div>
         </GlassCard>
 
-        <GlassCard className="p-4 hover:shadow-md transition-all">
-          <p className="text-xs font-semibold text-[#F87171] uppercase tracking-wider">
+        <GlassCard className="p-4 sm:p-5 hover:shadow-md transition-all">
+          <p className="text-xs font-semibold text-[#e63946] uppercase tracking-wider">
             Suspended
           </p>
-          <p className="text-2xl font-extrabold text-[#F87171] mt-1">
-            {isLoading ? "..." : suspendedCount}
-          </p>
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#e63946] mt-1.5 flex items-baseline">
+            {isLoading ? (
+              <span className="text-xl text-[#7a9a8b] animate-pulse">...</span>
+            ) : (
+              <AnimatedCounter value={suspendedCount} duration={1200} delay={200} />
+            )}
+          </div>
         </GlassCard>
 
-        <GlassCard className="p-4 hover:shadow-md transition-all">
-          <p className="text-xs font-semibold text-[#DDD0C8] uppercase tracking-wider">
+        <GlassCard className="p-4 sm:p-5 hover:shadow-md transition-all">
+          <p className="text-xs font-semibold text-[#7b2cbf] uppercase tracking-wider">
             Enterprise Tier
           </p>
-          <p className="text-2xl font-extrabold text-[#DDD0C8] mt-1">
-            {isLoading ? "..." : enterpriseCount}
-          </p>
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#7b2cbf] mt-1.5 flex items-baseline">
+            {isLoading ? (
+              <span className="text-xl text-[#7a9a8b] animate-pulse">...</span>
+            ) : (
+              <AnimatedCounter value={enterpriseCount} duration={1200} delay={300} />
+            )}
+          </div>
         </GlassCard>
       </div>
 

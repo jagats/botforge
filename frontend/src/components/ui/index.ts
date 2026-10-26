@@ -18,3 +18,4 @@ export * from "./EmptyState";
 export * from "./Avatar";
 export * from "./Tooltip";
 export * from "./Dropdown";
+export * from "./AnimatedCounter";
