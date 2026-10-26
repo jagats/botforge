@@ -6,6 +6,7 @@ import { Brand } from "@/types";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatDate } from "@/lib/utils";
@@ -27,6 +28,7 @@ export const BrandTable: React.FC<BrandTableProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "suspended">("all");
+  const [planFilter, setPlanFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [impersonatingTenantId, setImpersonatingTenantId] = useState<string | null>(null);
   const pageSize = 10;
@@ -51,7 +53,7 @@ export const BrandTable: React.FC<BrandTableProps> = ({
     }
   };
 
-  // Filter brands based on search & status
+  // Filter brands based on search & status & plan
   const filteredBrands = useMemo(() => {
     return brands.filter((brand) => {
       const matchesSearch =
@@ -64,9 +66,13 @@ export const BrandTable: React.FC<BrandTableProps> = ({
         (statusFilter === "active" && brand.is_active) ||
         (statusFilter === "suspended" && !brand.is_active);
 
-      return matchesSearch && matchesStatus;
+      const matchesPlan =
+        planFilter === "all" ||
+        (brand.plan && brand.plan.toLowerCase() === planFilter.toLowerCase());
+
+      return matchesSearch && matchesStatus && matchesPlan;
     });
-  }, [brands, searchQuery, statusFilter]);
+  }, [brands, searchQuery, statusFilter, planFilter]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -116,20 +122,41 @@ export const BrandTable: React.FC<BrandTableProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Controls Bar: Search & Status Filters */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="w-full sm:w-80">
-          <Input
-            id="brand-search"
-            type="text"
-            placeholder="Search by brand name, slug, or email..."
-            leftIcon={<PiMagnifyingGlassLight size={16} />}
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
+      {/* Controls Bar: Search, Plan Filter Dropdown & Status Filters */}
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+          <div className="w-full sm:w-72">
+            <Input
+              id="brand-search"
+              type="text"
+              placeholder="Search by brand name, slug, or email..."
+              leftIcon={<PiMagnifyingGlassLight size={16} />}
+              value={searchQuery}
+              onChange={handleSearchChange}
+            />
+          </div>
+
+          <div className="w-full sm:w-52">
+            <Select
+              id="brand-plan-filter"
+              size="md"
+              value={planFilter}
+              onValueChange={(val: string | number) => {
+                setPlanFilter(String(val));
+                setCurrentPage(1);
+              }}
+              options={[
+                { label: "All Plans", value: "all" },
+                { label: "Trial Plan", value: "trial" },
+                { label: "Starter ($49/mo)", value: "starter" },
+                { label: "Professional ($199/mo)", value: "pro" },
+                { label: "Enterprise Tier", value: "enterprise" },
+              ]}
+            />
+          </div>
         </div>
 
-        <div className="flex items-center gap-1.5 self-start sm:self-auto bg-[#ffffff] p-1 rounded-xl border border-[#d8f3dc] shadow-sm">
+        <div className="flex items-center gap-1.5 self-start lg:self-auto bg-[#ffffff] p-1 rounded-xl border border-[#d8f3dc] shadow-sm">
           {(
             [
               { label: "All Brands", value: "all" },
@@ -159,8 +186,8 @@ export const BrandTable: React.FC<BrandTableProps> = ({
           <EmptyState
             title="No client brands found"
             description={
-              searchQuery || statusFilter !== "all"
-                ? "Try adjusting your search query or status filter."
+              searchQuery || statusFilter !== "all" || planFilter !== "all"
+                ? "Try adjusting your search query, plan filter, or status filter."
                 : "No client brands have been provisioned yet. Onboard your first brand to get started."
             }
             action={

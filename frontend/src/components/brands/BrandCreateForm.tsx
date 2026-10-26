@@ -108,6 +108,12 @@ export const BrandCreateForm: React.FC<BrandCreateFormProps> = ({
         options={PLAN_TIERS.map((tier) => ({
           label: tier.label,
           value: tier.value,
+          description:
+            tier.value === "trial"
+              ? "14-day evaluation with standard vector limits"
+              : tier.value === "starter"
+              ? "Up to 5 bot instances and standard SLA"
+              : "Unlimited bot instances with priority vector partitioning",
         }))}
         value={formik.values.plan}
         onChange={formik.handleChange}
