@@ -22,15 +22,20 @@ export default function NotFound() {
           The page or resource you are looking for does not exist or has been moved to another route.
         </p>
 
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           <Link href="/">
             <Button variant="secondary" size="sm">
               Return Home
             </Button>
           </Link>
+          <Link href="/admin/brands">
+            <Button variant="secondary" size="sm">
+              Admin Portal
+            </Button>
+          </Link>
           <Link href="/dashboard">
             <Button variant="accent" size="sm">
-              Go to Dashboard
+              Client Dashboard
             </Button>
           </Link>
         </div>

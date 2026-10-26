@@ -5,8 +5,10 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.security import hash_password
+from app.models.api_key import ApiKey
 from app.models.tenant import Tenant
 from app.models.user import User
+from app.services.auth_service import generate_public_key
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,21 @@ def seed_superadmin(db: Session) -> User:
             status="active",
         )
         db.add(system_tenant)
+        db.flush()
+
+    # Ensure system tenant has a default active public API key
+    system_api_key = (
+        db.query(ApiKey)
+        .filter(ApiKey.tenant_id == system_tenant.id, ApiKey.is_active.is_(True))
+        .first()
+    )
+    if not system_api_key:
+        system_api_key = ApiKey(
+            tenant_id=system_tenant.id,
+            public_key=generate_public_key(),
+            is_active=True,
+        )
+        db.add(system_api_key)
         db.flush()
 
     # 2. Find or create superadmin user
