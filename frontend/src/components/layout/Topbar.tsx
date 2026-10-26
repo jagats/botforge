@@ -65,15 +65,15 @@ export const Topbar: React.FC = () => {
 
       {/* Right: Impersonation quick exit (if active), Tenant ID info & status pill */}
       <div className="flex items-center gap-3">
-        {impersonation && (
+        {(impersonation || user?.role === "superadmin") && (
           <button
             onClick={handleReturnToAdmin}
-            title="Exit client view and return to Superadmin console"
+            title={impersonation ? "Exit client view and return to Superadmin console" : "Open Superadmin console"}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#d8f3dc] hover:bg-[#b7e4c7] text-[#1b4332] border border-[#95d5b2] font-semibold text-xs transition-all cursor-pointer shadow-2xs"
           >
             <PiShieldCheckLight size={15} className="text-[#2d6a4f]" />
             <span className="hidden sm:inline">Superadmin:</span>
-            <span>Exit to Console</span>
+            <span>{impersonation ? "Exit to Console" : "Console"}</span>
           </button>
         )}
 

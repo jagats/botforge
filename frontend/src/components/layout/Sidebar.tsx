@@ -15,6 +15,7 @@ import {
   PiGearLight,
   PiSignOutLight,
   PiCaretLeftLight,
+  PiShieldCheckLight,
 } from "react-icons/pi";
 
 interface NavItem {
@@ -29,6 +30,15 @@ export const Sidebar: React.FC = () => {
   const { isCollapsed, toggleCollapse, isMobileOpen, closeMobile } = useSidebar();
 
   const navItems: NavItem[] = [
+    ...(user?.role === "superadmin"
+      ? [
+          {
+            label: "Admin Portal",
+            href: "/admin/brands",
+            icon: <PiShieldCheckLight size={20} />,
+          },
+        ]
+      : []),
     {
       label: "Overview",
       href: "/dashboard",

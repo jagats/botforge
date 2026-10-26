@@ -45,6 +45,10 @@ export function middleware(request: NextRequest) {
     if (!payload || payload.role !== "superadmin") {
       return NextResponse.redirect(new URL("/login", request.url));
     }
+    // Convenience redirects for common admin root/dashboard URLs
+    if (pathname === "/admin" || pathname === "/admin/" || pathname === "/admin/dashboard") {
+      return NextResponse.redirect(new URL("/admin/brands", request.url));
+    }
     return NextResponse.next();
   }
 
@@ -65,5 +69,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*"],
+  matcher: ["/dashboard", "/dashboard/:path*", "/admin", "/admin/:path*"],
 };
