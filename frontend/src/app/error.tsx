@@ -22,7 +22,7 @@ export default function GlobalError({
       <div className="bg-orb-1" />
       <div className="bg-orb-2" />
 
-      <GlassCard elevated padding="lg" className="w-full max-w-md text-center shadow-2xl relative z-10 animate-scale-in rounded-3xl border border-[#d8f3dc]">
+      <GlassCard elevated padding="lg" className="w-full max-w-md text-center shadow-lg relative z-10 animate-scale-in rounded-3xl border border-[#d8f3dc]">
         <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-2xl bg-rose-100 text-rose-600 border border-rose-200 text-2xl font-bold mb-4 shadow-xs">
           <PiWarningCircleLight size={28} />
         </div>

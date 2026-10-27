@@ -70,7 +70,7 @@ export default function HomePage() {
 
         {/* Interactive Visual Mockup Preview */}
         <div className="mt-14 w-full max-w-3xl">
-          <GlassCard elevated className="p-4 sm:p-6 shadow-2xl border-[#d8f3dc] text-left space-y-4">
+          <GlassCard elevated className="p-4 sm:p-6 shadow-md border-[#d8f3dc] text-left space-y-4">
             {/* Mock Chat Window Header */}
             <div className="flex items-center justify-between pb-3 border-b border-[#e0ece4]">
               <div className="flex items-center gap-2.5">
