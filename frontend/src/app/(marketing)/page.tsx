@@ -36,7 +36,7 @@ export default function HomePage() {
         </h1>
 
         <p className="text-base sm:text-lg text-[#3f5e50] max-w-2xl leading-relaxed mb-8">
-          Upload manuals, scrape knowledge base URLs, or add FAQs. BotForge segments, vectorizes, and serves strictly-grounded AI assistants with 1-line website widget embedding.
+          Turn your documents, links, and FAQs into reliable AI assistants in minutes. Embed a smart, hallucination-free chat widget on any website with a single line of code.
         </p>
 
         {/* CTA Buttons */}
