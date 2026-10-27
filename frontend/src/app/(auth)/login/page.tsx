@@ -28,7 +28,7 @@ export default function LoginPage() {
   }, [isAuthenticated, isLoading, user, router]);
 
   return (
-    <div className="w-full max-w-5xl clay-card-elevated bg-[#ffffff] rounded-3xl overflow-hidden shadow-2xl border border-[#d8f3dc] grid grid-cols-1 lg:grid-cols-12 my-auto">
+    <div className="w-full max-w-5xl clay-card-elevated bg-[#ffffff] rounded-3xl overflow-hidden shadow-xl border border-[#d8f3dc] grid grid-cols-1 lg:grid-cols-12 my-auto">
       {/* Left Panel - Stylized Reference Layout with 3D Organic Spheres (Desktop) */}
       <div className="hidden lg:flex lg:col-span-5 xl:col-span-5 flex-col justify-between p-8 xl:p-10 bg-gradient-to-br from-[#1b4332] via-[#2d6a4f] to-[#40916c] text-[#ffffff] relative overflow-hidden select-none">
         {/* Claymorphic 3D spheres / orbs following the reference design */}

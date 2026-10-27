@@ -9,7 +9,7 @@ export default function NotFound() {
       <div className="bg-orb-1" />
       <div className="bg-orb-2" />
 
-      <GlassCard elevated padding="lg" className="w-full max-w-md text-center shadow-2xl relative z-10 animate-scale-in rounded-3xl border border-[#d8f3dc]">
+      <GlassCard elevated padding="lg" className="w-full max-w-md text-center shadow-lg relative z-10 animate-scale-in rounded-3xl border border-[#d8f3dc]">
         <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-2xl bg-[#d8f3dc] text-[#1b4332] border border-[#b7e4c7] text-2xl font-black mb-4 shadow-xs">
           404
         </div>
