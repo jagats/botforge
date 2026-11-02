@@ -16,7 +16,11 @@ from app.schemas.chat import (
     ChatSessionDetailResponse,
 )
 from app.models.tenant import Tenant
-from app.services.llm import generate_rag_answer
+from app.services.llm import (
+    NO_CONTEXT_FALLBACK,
+    contains_ungrounded_amount,
+    generate_rag_answer,
+)
 from app.services.quota import enforce_message_quota
 from app.services.retrieval import retrieve_context_chunks
 
@@ -97,11 +101,23 @@ async def process_chat_message(
             query_text=req.message,
             top_k=5,
         )
-        answer = await generate_rag_answer(
-            query=req.message,
-            context_chunks=chunks,
-            history=history,
-        )
+        if not chunks:
+            # Confidence gate: nothing relevant passed retrieval (incl. RETRIEVAL_MIN_SCORE),
+            # so refuse with the generic fallback instead of asking the LLM to guess.
+            answer = NO_CONTEXT_FALLBACK
+        else:
+            answer = await generate_rag_answer(
+                query=req.message,
+                context_chunks=chunks,
+                history=history,
+            )
+            # Price/number guard: never surface a currency amount the context doesn't support.
+            if contains_ungrounded_amount(answer, [c.text for c in chunks]):
+                logger.warning(
+                    "Ungrounded currency amount in answer for tenant=%s; using fallback.",
+                    tenant_id,
+                )
+                answer = NO_CONTEXT_FALLBACK
     except RuntimeError as exc:
         logger.error("AI backend unavailable for tenant=%s: %s", tenant_id, exc)
         db.rollback()

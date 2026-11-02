@@ -28,6 +28,7 @@ A multi-tenant platform where DVIO Digital (Product Admin) onboards client brand
 | 17 | `17-security-and-performance-audit.md` | Security vulnerability audit, live API latency benchmarks, and navigation bottlenecks (incl. v2.0 deep pen-test addendum) |
 | 18 | `18-remediation-plan.md` | Prioritized fix plan for all audit findings, gated by exploitability, with verify steps & tests |
 | 19 | `19-multi-bot-architecture.md` | Design to support multiple bot types per tenant (Bot entity, type registry, channels, migration) |
+| 20 | `20-bot-production-readiness-plan.md` | Hallucination control, guardrails, semantic cache & full edge-case catalog before deploying a bot |
 
 ## The 5 rules that matter most
 1. **Every table has `tenant_id`, and every query filters by it.** Missing this leaks one client's data to another.

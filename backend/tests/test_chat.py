@@ -130,4 +130,5 @@ def test_chat_no_context_fallback():
     assert res.status_code == 200
     data = res.json()
     assert len(data["sources"]) == 0
-    assert "knowledge base" in data["answer"].lower()
+    # Generic, brand-neutral refusal (confidence gate / no-context fallback).
+    assert "don't have enough information" in data["answer"].lower()

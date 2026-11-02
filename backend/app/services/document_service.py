@@ -132,11 +132,13 @@ async def run_document_ingestion(
             for row, meta in zip(chunk_rows, chunk_meta)
         ]
 
-        # 6. Upsert vectors to Qdrant scoped to this tenant
+        # 6. Upsert vectors to Qdrant scoped to this tenant, labeled by source
         upsert_chunks_to_qdrant(
             tenant_id=tenant_id,
             document_id=doc.id,
             chunk_data=chunk_data,
+            source_type=doc.source_type or "",
+            title=doc.title or "",
         )
 
         # 7. Mark as ready
