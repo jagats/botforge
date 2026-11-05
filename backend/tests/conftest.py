@@ -11,6 +11,11 @@ from app.services.admin_service import onboard_brand
 
 # Tests run without a real OpenAI key, so force deterministic mock AI for the suite.
 settings.USE_MOCK_AI = True
+# Mock embeddings have no meaningful similarity scores, so don't filter on them;
+# the confidence gate is exercised explicitly where needed, not via a global threshold.
+settings.RETRIEVAL_MIN_SCORE = 0.0
+# Keep guardrail screening deterministic (rules only) in tests.
+settings.GUARDRAIL_LLM_ENABLED = False
 
 
 @pytest.fixture(autouse=True)

@@ -103,8 +103,8 @@ Severity: **P0** = block launch, **P1** = fix before real customers, **P2** = qu
 ## 5. Roadmap
 
 - **Phase 1 — Enable built-ins + prompt hardening (fast, little new code):** turn on `RETRIEVAL_MIN_SCORE`; add the confidence gate + price/number guard; rewrite the system prompt with scope-lock, AI-disclosure, missing-data/contact fallback, and the medical/ethics/transactional refusals; label chunks by source at ingestion.
-- **Phase 2 — Guardrails:** rules-first input classifier (+ `gpt-4o-mini` for ambiguous) and output checks for the P0 categories.
-- **Phase 3 — Semantic cache:** Redis two-layer, tenant-scoped, with doc-change invalidation.
+- **Phase 2 — Guardrails:** ✅ DONE. `app/services/guardrails.py` — rules-first input screening (injection, jailbreak, transactional, medical/legal/financial advice, self-harm) with an optional `gpt-4o-mini` classifier for ambiguous inputs (`GUARDRAIL_LLM_ENABLED`, default off), plus output screening (action-promise → transactional refusal, system-prompt leak → fallback). Wired into `chat_service` before retrieval and after generation. Abuse/toxicity is intentionally left to the LLM layer to avoid false positives. Brand-neutral throughout. To enable the LLM layer in production set `GUARDRAIL_LLM_ENABLED=true`.
+- **Phase 3 — Semantic cache:** ✅ DONE. `app/services/semantic_cache.py` — Redis-backed, scoped per tenant: an exact normalized-question layer plus a semantic cosine layer (`SEMANTIC_CACHE_THRESHOLD`, default 0.95) that serves a cached answer for similar questions, skipping retrieval + the LLM. Only safe, grounded, standalone (no-history) answers are cached; refusals, fallbacks and PII are excluded. Invalidated by a per-tenant version bump on document ingest/delete, with a TTL backstop. No-op when `REDIS_URL` is unset, so dev/tests are unaffected. The query is embedded once and reused for both the cache lookup and retrieval.
 - **Phase 4 — Red-team test suite:** adversarial prompts (one per edge case below), scored pass/fail, wired into the test suite to catch regressions.
 
 ### Phase 1 — concrete tasks

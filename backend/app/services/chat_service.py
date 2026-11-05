@@ -16,6 +16,9 @@ from app.schemas.chat import (
     ChatSessionDetailResponse,
 )
 from app.models.tenant import Tenant
+from app.services import semantic_cache
+from app.services.embedding import generate_embeddings
+from app.services.guardrails import screen_input, screen_output
 from app.services.llm import (
     NO_CONTEXT_FALLBACK,
     contains_ungrounded_amount,
@@ -93,41 +96,116 @@ async def process_chat_message(
     db.add(user_message)
     db.flush()
 
-    # 4 + 5. Retrieve context and generate a grounded answer. If the AI backend is
-    # unavailable, surface a 503 rather than persisting a fake answer (finding H-02).
-    try:
-        chunks = await retrieve_context_chunks(
-            tenant_id=tenant_id,
-            query_text=req.message,
-            top_k=5,
-        )
-        if not chunks:
-            # Confidence gate: nothing relevant passed retrieval (incl. RETRIEVAL_MIN_SCORE),
-            # so refuse with the generic fallback instead of asking the LLM to guess.
-            answer = NO_CONTEXT_FALLBACK
-        else:
-            answer = await generate_rag_answer(
-                query=req.message,
-                context_chunks=chunks,
-                history=history,
-            )
-            # Price/number guard: never surface a currency amount the context doesn't support.
-            if contains_ungrounded_amount(answer, [c.text for c in chunks]):
-                logger.warning(
-                    "Ungrounded currency amount in answer for tenant=%s; using fallback.",
-                    tenant_id,
-                )
-                answer = NO_CONTEXT_FALLBACK
-    except RuntimeError as exc:
-        logger.error("AI backend unavailable for tenant=%s: %s", tenant_id, exc)
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="The assistant is temporarily unavailable. Please try again shortly.",
-        )
+    # 4. Input guardrail (Phase 2): block injection/jailbreak/transactional/advice/self-harm
+    # BEFORE any retrieval or LLM call. Blocked messages get a canned, brand-neutral reply.
+    guard = await screen_input(req.message)
+    chunks = []
+    cached_payload = None
+    query_vec = None
+    if guard.blocked:
+        logger.info("Input guardrail blocked message for tenant=%s (category=%s)", tenant_id, guard.category)
+        answer = guard.message
+    else:
+        # 5. Semantic cache (Phase 3): only for standalone questions (no prior turns in this
+        # session) so context-dependent follow-ups are never served a cached, context-free answer.
+        if not history and semantic_cache.is_enabled():
+            cached_payload = semantic_cache.get_exact(tenant_id, req.message)
+            if cached_payload is None:
+                try:
+                    vecs = await generate_embeddings([req.message])
+                    query_vec = vecs[0] if vecs else None
+                except RuntimeError:
+                    query_vec = None
+                if query_vec is not None:
+                    cached_payload = semantic_cache.get_semantic(tenant_id, query_vec)
 
-    # 6. Save Assistant message with citation chunk IDs
-    chunk_ids = [c.chunk_id for c in chunks]
+        if cached_payload is not None:
+            logger.info("Semantic cache hit for tenant=%s", tenant_id)
+            answer = cached_payload["answer"]
+        else:
+            # 6 + 7. Retrieve context and generate a grounded answer (reusing the query vector
+            # if we already embedded it for the cache lookup). On AI outage, surface a 503.
+            try:
+                chunks = await retrieve_context_chunks(
+                    tenant_id=tenant_id,
+                    query_text=req.message,
+                    top_k=5,
+                    query_vector=query_vec,
+                )
+                if not chunks:
+                    # Confidence gate: nothing relevant passed retrieval (incl. RETRIEVAL_MIN_SCORE).
+                    answer = NO_CONTEXT_FALLBACK
+                else:
+                    answer = await generate_rag_answer(
+                        query=req.message,
+                        context_chunks=chunks,
+                        history=history,
+                    )
+                    # Price/number guard: never surface a currency amount the context lacks.
+                    if contains_ungrounded_amount(answer, [c.text for c in chunks]):
+                        logger.warning(
+                            "Ungrounded currency amount in answer for tenant=%s; using fallback.",
+                            tenant_id,
+                        )
+                        answer = NO_CONTEXT_FALLBACK
+            except RuntimeError as exc:
+                logger.error("AI backend unavailable for tenant=%s: %s", tenant_id, exc)
+                db.rollback()
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail="The assistant is temporarily unavailable. Please try again shortly.",
+                )
+
+            # 8. Output guardrail: block action-promises / system-prompt leaks before saving.
+            answer, flagged = screen_output(answer)
+            if flagged:
+                logger.warning("Output guardrail triggered for tenant=%s (%s)", tenant_id, flagged)
+                chunks = []
+
+    # 9. Build citations from the cache hit or from freshly retrieved chunks.
+    if cached_payload is not None:
+        chunk_ids = [uuid.UUID(s) for s in cached_payload.get("sources", [])]
+        source_items = [
+            ChatSourceItem(
+                chunk_id=uuid.UUID(s["chunk_id"]),
+                document_id=uuid.UUID(s["document_id"]),
+                text=s["text"],
+                score=s["score"],
+            )
+            for s in cached_payload.get("source_chunks", [])
+        ]
+    else:
+        chunk_ids = [c.chunk_id for c in chunks]
+        source_items = [
+            ChatSourceItem(chunk_id=c.chunk_id, document_id=c.document_id, text=c.text, score=c.score)
+            for c in chunks
+        ]
+        # Cache safe, grounded, standalone answers for reuse by similar questions.
+        if (
+            not history
+            and chunks
+            and semantic_cache.is_enabled()
+            and semantic_cache.is_cacheable(req.message, answer, [NO_CONTEXT_FALLBACK])
+        ):
+            semantic_cache.store(
+                tenant_id,
+                req.message,
+                query_vec,
+                {
+                    "answer": answer,
+                    "sources": [str(cid) for cid in chunk_ids],
+                    "source_chunks": [
+                        {
+                            "chunk_id": str(s.chunk_id),
+                            "document_id": str(s.document_id),
+                            "text": s.text,
+                            "score": s.score,
+                        }
+                        for s in source_items
+                    ],
+                },
+            )
+
     assistant_message = ChatMessage(
         tenant_id=tenant_id,
         session_id=session.id,
@@ -137,16 +215,6 @@ async def process_chat_message(
     )
     db.add(assistant_message)
     db.commit()
-
-    source_items = [
-        ChatSourceItem(
-            chunk_id=c.chunk_id,
-            document_id=c.document_id,
-            text=c.text,
-            score=c.score,
-        )
-        for c in chunks
-    ]
 
     return ChatResponse(
         session_id=session.id,

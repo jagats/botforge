@@ -61,6 +61,19 @@ class Settings(BaseSettings):
     # When false, any OpenAI failure surfaces as a real error instead of fake data.
     USE_MOCK_AI: bool = False
 
+    # Guardrails (Phase 2) — brand-agnostic input/output safety layer.
+    GUARDRAILS_ENABLED: bool = True
+    # Use a cheap LLM to classify borderline inputs the rules can't decide.
+    # Off by default (rules-only, deterministic); recommended on in production.
+    GUARDRAIL_LLM_ENABLED: bool = False
+    GUARDRAIL_MODEL: str = "gpt-4o-mini"
+
+    # Semantic answer cache (Phase 3) — needs REDIS_URL set to take effect.
+    SEMANTIC_CACHE_ENABLED: bool = True
+    SEMANTIC_CACHE_THRESHOLD: float = 0.95  # min cosine to treat two questions as "the same"
+    SEMANTIC_CACHE_TTL_SECONDS: int = 86400  # 24h backstop
+    SEMANTIC_CACHE_MAX_ENTRIES: int = 200  # per tenant, per cache version
+
     # File uploads
     MAX_UPLOAD_SIZE_MB: int = 20
     UPLOAD_DIR: str = "/app/uploads"

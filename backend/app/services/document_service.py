@@ -145,6 +145,10 @@ async def run_document_ingestion(
         doc.status = "ready"
         doc.error_message = None
         db.commit()
+
+        # Knowledge base changed — invalidate this tenant's cached answers (Phase 3).
+        from app.services.semantic_cache import bump_version
+        bump_version(tenant_id)
         logger.info(
             "Document %s (tenant %s) successfully processed with %d chunks.",
             document_id,
@@ -260,4 +264,8 @@ def delete_document(db: Session, tenant_id: uuid.UUID, document_id: uuid.UUID) -
     # 3. Delete from Postgres
     db.delete(doc)
     db.commit()
+
+    # Knowledge base changed — invalidate this tenant's cached answers (Phase 3).
+    from app.services.semantic_cache import bump_version
+    bump_version(tenant_id)
     return True
