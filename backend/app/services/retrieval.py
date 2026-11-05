@@ -20,6 +20,8 @@ class RetrievedChunk:
     document_id: uuid.UUID
     text: str
     score: float
+    source_type: str = ""
+    title: str = ""
 
 
 async def retrieve_context_chunks(
@@ -90,6 +92,8 @@ async def retrieve_context_chunks(
                     document_id=uuid.UUID(doc_id_str),
                     text=text,
                     score=score,
+                    source_type=payload.get("source_type", ""),
+                    title=payload.get("title", ""),
                 )
             )
         except ValueError:

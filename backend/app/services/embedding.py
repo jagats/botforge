@@ -104,10 +104,15 @@ def upsert_chunks_to_qdrant(
     tenant_id: uuid.UUID,
     document_id: uuid.UUID,
     chunk_data: List[Tuple[uuid.UUID, uuid.UUID, str, List[float]]],
+    source_type: str = "",
+    title: str = "",
 ) -> None:
     """
     Upsert vector points to Qdrant with tenant_id payload scoping.
     chunk_data: List of (chunk_db_id, qdrant_point_id, chunk_text, vector)
+
+    source_type/title are stored on every point so retrieval can label sources and
+    (later) prefer a canonical source — generic, applies to any tenant.
     """
     if not chunk_data:
         return
@@ -124,6 +129,8 @@ def upsert_chunks_to_qdrant(
                 "document_id": str(document_id),
                 "chunk_id": str(chunk_db_id),
                 "text": text,
+                "source_type": source_type,
+                "title": title,
             },
         )
         points.append(point)
