@@ -28,20 +28,22 @@ async def retrieve_context_chunks(
     tenant_id: uuid.UUID,
     query_text: str,
     top_k: int = 5,
+    query_vector: Optional[List[float]] = None,
 ) -> List[RetrievedChunk]:
     """
-    Embed query text and retrieve top-k most relevant chunks from Qdrant,
-    strictly filtered by tenant_id to guarantee multi-tenant isolation.
+    Embed query text (unless a precomputed vector is passed) and retrieve top-k most
+    relevant chunks from Qdrant, strictly filtered by tenant_id for multi-tenant isolation.
     """
     cleaned_query = query_text.strip()
     if not cleaned_query:
         return []
 
-    # 1. Generate query embedding
-    vectors = await generate_embeddings([cleaned_query])
-    if not vectors:
-        return []
-    query_vector = vectors[0]
+    # 1. Generate query embedding (reuse a precomputed vector when available)
+    if query_vector is None:
+        vectors = await generate_embeddings([cleaned_query])
+        if not vectors:
+            return []
+        query_vector = vectors[0]
 
     # 2. Query Qdrant with tenant filter. The client is synchronous, so run it in a
     # threadpool to avoid blocking the event loop for other requests (finding P-01).
