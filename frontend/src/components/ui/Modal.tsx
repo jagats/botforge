@@ -69,7 +69,7 @@ export const Modal: React.FC<ModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className={`relative w-full ${sizeStyles} clay-card-elevated p-6 shadow-2xl rounded-2xl transition-all duration-300 animate-scale-in z-10 text-[#1b4332] bg-[#ffffff]`}
+        className={`relative w-full ${sizeStyles} bg-[#ffffff] border border-[#d8e2dc] p-6 shadow-xl rounded-2xl transition-all duration-300 animate-scale-in z-10 text-[#1b4332]`}
       >
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b border-[#e0ece4]">

@@ -36,7 +36,7 @@ export default function HomePage() {
         </h1>
 
         <p className="text-base sm:text-lg text-[#3f5e50] max-w-2xl leading-relaxed mb-8">
-          Upload manuals, scrape knowledge base URLs, or add FAQs. BotForge segments, vectorizes, and serves strictly-grounded AI assistants with 1-line website widget embedding.
+          Turn your documents, links, and FAQs into reliable AI assistants in minutes. Embed a smart, hallucination-free chat widget on any website with a single line of code.
         </p>
 
         {/* CTA Buttons */}
@@ -70,7 +70,7 @@ export default function HomePage() {
 
         {/* Interactive Visual Mockup Preview */}
         <div className="mt-14 w-full max-w-3xl">
-          <GlassCard elevated className="p-4 sm:p-6 shadow-2xl border-[#d8f3dc] text-left space-y-4">
+          <GlassCard elevated className="p-4 sm:p-6 shadow-md border-[#d8f3dc] text-left space-y-4">
             {/* Mock Chat Window Header */}
             <div className="flex items-center justify-between pb-3 border-b border-[#e0ece4]">
               <div className="flex items-center gap-2.5">
