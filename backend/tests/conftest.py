@@ -17,6 +17,15 @@ settings.RETRIEVAL_MIN_SCORE = 0.0
 # Keep guardrail screening deterministic (rules only) in tests.
 settings.GUARDRAIL_LLM_ENABLED = False
 
+# Tests must be hermetic and not depend on an ambient Redis (rate limiter / semantic
+# cache). Force both to their in-process / disabled forms regardless of REDIS_URL.
+settings.REDIS_URL = ""
+import app.core.rate_limiter as _rate_limiter  # noqa: E402
+_rate_limiter.limiter = _rate_limiter.InMemoryRateLimiter()
+import app.services.semantic_cache as _semantic_cache  # noqa: E402
+_semantic_cache._redis = None
+_semantic_cache._redis_init = True  # mark initialized-and-disabled
+
 
 @pytest.fixture(autouse=True)
 def reset_test_state(request):

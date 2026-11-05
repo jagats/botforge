@@ -52,6 +52,11 @@ REFUSALS = {
         "I'd like to keep things respectful. I'm here to help with questions about this "
         "business's products or services."
     ),
+    # Not a refusal — a helpful canned answer for "are you human / what can you do".
+    "identity": (
+        "I'm an AI assistant for this business. I can help answer questions about its "
+        "products and services."
+    ),
 }
 
 # --- Definitive rule patterns, checked in priority order (safety first) ---
@@ -94,6 +99,12 @@ _RULES: List[Tuple[str, re.Pattern]] = [
         r"|cancel\s+(my\s+)?order"
         r"|refund\s+(me|my)"
         r"|apply\s+(a\s+)?(coupon|promo|discount\s+code)", re.I)),
+    # Lowest priority (after safety/attack categories): answer meta questions helpfully
+    # so they don't fall through to the no-context refusal.
+    ("identity", re.compile(
+        r"are\s+you\s+(a\s+)?(human|real\s+person|person|bot|ai|robot|machine|chatbot)"
+        r"|am\s+i\s+(talking|speaking|chatting)\s+(to|with)\s+(a\s+)?(human|person|bot|robot)"
+        r"|what\s+can\s+you\s+(do|help\s+with)", re.I)),
 ]
 
 # Soft keywords: not definitive, but if present with no hard rule match, the message is
@@ -166,7 +177,7 @@ async def screen_input(message: str) -> GuardResult:
 # The model claiming it performed an action it cannot perform.
 _ACTION_PROMISE = re.compile(
     r"\b(i('?ve| have| will|'ll| am going to)\s+"
-    r"(placed|created|processed|cancel(?:l)?ed|refunded|charged|booked|ordered|submitted|shipped))\b"
+    r"(placed|created|processed|cancel(?:l)?ed|refunded|charged|booked|ordered|submitted|shipped|ship|send|sent))\b"
     r"|your\s+(order|refund|payment|booking|cancellation)\s+(has\s+been|is|was)\s+"
     r"(placed|confirmed|processed|cancel(?:l)?ed|refunded|shipped|received)",
     re.I,
